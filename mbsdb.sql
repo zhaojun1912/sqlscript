@@ -115,7 +115,7 @@ FROM rtx_030301 rtx WHERE r_p_customer_id = 6115765 AND r_p_contract_id = 630472
 'A' -- Air
 'L' -- Land (IDD)
 'S' -- sucharge
-'C' --
+'C' -- Content
 
 SELECT * FROM mpusntab WHERE sncode = 421;
 
