@@ -1,13 +1,14 @@
 SELECT * FROM directory_number   WHERE dn_num = '56407060';
 SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode, cs.spcode,cs.sncode,cs.dn_id,
-dn.dn_num, cs.cs_sparam1
+dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_stat_chng
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
-WHERE dn.dn_num = '92047383'
+WHERE dn.dn_num = '54891697'
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
 AND coa.customer_id = ca.customer_id
-AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
-
+--AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
+;
+SELECT * FROM contract_history WHERE co_id = 5048296;
 SELECT tmcode, Count(*) cnt FROM ptcbill_co_usage_summary
 WHERE custcode LIKE '2.11%'
 GROUP BY tmcode
@@ -92,11 +93,14 @@ SELECT * FROM GPRS_CDR_DETAIL_ROAMING_MVNO WHERE  file_name = 'GGSN_S2T_20160905
 SELECT * FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
 SELECT Ceil(unb_p_gprs_usg/60),Ceil(unb_p_roamgprs_usg/60),Ceil(unb_p_chn_roamgprs_usg/60)
 FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
-SELECT fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu
-WHERE tmcode = 509
+SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
+mpusntab sn
+WHERE tmcode = 571
+AND sn.sncode = fu.pkg_id
 AND   tfu.expiry_date IS null
 AND   tfu.free_unit_id = fu.free_unit_id
-AND   fu.pkg_id = 1;
+--and free_unit_inter = 100
+AND   fu.pkg_id = 421;
 SELECT * FROM ptcbill_pkg_group WHERE pkg_id = 421;
 SELECT * FROM mpusntab WHERE sncode IN (421,1) ;
 SELECT * FROM mpusptab WHERE spcode IN (208);
@@ -106,3 +110,22 @@ SELECT * FROM contr_volume_history WHERE co_id = 6422401 ORDER BY seq_no;
 SELECT * FROM contr_volume_history WHERE ent_user NOT LIKE 'md%';
 SELECT * FROM ptcbill_rtx_type_Group WHERE rtx_type_group = 7;
 SELECT * FROM ptcbill_roam_group WHERE roam_group = 7 ;
+
+
+SELECT pcd.cdesc, ids.*FROM ptcbill_invoice_detail_sum ids,
+ptcbpp_cfg_description pcd
+WHERE
+ids.des = pcd.source and custcode = '1.6204460' ORDER BY seq;
+SELECT * FROM ptcbill_text_config ;
+SELECT * FROM ptcbpp_cfg_description WHERE ROWNUM <= 1;
+SELECT * FROM v$session ;
+SELECT * FROM dba_tables WHERE table_name LIKE '%NLS';
+SELECT * FROM all_tab_columns WHERE column_name = Upper('nls_language');
+SELECT * FROM v$session;
+SELECT * FROM mputmview WHERE DES LIKE '%CAL%';
+SELECT *FROM mpusntab WHERE sncode  = 525;
+SELECT * FROM mpuzptab WHERE zpcode = 7364;
+SELECT * FROM mpdpltab WHERE plcode = 133;
+SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' and tag IN ('ITB1I','ITB1A') AND msisdn = 53031755 ORDER BY seq;
+SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' and tag IN ('ITB1R','ITB1r') AND msisdn = 53031755 ORDER BY plcode, seq;
+SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' AND msisdn = 51084508;
