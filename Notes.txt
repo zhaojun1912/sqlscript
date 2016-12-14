@@ -514,4 +514,5 @@ SELECT *FROM ordertrailer  WHERE otxact = 5127376256;
 Usage: pbrp.sh -bc<billcycle> -billdate<billdate_yyyymmdd> [-postingperiod<postingperiod_yyyymm>] [-duedate<duedate_yyyymmdd>] [-d<debug_level>]
 + exit -1
 
+export NLS_LANG="TRADITIONAL CHINESE_AMERICA.ZHS16GBK"
 
