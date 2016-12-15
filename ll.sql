@@ -2,7 +2,9 @@ SELECT * FROM directory_number   WHERE dn_num = '56407060';
 SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode, cs.spcode,cs.sncode,cs.dn_id,
 dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_stat_chng
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
-WHERE dn.dn_num = '54891697'
+WHERE
+-- dn.dn_num = '56407060'
+ca.custcode = '1.6404104'
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
 AND coa.customer_id = ca.customer_id
@@ -15,8 +17,11 @@ GROUP BY tmcode
 ORDER BY cnt desc;
 SELECT * FROM ptcbill_rateplan_group_lnk WHERE tm_group_id = 1 AND market_type  = 'M';
 
-SELECT * FROM ptcbill_main_sub_lnk WHERE sub_customer_id = 6229688;
+SELECT * FROM ptcbill_main_sub_lnk WHERE custcode = '1.6349253';
+
+SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 6288300;
 SELECT * FROM customer_all WHERE customer_id = 3969801;
+SELECT * FROM customer_all WHERE custcode = '1.6349253';
 SELECT
 --Sum(LOCAL_FREE_MINS_INTER),Sum(LOCAL_FREE_MINS_INTRA),Sum(CHINA_FREE_MINS),Sum(INTER_VOICE_USAGE),Sum(INTRA_VOICE_USAGE),Sum(CHINA_USAGE)
 a.*
@@ -57,7 +62,7 @@ SELECT * FROM customer_all WHERE custcode LIKE '2.11%';
 SELECT * FROM customer_all WHERE custcode = '1.4815717';
 SELECT * FROM mpusntab WHERE sncode IN (1, 441, 399);
 SELECT * FROM mpusptab WHERE spcode IN(361);
-SELECT * FROM MPUTMTAB WHERE tmcode IN(509,653);
+SELECT * FROM MPUTMview WHERE tmcode IN(754);
 SELECT * FROM mputmview WHERE tmcode IN    (618);
 SELECT * FROM tapin_Rtx WHERE
 --tapin_output_file = 'CDJPNDOHK0PP02534'
@@ -95,7 +100,7 @@ SELECT Ceil(unb_p_gprs_usg/60),Ceil(unb_p_roamgprs_usg/60),Ceil(unb_p_chn_roamgp
 FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
 mpusntab sn
-WHERE tmcode = 571
+WHERE tmcode = 723
 AND sn.sncode = fu.pkg_id
 AND   tfu.expiry_date IS null
 AND   tfu.free_unit_id = fu.free_unit_id
@@ -112,13 +117,17 @@ SELECT * FROM ptcbill_rtx_type_Group WHERE rtx_type_group = 7;
 SELECT * FROM ptcbill_roam_group WHERE roam_group = 7 ;
 
 
-SELECT pcd.cdesc, ids.*FROM ptcbill_invoice_detail_sum ids,
+SELECT pcd.cdesc, ids.*FROM ptcbill_invoice_detail_cosum ids,
 ptcbpp_cfg_description pcd
 WHERE
-ids.des = pcd.source and custcode = '1.6204460' ORDER BY seq;
+ids.des = pcd.source and custcode = '1.6204460'
+AND msisdn = 56467561 ORDER BY seq;
 SELECT * FROM ptcbill_text_config ;
 SELECT * FROM ptcbpp_cfg_description WHERE ROWNUM <= 1;
+select * from v$parameter WHERE name LIKE 'nls%';
+SELECT * FROM v$database;
 SELECT * FROM v$session ;
+SELECT * FROM v$instance;
 SELECT * FROM dba_tables WHERE table_name LIKE '%NLS';
 SELECT * FROM all_tab_columns WHERE column_name = Upper('nls_language');
 SELECT * FROM v$session;
@@ -129,3 +138,15 @@ SELECT * FROM mpdpltab WHERE plcode = 133;
 SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' and tag IN ('ITB1I','ITB1A') AND msisdn = 53031755 ORDER BY seq;
 SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' and tag IN ('ITB1R','ITB1r') AND msisdn = 53031755 ORDER BY plcode, seq;
 SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' AND msisdn = 51084508;
+
+SELECT * FROM ptcbill_invoice_header WHERE custcode =    '1.6204460';
+SELECT *FROM ptcbill_invoice_detail_sum WHERE custcode = '1.6204460' ORDER BY seq;
+SELECT *FROM ptcbill_text_config ;
+SELECT * FROM 	ptcbpp_cfg_rateplan WHERE tmcode = 653;
+SELECT * FROM ptcapp_bill_country pbc, MPDPLTAB dpl
+WHERE pbc.source = dpl.source ;
+SELECT * FROM MPDPLTAB ;
+SELECT * FROM mpulktmz WHERE zpcode = 231;
+SELECT * FROM ptcbill_idd_roa_display WHERE sncode = 4;
+SELECT *FROM user_tab_columns WHERE column_name LIKE '%QOS%';
+SELECT *FROM mputmview WHERE des LIKE '4G Local 6GB%';

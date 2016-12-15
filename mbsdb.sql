@@ -14,7 +14,6 @@ AND ca.tmcode = tm.tmcode
 AND tm.tmcode = lnk.tmcode
 AND lnk.TM_GROUP_ID=1
 ORDER BY 2
-
 ;
 
 --KwLi sql:
@@ -34,7 +33,7 @@ ORDER BY 2
 491£º4G-300 Free China IDD Mins
 --service code: 7 for 2/3G , 10 for LTE
 --call type:1 mo, 2 mt
-
+SELECT * FROM mpusntab WHERE sncode= 119;
 SELECT
 tm.tmcode,
 tm.des,
@@ -99,7 +98,7 @@ SELECT * FROM contr_volume_history WHERE co_id = 6422401 ORDER BY seq_no;
 SELECT * FROM contr_volume_history WHERE ent_user NOT LIKE 'md%';
 SELECT * FROM ptcbill_rtx_type_Group WHERE rtx_type_group = 7;
 SELECT * FROM ptcbill_roam_group WHERE roam_group = 7 ;
-SELECT * FROM all_tables WHERE table_name LIKE '%WIFI%';
+SELECT * FROM user_tables WHERE table_name LIKE '%CONTR_%';
 SELECT * FROM mbsadm.ROAMING_WIFI_FILE ORDER BY entdate desc;
 SELECT * FROM tapin_rtx WHERE f_id = 2210296;
 SELECT /*+index(rtx rtx_070301_1)*/ rtx_Type, sncode, call_type, original_Start_d_T,actual_volume, plcode , rated_flat_amount, grp_id
@@ -302,4 +301,30 @@ ORDER BY msisdn
 WHERE c.sumcode = d.sumcode
 AND a.oc_Id = b.oc_id
 AND a.usagefee_grp_id = c.group_id(+)
+;
+
+--single customer
+SELECT Ceil(unb_p_gprs_usg/60),Ceil(unb_p_roamgprs_usg/60),Ceil(unb_p_chn_roamgprs_usg/60)
+FROM ptcapp_sub_usage psu, customer_all ca, contract_all co
+WHERE psu.customer_id = ca.customer_id
+AND co.customer_id = ca.customer_id
+AND psu.co_id = co.co_id
+AND ca.custcode = '2.11.52.64.100109';
+
+--multi sub customers
+SELECT ca.custcode, cs.tmcode, tm.des, dn.dn_num MSISDN, Nvl(Ceil(unb_p_gprs_usg/60),0) HK_DATA,
+Nvl(Ceil(unb_p_roamgprs_usg/60),0)  ROAM_DATA,
+Nvl(Ceil(unb_p_chn_roamgprs_usg/60),0) CHINA_DATA
+FROM ptcapp_sub_usage psu, customer_all ca, ptcbill_main_sub_lnk l,contr_services cs, directory_number dn, mputmtab tm
+WHERE psu.customer_id(+) = l.sub_customer_id
+AND psu.co_id(+) = l.sub_co_id
+AND ca.custcode = '1.6349253'
+AND ca.customer_id = l.main_customer_id
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_id
+AND SubStr(cs.cs_stat_chng , -1) IN ( 'a', 's')
+AND l.eff_date < To_Date('20161201', 'yyyymmdd')
+AND ( l.exp_date IS NULL OR l.exp_date > To_Date( '20161201', 'yyyymmdd'))
+AND cs.tmcode = tm.tmcode
+ORDER BY dn.dn_num
 ;
