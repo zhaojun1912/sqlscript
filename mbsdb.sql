@@ -38,19 +38,20 @@ SELECT
 tm.tmcode,
 tm.des,
 lnk.TM_GROUP_ID,
-Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
+Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 4 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id, a.msisdn, a.invoice_date, a.FREE_GPRS, a.GPRS_USAGE, a.EXTRA_GPRS_VOL, a.FREE_CHINA_GPRS, a.CHINA_GPRS_USAGE, a.EXTRA_CHINA_GPRS_VOL, a.CHINA_LOCAL_GPRS_USAGE, a.EXTRA_CHINA_LOCAL_GPRS_VOL
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-WHERE a.custcode IN ('1.4054269')
-AND a.invoice_date = To_Date('20161101','yyyymmdd')
+WHERE a.custcode IN ('1.3875551')
+AND a.invoice_date = To_Date('20160806','yyyymmdd')
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
-AND Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') = 'Y'
+--AND Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') = 'Y'
 AND tm.tmcode = lnk.tmcode
 ORDER BY 2
 ;
-
+SELECT * FROM  ptcbill_sub_psh_fu_cat WHERE main_customer_id =    3790808;
+SELECT * FROM ptcbill_free_Unit_cat WHERE free_unit_cat_id IN (1,4,13,16);
 -- For 1CMN service (sncode 237), the CHN MSISDN recorded in the column cs_sparam1
 
 SELECT l.sub_co_id ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN
@@ -68,9 +69,10 @@ AND cs1.dn_id = dn.dn_id;
 --CREATE SEQUENCE ppcom_roaming_cdr_file_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 
 --20161129 KwLi NOTE
-SELECT * FROM ptcapp_usage_hist WHERE customer_id = 6045181 AND co_id =6231559;
+SELECT * FROM ptcapp_usage_hist WHERE customer_id = 5133893 AND co_id =6231559;
 
-SELECT date_billed, Ceil(gprs_usg/60), Ceil(roamgprs_chn_usg/60) FROM ptcapp_usage_hist WHERE customer_id = 6227103 AND co_id = 6422401;
+SELECT date_billed, Ceil(gprs_usg/60), Ceil(roamgprs_chn_usg/60)
+ FROM ptcapp_usage_hist WHERE customer_id = 6227103 AND co_id = 6422401;
 SELECT Ceil(unb_p_gprs_usg/60),Ceil(unb_p_roamgprs_usg/60),Ceil(unb_p_chn_roamgprs_usg/60) FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
 SELECT * FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
 
@@ -78,7 +80,7 @@ SELECT * FROM directory_number WHERE dn_num ='92047383';
 SELECT * FROM contr_services WHERE dn_id =163893 ;
 SELECT * FROM mputmview WHERE tmcode = 653;
 SELECT fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu
-WHERE tmcode = 653
+WHERE tmcode = 597
 AND tfu.expiry_date IS null
 AND tfu.free_unit_id = fu.free_unit_id
 AND fu.pkg_id = 421;
@@ -97,7 +99,7 @@ SELECT * FROM ptcbill_cat_Group WHERE cat_group = 907006;
 SELECT * FROM contr_volume_history WHERE co_id = 6422401 ORDER BY seq_no;
 SELECT * FROM contr_volume_history WHERE ent_user NOT LIKE 'md%';
 SELECT * FROM ptcbill_rtx_type_Group WHERE rtx_type_group = 7;
-SELECT * FROM ptcbill_roam_group WHERE roam_group = 7 ;
+SELECT * FROM ptcbill_roam_group WHERE roam_group = 3 ;
 SELECT * FROM user_tables WHERE table_name LIKE '%CONTR_%';
 SELECT * FROM mbsadm.ROAMING_WIFI_FILE ORDER BY entdate desc;
 SELECT * FROM tapin_rtx WHERE f_id = 2210296;
@@ -263,8 +265,8 @@ lnk.TM_GROUP_ID,
 Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id, a.msisdn, a.invoice_date, a.inter_voice_usage +a.intra_voice_usage, a.china_usage, Ceil(a.GPRS_USAGE/1024),Ceil(a.CHINA_GPRS_USAGE/1024)
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-WHERE a.custcode IN ('1.5769079')
-AND a.invoice_date = To_Date('20160606','yyyymmdd')
+WHERE a.custcode IN ('1.5070640')
+AND a.invoice_date = To_Date('20161126','yyyymmdd')
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
@@ -318,7 +320,7 @@ Nvl(Ceil(unb_p_chn_roamgprs_usg/60),0) CHINA_DATA
 FROM ptcapp_sub_usage psu, customer_all ca, ptcbill_main_sub_lnk l,contr_services cs, directory_number dn, mputmtab tm
 WHERE psu.customer_id(+) = l.sub_customer_id
 AND psu.co_id(+) = l.sub_co_id
-AND ca.custcode = '1.6349253'
+AND ca.custcode = '1.5070640'
 AND ca.customer_id = l.main_customer_id
 AND cs.co_id = l.sub_co_id
 AND cs.dn_id = dn.dn_id
@@ -328,3 +330,25 @@ AND ( l.exp_date IS NULL OR l.exp_date > To_Date( '20161201', 'yyyymmdd'))
 AND cs.tmcode = tm.tmcode
 ORDER BY dn.dn_num
 ;
+
+SELECT ca.custcode, psu.date_billed, cs.tmcode, tm.des, dn.dn_num MSISDN, Nvl(Ceil(gprs_usg/60),0) HK_DATA,
+Nvl(Ceil(roamgprs_chn_usg/60),0) CHINA_DATA
+FROM ptcapp_usage_hist psu, customer_all ca, ptcbill_main_sub_lnk l,contr_services cs, directory_number dn, mputmview tm
+WHERE psu.customer_id(+) = l.sub_customer_id
+AND psu.co_id(+) = l.sub_co_id
+AND ca.custcode = '1.5070640'
+AND ca.customer_id = l.main_customer_id
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_id
+AND SubStr(cs.cs_stat_chng , -1) IN ( 'a', 's')
+--AND l.eff_date < To_Date('20161201', 'yyyymmdd')
+--AND ( l.exp_date IS NULL OR l.exp_date > To_Date( '20161201', 'yyyymmdd'))
+AND cs.tmcode = tm.tmcode
+AND psu.date_billed IN (To_Date('20160726', 'yyyymmdd'),
+ To_Date('20160826', 'yyyymmdd'),
+  To_Date('20160926', 'yyyymmdd'),
+   To_Date('20161026', 'yyyymmdd'),
+    To_Date('20161126', 'yyyymmdd'))
+ORDER BY psu.date_billed, dn.dn_num
+;
+

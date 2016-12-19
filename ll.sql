@@ -3,11 +3,11 @@ SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode, cs.spcode
 dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_stat_chng
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
--- dn.dn_num = '56407060'
-ca.custcode = '1.6404104'
+--dn.dn_num = ''
+ca.custcode = '1.5070640'
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
-AND coa.customer_id = ca.customer_id
+AND coa.customer_id = ca.customer_id     ORDER BY csactivated
 --AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
 ;
 SELECT * FROM contract_history WHERE co_id = 5048296;
@@ -17,11 +17,11 @@ GROUP BY tmcode
 ORDER BY cnt desc;
 SELECT * FROM ptcbill_rateplan_group_lnk WHERE tm_group_id = 1 AND market_type  = 'M';
 
-SELECT * FROM ptcbill_main_sub_lnk WHERE custcode = '1.6349253';
+SELECT * FROM ptcbill_main_sub_lnk WHERE custcode = '1.3875551';
 
-SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 6288300;
+SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 3790808 ORDER BY eff_date;
 SELECT * FROM customer_all WHERE customer_id = 3969801;
-SELECT * FROM customer_all WHERE custcode = '1.6349253';
+SELECT * FROM customer_all WHERE custcode = '1.3875551';
 SELECT
 --Sum(LOCAL_FREE_MINS_INTER),Sum(LOCAL_FREE_MINS_INTRA),Sum(CHINA_FREE_MINS),Sum(INTER_VOICE_USAGE),Sum(INTRA_VOICE_USAGE),Sum(CHINA_USAGE)
 a.*
@@ -100,21 +100,24 @@ SELECT Ceil(unb_p_gprs_usg/60),Ceil(unb_p_roamgprs_usg/60),Ceil(unb_p_chn_roamgp
 FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
 mpusntab sn
-WHERE tmcode = 723
+WHERE tmcode = 566
 AND sn.sncode = fu.pkg_id
 AND   tfu.expiry_date IS null
 AND   tfu.free_unit_id = fu.free_unit_id
 --and free_unit_inter = 100
 AND   fu.pkg_id = 421;
+SELECT * FROM mputmtab ;
+SELECT * FROM ptcbill_free_unit;
 SELECT * FROM ptcbill_pkg_group WHERE pkg_id = 421;
 SELECT * FROM mpusntab WHERE sncode IN (421,1) ;
 SELECT * FROM mpusptab WHERE spcode IN (208);
 SELECT * FROM ptcbill_cat_Group WHERE cat_group = 907002;
-SELECT * FROM ptcbill_cat_Group WHERE cat_group = 907006;
+SELECT * FROM sms_group  WHERE GRp_id IN (0, 8200);
+SELECT * FROM ptcbill_cat_Group WHERE cat_group = 907005;
 SELECT * FROM contr_volume_history WHERE co_id = 6422401 ORDER BY seq_no;
 SELECT * FROM contr_volume_history WHERE ent_user NOT LIKE 'md%';
-SELECT * FROM ptcbill_rtx_type_Group WHERE rtx_type_group = 7;
-SELECT * FROM ptcbill_roam_group WHERE roam_group = 7 ;
+SELECT * FROM ptcbill_rtx_type_Group WHERE rtx_type_group = 4;
+SELECT * FROM mpdpltab WHERE plcode IN (SELECT plcode FROM ptcbill_roam_group WHERE roam_group = 6) ;
 
 
 SELECT pcd.cdesc, ids.*FROM ptcbill_invoice_detail_cosum ids,
@@ -131,7 +134,8 @@ SELECT * FROM v$instance;
 SELECT * FROM dba_tables WHERE table_name LIKE '%NLS';
 SELECT * FROM all_tab_columns WHERE column_name = Upper('nls_language');
 SELECT * FROM v$session;
-SELECT * FROM mputmview WHERE DES LIKE '%CAL%';
+SELECT * FROM mputmview WHERE DES LIKE '%21Mbps%';
+SELECT * FROM mputmview WHERE tmcode = 653;
 SELECT *FROM mpusntab WHERE sncode  = 525;
 SELECT * FROM mpuzptab WHERE zpcode = 7364;
 SELECT * FROM mpdpltab WHERE plcode = 133;
@@ -150,3 +154,169 @@ SELECT * FROM mpulktmz WHERE zpcode = 231;
 SELECT * FROM ptcbill_idd_roa_display WHERE sncode = 4;
 SELECT *FROM user_tab_columns WHERE column_name LIKE '%QOS%';
 SELECT *FROM mputmview WHERE des LIKE '4G Local 6GB%';
+SELECT * FROM ptcbill_co_usage_summary WHERE msisdn = 92047223;
+SELECT tm.des, ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode, cs.spcode,cs.sncode,cs.dn_id,
+dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_stat_chng
+FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm
+WHERE
+--dn.dn_num = '92047223'
+--ca.custcode = '1.6404104'
+ dn.dn_id = cs.dn_id
+AND cs.co_id = coa.co_id
+AND coa.customer_id = ca.customer_id
+AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
+AND tm.tmcode = ca.tmcode
+AND ca.custcode LIKE '2.11%'
+ORDER BY tm.des, dn.dn_num;
+
+SELECT custcode, msisdn, invoice_date,s.*  FROM ptcbill_co_usage_summary s
+ WHERE tmcode = 509 AND  invoice_date = To_Date('20161120', 'yyyymmdd');
+SELECT *  FROM ptcapp_usage_hist s
+ WHERE air_entitle_tmcode = 509 AND  date_billed = To_Date('20161120', 'yyyymmdd');
+SELECT *FROM rtx_060201 where r_p_customer_id = 6049325 AND r_p_contract_id = 6236008 AND sncode = 119 ORDER BY start_d_t ;
+SELECT *FROM rtx_060201 ;
+
+SELECT trunc(original_start_d_t) ,rtx.r_p_customer_Id,
+rtx.r_p_contract_id, dn.dn_num,
+Sum(CASE  rtx_type  when 'A' THEN  rounded_volume/60 ELSE 0 END)
+as HK_DATA, Sum(CASE   rtx_type when 'R' THEN  rounded_volume/60 ELSE 0 END) as CHINA_DATA, Sum(rounded_volume/60)
+FROM rtx_060201 rtx ,
+ ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, directory_number dn
+WHERE l.main_customer_id = ca.customer_id
+AND ca.custcode = '1.6110132'
+AND rtx.r_p_customer_id = l.sub_customer_id
+AND rtx.r_p_contract_id = l.sub_co_id
+AND rtx.sncode = 119
+AND ( rtx_type = 'A' OR (rtx_type = 'R' AND rtx.plcode IN (76, 115, 254, 417)))
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_Id
+GROUP BY trunc(original_start_d_t) ,rtx.r_p_customer_Id, rtx.r_p_contract_id,  dn.dn_num;
+
+SELECT trunc(original_start_d_t) ,rtx.r_p_customer_Id,
+rtx.r_p_contract_id, dn.dn_num,
+Sum(CASE  rtx_type  when 'A' THEN  rounded_volume/60 ELSE 0 END)
+as HK_DATA, Sum(CASE   rtx_type when 'R' THEN  rounded_volume/60 ELSE 0 END) as CHINA_DATA, Sum(rounded_volume/60)
+FROM rtx_060201 rtx ,
+ ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, directory_number dn
+WHERE l.main_customer_id = ca.customer_id
+AND ca.custcode = '1.6110132'
+AND rtx.r_p_customer_id = l.sub_customer_id
+AND rtx.r_p_contract_id = l.sub_co_id
+AND rtx.sncode = 119
+AND rtx.rated_flat_amount <> 0
+AND ( rtx_type = 'A' OR (rtx_type = 'R' AND rtx.plcode IN (76, 115, 254, 417)))
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_Id
+GROUP BY trunc(original_start_d_t) ,rtx.r_p_customer_Id, rtx.r_p_contract_id,  dn.dn_num;
+
+--Ïã¸Û
+SELECT l.sub_customer_id,
+l.sub_co_id, dn.dn_num,
+Sum(CASE  rtx_type  when 'A' THEN  rounded_volume/60 ELSE 0 END)
+as HK_DATA, Sum(CASE   rtx_type when 'R' THEN  rounded_volume/60 ELSE 0 END) as CHINA_DATA, Sum(rounded_volume/60)
+FROM rtx_060201 rtx ,
+ ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, directory_number dn
+WHERE l.main_customer_id = ca.customer_id
+AND ca.custcode = '1.6110132'
+AND rtx.r_p_customer_id(+) = l.sub_customer_id
+AND rtx.r_p_contract_id(+) = l.sub_co_id
+AND rtx.sncode(+) = 119
+AND rtx.rated_flat_amount(+) <> 0
+--AND ( rtx.rtx_type = 'A' OR (rtx.rtx_type= 'R' AND rtx.plcode IN (76, 115, 254, 417)))
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_Id
+AND Trunc(rtx.original_start_d_t) = To_Date('20161026', 'yyyymmdd')
+GROUP BY l.sub_customer_id, l.sub_co_id,  dn.dn_num;
+--´óÂ½
+SELECT dn.dn_num, Sum(CASE  rtx_type  when 'A' THEN  Nvl(rounded_volume,0)/60 ELSE 0 END)
+as HK_DATA, Sum(CASE   rtx_type when 'R' THEN  Nvl(rounded_volume,0)/60 ELSE 0 END) as CHINA_DATA, Sum(Nvl(rounded_volume,0)/60)
+FROM rtx_060201 rtx ,
+ ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, directory_number dn
+ WHERE l.main_customer_id = ca.customer_id
+AND ca.custcode = '1.6110132'
+AND rtx.r_p_customer_id(+) = l.sub_customer_id
+AND rtx.r_p_contract_id(+) = l.sub_co_id
+AND rtx.sncode(+) = 119
+AND rtx.rated_flat_amount(+) <> 0
+AND ( rtx.rtx_type(+) = 'A' )
+
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_Id
+AND  original_start_d_t(+) >= To_Date('20161029', 'yyyymmdd')
+AND original_start_d_t(+) <  To_Date('20161030', 'yyyymmdd')
+GROUP BY dn.dn_num
+ORDER BY dn.dn_num;
+
+SELECT dn.dn_num Mobile, Sum(CASE  rtx_type  when 'A' THEN  Nvl(rounded_volume,0)/60 ELSE 0 END) AS "HK data(KB)"
+, Sum(CASE   rtx_type when 'R' THEN  Nvl(rounded_volume,0)/60 ELSE 0 END) "China data(KB)" , Sum(Nvl(rounded_volume,0)/60) "Total(KB)"
+FROM rtx_060201 rtx ,
+ ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, directory_number dn
+ WHERE l.main_customer_id = ca.customer_id
+AND ca.custcode = '1.6110132'
+AND rtx.r_p_customer_id(+) = l.sub_customer_id
+AND rtx.r_p_contract_id(+) = l.sub_co_id
+AND rtx.sncode(+) = 119
+AND rtx.rated_flat_amount(+) <> 0
+--AND ( rtx.rtx_type(+) = 'A' )
+
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_Id
+--AND Trunc(original_start_d_t) = To_Date('20161026', 'yyyymmdd')
+AND  original_start_d_t(+) >= To_Date('20161106', 'yyyymmdd')
+AND original_start_d_t(+) <  To_Date('20161107', 'yyyymmdd')
+GROUP BY dn.dn_num
+ORDER BY dn.dn_num;
+
+
+SELECT dn.dn_num, Sum(CASE  rtx_type  when 'A' THEN  Nvl(rounded_volume,0)/60 ELSE 0 END)
+as HK_DATA, Sum(CASE   rtx_type when 'R' THEN  Nvl(rounded_volume,0)/60 ELSE 0 END) as CHINA_DATA, Sum(Nvl(rounded_volume,0)/60)
+FROM rtx_060201 rtx ,
+ ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, directory_number dn
+ WHERE l.main_customer_id = ca.customer_id
+AND ca.custcode = '1.6110132'
+AND rtx.r_p_customer_id(+) = l.sub_customer_id
+AND rtx.r_p_contract_id(+) = l.sub_co_id
+AND rtx.sncode(+) = 119
+AND rtx.rated_flat_amount(+) <> 0
+AND ( rtx.rtx_type(+) = 'R' AND rtx.plcode(+) = 76 )
+
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_Id
+AND  original_start_d_t(+) >= To_Date('20161029', 'yyyymmdd')
+AND original_start_d_t(+) <  To_Date('20161030', 'yyyymmdd')
+GROUP BY dn.dn_num
+ORDER BY dn.dn_num;
+
+
+
+
+SELECT *
+FROM rtx_060201 rtx ,
+ ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, directory_number dn
+WHERE l.main_customer_id = ca.customer_id
+AND ca.custcode = '1.6110132'
+AND rtx.r_p_customer_id = l.sub_customer_id
+AND rtx.r_p_contract_id = l.sub_co_id
+AND rtx.sncode = 119
+AND rtx.rounded_volume = 68640
+AND ( rtx_type = 'A' OR (rtx_type = 'R' AND rtx.plcode IN (76, 115, 254, 417)))
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_Id ;
+
+
+SELECT rtx.r_p_customer_Id,
+rtx.r_p_contract_id, dn.dn_num,
+Sum(CASE  rtx_type  when 'A' THEN  rounded_volume/60 ELSE 0 END)
+as HK_DATA, Sum(CASE   rtx_type when 'R' THEN  rounded_volume/60 ELSE 0 END) as CHINA_DATA, Sum(rounded_volume/60)
+FROM rtx_060201 rtx ,
+ ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, directory_number dn
+WHERE l.main_customer_id = ca.customer_id
+AND ca.custcode = '1.6110132'
+AND rtx.r_p_customer_id = l.sub_customer_id
+AND rtx.r_p_contract_id = l.sub_co_id
+AND rtx.sncode = 119
+AND ( rtx_type = 'A' OR (rtx_type = 'R' AND rtx.plcode IN (76, 115, 254, 417)))
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_Id
+GROUP BY rtx.r_p_customer_Id, rtx.r_p_contract_id,  dn.dn_num
+ORDER BY dn.dn_num;

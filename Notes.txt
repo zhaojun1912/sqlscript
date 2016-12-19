@@ -515,4 +515,6 @@ Usage: pbrp.sh -bc<billcycle> -billdate<billdate_yyyymmdd> [-postingperiod<posti
 + exit -1
 
 export NLS_LANG="TRADITIONAL CHINESE_AMERICA.ZHS16GBK"
+pos： P2683/b 
+		P2870/b
 
