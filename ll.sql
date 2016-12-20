@@ -3,23 +3,39 @@ SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode, cs.spcode
 dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_stat_chng
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
---dn.dn_num = ''
-ca.custcode = '1.5070640'
+--dn.dn_num = '54983766'
+--ca.custcode = '407060'
+ca.customer_id = 5759330
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
 AND coa.customer_id = ca.customer_id     ORDER BY csactivated
 --AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
 ;
 SELECT * FROM contract_history WHERE co_id = 5048296;
+SELECT * FROM mputmview WHERE tmcode IN (674, 726, 728);
 SELECT tmcode, Count(*) cnt FROM ptcbill_co_usage_summary
 WHERE custcode LIKE '2.11%'
 GROUP BY tmcode
 ORDER BY cnt desc;
 SELECT * FROM ptcbill_rateplan_group_lnk WHERE tm_group_id = 1 AND market_type  = 'M';
+SELECT tmcode FROM customer_all ca WHERE customer_id IN (
+SELECT sub_customer_id  FROM ptcbill_main_sub_lnk WHERE main_customer_id = 6042274);
 
-SELECT * FROM ptcbill_main_sub_lnk WHERE custcode = '1.3875551';
+SELECT *  FROM contract_all  WHERE co_id IN (
+SELECT sub_co_id FROM ptcbill_main_sub_lnk WHERE main_customer_id = 3790808);
 
-SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 3790808 ORDER BY eff_date;
+SELECT *  FROM contr_services cs WHERE co_id IN (
+SELECT sub_co_id FROM ptcbill_main_sub_lnk WHERE main_customer_id = 3790808)
+AND  ;
+
+SELECT sp.des, sn.des,cs.cs_stat_chng, cs.* FROM contr_services cs, mpusptab sp, mpusntab sn
+ WHERE co_id = 5932465
+ AND cs.spcode = sp.spcode
+ AND cs.sncode = sn.sncode
+ ORDER BY sp.des, sn.des, cs.cs_stat_chng;
+SELECT *FROM customer_all WHERE custcode = '1.6105862';
+SELECT * FROM contract_history  WHERE co_id = 3940002;
+SELECT * FROM contract_all  WHERE co_id = 3940002;
 SELECT * FROM customer_all WHERE customer_id = 3969801;
 SELECT * FROM customer_all WHERE custcode = '1.3875551';
 SELECT
@@ -100,12 +116,13 @@ SELECT Ceil(unb_p_gprs_usg/60),Ceil(unb_p_roamgprs_usg/60),Ceil(unb_p_chn_roamgp
 FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
 mpusntab sn
-WHERE tmcode = 566
+WHERE tmcode = 726
 AND sn.sncode = fu.pkg_id
 AND   tfu.expiry_date IS null
 AND   tfu.free_unit_id = fu.free_unit_id
 --and free_unit_inter = 100
-AND   fu.pkg_id = 421;
+AND   fu.pkg_id = 421
+;
 SELECT * FROM mputmtab ;
 SELECT * FROM ptcbill_free_unit;
 SELECT * FROM ptcbill_pkg_group WHERE pkg_id = 421;
@@ -113,12 +130,22 @@ SELECT * FROM mpusntab WHERE sncode IN (421,1) ;
 SELECT * FROM mpusptab WHERE spcode IN (208);
 SELECT * FROM ptcbill_cat_Group WHERE cat_group = 907002;
 SELECT * FROM sms_group  WHERE GRp_id IN (0, 8200);
-SELECT * FROM ptcbill_cat_Group WHERE cat_group = 907005;
+SELECT * FROM ptcbill_cat_Group WHERE cat_group = 907006;
 SELECT * FROM contr_volume_history WHERE co_id = 6422401 ORDER BY seq_no;
 SELECT * FROM contr_volume_history WHERE ent_user NOT LIKE 'md%';
-SELECT * FROM ptcbill_rtx_type_Group WHERE rtx_type_group = 4;
-SELECT * FROM mpdpltab WHERE plcode IN (SELECT plcode FROM ptcbill_roam_group WHERE roam_group = 6) ;
+SELECT * FROM ptcbill_rtx_type_Group ;
+SELECT * FROM mpdpltab WHERE plcode IN (SELECT plcode FROM ptcbill_roam_group WHERE roam_group = 15) ;
+SELECT *FROM directory_number;
+SELECT * FROM user_tab_columns  WHERE COLUMN_name LIKE 'IMSI';
+SELECT * FROM contr_devices;
+SELECT *FROM port WHERE  port_num = 454120054983764;
+SELECT *FROM EQUIPMENT;
+SELECT * FROM storage_medium sm, contr_devices cd
+WHERE co_id = 4816974
+AND cd.cd_sm_num = sm.sm_serialnum;
 
+SELECT * FROM mputmview WHERE des LIKE '4G HK%CH 3GB%';
+SELECT * FROM customer_all WHERE tmcode = 727;
 
 SELECT pcd.cdesc, ids.*FROM ptcbill_invoice_detail_cosum ids,
 ptcbpp_cfg_description pcd
@@ -320,3 +347,8 @@ AND cs.co_id = l.sub_co_id
 AND cs.dn_id = dn.dn_Id
 GROUP BY rtx.r_p_customer_Id, rtx.r_p_contract_id,  dn.dn_num
 ORDER BY dn.dn_num;
+
+SELECT * FROM rtx_060201 ;
+SELECT *FROM PTCBILL_MASTER_CONTROL;
+SELECT *FROM mpusntab;
+SELECT *FROM ;
