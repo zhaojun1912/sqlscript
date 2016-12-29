@@ -528,5 +528,15 @@ contract_all: co_status:无意义。 本表记录customer_id, co_id对应关系�
 contr_services:	记录合同服务详情。cs_stat_chng: 服务状态及改变日期。
                 cs_status:无意义。
 UOM: 1, minutes, 2, charge , 3 call, 4, 6 secs
-				
+454120454983764
+       54983764				
+中國一咭多號地區通話： 包括
+一咭多號(接聽) 1 分鐘, 金額共 0.65
+一咭多號(打出) 87 分鐘, 金額共 56.55
+一咭多號接駁費香港號碼 1 分鐘, 金額共 0.00  别人打你香港号码，你在大陆，需要大陆运营商接驳。
+接驳服务 sncode = 237
+接收短信 sncode = 3
+发送短信 sncode = 4
+1CMN MO Call Rating sncode = 283
+
 

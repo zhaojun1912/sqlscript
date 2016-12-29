@@ -3,14 +3,65 @@ SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode, cs.spcode
 dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_stat_chng
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
---dn.dn_num = '54983766'
+dn.dn_num = '92047383'
 --ca.custcode = '407060'
-ca.customer_id = 5759330
+--ca.customer_id = 5759330
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
-AND coa.customer_id = ca.customer_id     ORDER BY csactivated
---AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
+AND coa.customer_id = ca.customer_id     --ORDER BY csactivated
+AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
+
+--查询主账号下所有子账号的流量限制
+SELECT dn.dn_num, volume/1024 "volume(GB)", l.sub_customer_id,  cvh.co_id, seq_no, cvh.ent_date, cs.tmcode, cs.spcode, cs.sncode FROM contr_volume_history cvh,
+ptcbill_main_sub_lnk l ,contr_services cs, directory_number dn
+WHERE l.sub_co_id = cvh.co_id
+AND l.main_customer_id = 3843789
+AND seq_no = (SELECT Max(seq_no) FROM contr_volume_history hh WHERE hh.co_id = cvh.co_id)
+AND  cs.co_id = l.sub_co_id
+AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
+--AND cs.dn_id IS NOT NULL
+and cs.dn_id = dn.dn_id
+ORDER BY dn_num;
+
+SELECT *FROM rtx_010401 WHERE r_p_customer_id =  6293607 AND r_p_contract_id =  6488825 AND sncode = 119 AND ;
+
+SELECT  rtx.r_p_customer_id, Sum(rounded_volume)/60/1024/1024 FROM  rtx_010401 rtx, ptcbill_main_sub_lnk l
+WHERE rtx.r_p_customer_id = l.sub_customer_id
+AND rtx.r_p_contract_id = l.sub_co_id
+AND l.main_customer_id =  3843789
+AND rtx.rtx_type IN ('A')
+AND rtx.sncode = 119
+GROUP BY rtx.r_p_customer_id;
+--66931872
+SELECT Sum(unb_p_gprs_usg)/60 FROM ptcapp_sub_usage psu, ptcbill_main_sub_lnk l
+WHERE psu.co_id = l.sub_co_id
+AND l.main_customer_id = 3843789;
+--66931872
+
+SELECT *FROM   contr_volume_history cvh,  ptcbill_main_sub_lnk l ,contr_services cs
+WHERE l.sub_co_id = cvh.co_id
+AND l.main_customer_id = 3843789
+AND  cs.co_id = l.sub_co_id
+AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
+AND cs.dn_id IS NOT null
+ORDER BY cs.co_id, cvh.seq_no desc;
+
+
+SELECT *FROM customer_all WHERE custcode = '1.3928440';
+SELECT *FROM contract_all WHERE customer_id = 3843789;
+SELECT *FROM
+SELECT *FROM contr_volume_history WHERE co_id = 6422401;
+SELECT sub_co_id FROM ptcbill_main_sub_lnk WHERE main_customer_id = 5559330 ORDER BY sub_co_id
+minus
+SELECT co_id FROM (
+SELECT cvh.co_id, seq_no, volume, cvh.ent_date FROM contr_volume_history cvh,   ptcbill_main_sub_lnk l
+WHERE l.sub_co_id = cvh.co_id
+AND l.main_customer_id = 5559330
+AND seq_no = (SELECT Max(seq_no) FROM contr_volume_history hh WHERE hh.co_id = cvh.co_id) ORDER BY co_id )
 ;
+
+
+SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 3843789;
 SELECT * FROM contract_history WHERE co_id = 5048296;
 SELECT * FROM mputmview WHERE tmcode IN (674, 726, 728);
 SELECT tmcode, Count(*) cnt FROM ptcbill_co_usage_summary
@@ -33,7 +84,7 @@ SELECT sp.des, sn.des,cs.cs_stat_chng, cs.* FROM contr_services cs, mpusptab sp,
  AND cs.spcode = sp.spcode
  AND cs.sncode = sn.sncode
  ORDER BY sp.des, sn.des, cs.cs_stat_chng;
-SELECT *FROM customer_all WHERE custcode = '1.6105862';
+SELECT *FROM customer_all WHERE custcode = '1.5626549';
 SELECT * FROM contract_history  WHERE co_id = 3940002;
 SELECT * FROM contract_all  WHERE co_id = 3940002;
 SELECT * FROM customer_all WHERE customer_id = 3969801;
@@ -63,8 +114,8 @@ lnk.TM_GROUP_ID,
 Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id, a.msisdn, a.invoice_date, a.FREE_GPRS, a.GPRS_USAGE,  a.EXTRA_GPRS_VOL,  a.FREE_CHINA_GPRS,  a.CHINA_GPRS_USAGE,  a.EXTRA_CHINA_GPRS_VOL, a.CHINA_LOCAL_GPRS_USAGE, a.EXTRA_CHINA_LOCAL_GPRS_VOL
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-WHERE a.custcode IN ('1.4054269')
-AND a.invoice_date = To_Date('20161101','yyyymmdd')
+WHERE a.custcode IN ('1.3928440')
+AND a.invoice_date = To_Date('20161201','yyyymmdd')
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
@@ -111,18 +162,36 @@ SELECT * FROM contract_all WHERE customer_id = 6227103;
 SELECT * FROM GPRS_CDR_DETAIL_ROAMING_MVNO WHERE  file_name = 'GGSN_S2T_2016090508' ;
 
 
-SELECT * FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
+SELECT * FROM ptcapp_sub_usage WHERE customer_id = 6238481 AND co_id = 6432204;
 SELECT Ceil(unb_p_gprs_usg/60),Ceil(unb_p_roamgprs_usg/60),Ceil(unb_p_chn_roamgprs_usg/60)
 FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
 mpusntab sn
-WHERE tmcode = 726
+WHERE tmcode = 751
 AND sn.sncode = fu.pkg_id
 AND   tfu.expiry_date IS null
 AND   tfu.free_unit_id = fu.free_unit_id
 --and free_unit_inter = 100
 AND   fu.pkg_id = 421
 ;
+
+SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
+mpusntab sn
+WHERE tmcode = 751
+AND sn.sncode = fu.pkg_id
+AND   tfu.expiry_date IS null
+AND   tfu.free_unit_id = fu.free_unit_id
+AND fu.pkg_id IN (
+SELECT sncode FROM contr_services cs
+WHERE cs.co_id = 6488825
+AND SubStr(cs.cs_stat_chng, -1) IN ('a', 's')
+AND cs.cs_seqno = (SELECT Max(cs2.cs_seqno) FROM contr_services cs2
+WHERE cs2.co_id = cs.co_id
+AND cs2.tmcode = cs.tmcode
+AND cs2.spcode = cs.spcode
+AND cs2.sncode = cs.sncode)
+);
+
 SELECT * FROM mputmtab ;
 SELECT * FROM ptcbill_free_unit;
 SELECT * FROM ptcbill_pkg_group WHERE pkg_id = 421;
@@ -134,6 +203,7 @@ SELECT * FROM ptcbill_cat_Group WHERE cat_group = 907006;
 SELECT * FROM contr_volume_history WHERE co_id = 6422401 ORDER BY seq_no;
 SELECT * FROM contr_volume_history WHERE ent_user NOT LIKE 'md%';
 SELECT * FROM ptcbill_rtx_type_Group ;
+SELECT * FROM ptcbill_roam_group WHERE roam_group = 15;
 SELECT * FROM mpdpltab WHERE plcode IN (SELECT plcode FROM ptcbill_roam_group WHERE roam_group = 15) ;
 SELECT *FROM directory_number;
 SELECT * FROM user_tab_columns  WHERE COLUMN_name LIKE 'IMSI';
@@ -202,6 +272,7 @@ SELECT *  FROM ptcapp_usage_hist s
  WHERE air_entitle_tmcode = 509 AND  date_billed = To_Date('20161120', 'yyyymmdd');
 SELECT *FROM rtx_060201 where r_p_customer_id = 6049325 AND r_p_contract_id = 6236008 AND sncode = 119 ORDER BY start_d_t ;
 SELECT *FROM rtx_060201 ;
+SELECT sncode, call_type, rtx.* FROM rtx_070401 rtx where r_p_customer_id = 6238481 AND r_p_contract_id = 6432204 AND sncode  IN (4) AND rated_flat_amount <>0 ORDER BY start_d_t ;
 
 SELECT trunc(original_start_d_t) ,rtx.r_p_customer_Id,
 rtx.r_p_contract_id, dn.dn_num,
