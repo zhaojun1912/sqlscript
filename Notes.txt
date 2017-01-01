@@ -516,3 +516,4 @@ Usage: pbrp.sh -bc<billcycle> -billdate<billdate_yyyymmdd> [-postingperiod<posti
 
 export NLS_LANG="TRADITIONAL CHINESE_AMERICA.ZHS16GBK"
 
+wifi physical address: A0-88-B4-AC-78-C0

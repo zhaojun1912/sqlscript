@@ -1,16 +1,22 @@
 SELECT * FROM directory_number   WHERE dn_num = '56407060';
-SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode, cs.spcode,cs.sncode,cs.dn_id,
-dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_stat_chng
+SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode,cs.spcode,cs.sncode, cs.spcode,cs.sncode,cs.dn_id,
+dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
--- dn.dn_num = '56407060'
-ca.custcode = '1.6404104'
+dn.dn_num = '56407060'
+--ca.custcode = '1.6195420'
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
 AND coa.customer_id = ca.customer_id
 --AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
 ;
-SELECT * FROM contract_history WHERE co_id = 5048296;
+SELECT * FROM mpusptab ;
+SELECT  cs.* FROM  contr_services cs
+ WHERE cs.co_id =6322050
+ --AND cs.spcode = sp.spcode
+ AND sn.sncode = sn.sncode;
+
+SELECT * FROM contract_history WHERE co_id = 6322050;
 SELECT tmcode, Count(*) cnt FROM ptcbill_co_usage_summary
 WHERE custcode LIKE '2.11%'
 GROUP BY tmcode
@@ -19,9 +25,9 @@ SELECT * FROM ptcbill_rateplan_group_lnk WHERE tm_group_id = 1 AND market_type  
 
 SELECT * FROM ptcbill_main_sub_lnk WHERE custcode = '1.6349253';
 
-SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 6288300;
+SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 6132427;
 SELECT * FROM customer_all WHERE customer_id = 3969801;
-SELECT * FROM customer_all WHERE custcode = '1.6349253';
+SELECT * FROM customer_all WHERE custcode = '1.6061656';
 SELECT
 --Sum(LOCAL_FREE_MINS_INTER),Sum(LOCAL_FREE_MINS_INTRA),Sum(CHINA_FREE_MINS),Sum(INTER_VOICE_USAGE),Sum(INTRA_VOICE_USAGE),Sum(CHINA_USAGE)
 a.*
@@ -63,7 +69,7 @@ SELECT * FROM customer_all WHERE custcode = '1.4815717';
 SELECT * FROM mpusntab WHERE sncode IN (1, 441, 399);
 SELECT * FROM mpusptab WHERE spcode IN(361);
 SELECT * FROM MPUTMview WHERE tmcode IN(754);
-SELECT * FROM mputmview WHERE tmcode IN    (618);
+SELECT * FROM mputmview WHERE tmcode IN    (736);
 SELECT * FROM tapin_Rtx WHERE
 --tapin_output_file = 'CDJPNDOHK0PP02534'
  imsi = '454120410751713'
@@ -100,7 +106,7 @@ SELECT Ceil(unb_p_gprs_usg/60),Ceil(unb_p_roamgprs_usg/60),Ceil(unb_p_chn_roamgp
 FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
 mpusntab sn
-WHERE tmcode = 723
+WHERE tmcode = 736
 AND sn.sncode = fu.pkg_id
 AND   tfu.expiry_date IS null
 AND   tfu.free_unit_id = fu.free_unit_id
@@ -150,3 +156,18 @@ SELECT * FROM mpulktmz WHERE zpcode = 231;
 SELECT * FROM ptcbill_idd_roa_display WHERE sncode = 4;
 SELECT *FROM user_tab_columns WHERE column_name LIKE '%QOS%';
 SELECT *FROM mputmview WHERE des LIKE '4G Local 6GB%';
+SELECT 14/31*80 FROM dual;
+
+SELECT * FROM mdqos_lifebase;
+SELECT *  FROM PTCBILL_MASTER_CONTROL WHERE bill_date >= To_Date('20161101', 'yyyymmdd')
+AND bill_date <= To_Date('20161130', 'yyyymmdd') ORDER BY bill_cycle;
+
+mpulktmb, sms_group, mpuintab, mpufutab, fuom_all, usage_sum_def, usage_sum, ptcbpp_cfg_description, ptcbpp_cfg_rateplan, ptcapp_bill_country, mpuzntab;
+other_credits, usage_sum_group, mpulkddb, mpulkdmb;
+customer_all, contract_All, contr_services, contra_occ, ccontact_all, occ_history , cash_receipt, rateplan_hist, fees;
+
+SELECT * FROM mpulktmb WHERE tmcode  = 653 ;
+SELECT * FROM mpusptab WHERE spcode = 421;
+SELECT *FROM v$parameter;
+ SELECT * FROM v$nls_parameters;
+ select * from nls_database_parameters ;
