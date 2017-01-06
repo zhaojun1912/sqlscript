@@ -3,16 +3,44 @@ SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode, cs.spcode
 dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_stat_chng
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
---dn.dn_num = '92047383'
+dn.dn_num = '62189031'
 --ca.custcode = '407060'
 --ca.customer_id = 6187521
-coa.co_id = 6379001
+--coa.co_id = 5979591
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
 AND coa.customer_id = ca.customer_id     --ORDER BY csactivated
 AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
 
-SELECT l.sub_co_id ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN
+SELECT * FROM customer_all ca WHERE custcode  = '1.5483165';
+SELECT * FROM ptcbill_main_sub_lnk WHERE sub_customer_id  =   5774155;
+
+SELECT *FROM equipment WHERE customer_id = 5747798;
+SELECT * FROM rtx_050301 WHERE r_p_customer_id = 5803836 AND r_p_contract_id  =5979591  ;
+SELECT * FROM rtx_070101 WHERE r_p_customer_id = 6238481 AND r_p_contract_id  =6432204  AND sncode = ;
+
+
+--查找所有子账号的imei
+SELECT l.sub_co_id ,dn.dn_num HKG_MSISDN, mv.imei, cs.cs_sparam1 CHN_MSISDN, l.sub_customer_id
+FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  directory_number dn, DW_CONTRACT_IMEI_MVIEW mv, DW_HANDSET_MODEL
+hd
+WHERE custcode = '1.5483165'
+AND ca.customer_id = l.main_customer_id
+AND l.exp_date IS null
+AND l.sub_co_id = cs.co_id
+AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
+AND cs.sncode = 1
+AND cs.dn_id = dn.dn_id
+AND mv.co_id = l.sub_co_id
+AND mv.create_date = (SELECT Max(create_date) FROM  DW_CONTRACT_IMEI_MVIEW WHERE co_id= l.sub_co_id)
+AND mv.model_id = hd.model_id
+ORDER BY hkg_msisdn
+;
+
+SELECT * FROM contr_services WHERE co_id = 5979591;
+
+--查找大陆副号
+SELECT l.sub_co_id ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN, l.sub_customer_id
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs, contr_services cs1, directory_number dn
 WHERE custcode = '1.5483165'
 AND ca.customer_id = l.main_customer_id
@@ -22,13 +50,31 @@ AND cs.sncode = 237
 AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
 AND cs.co_id = cs1.co_id
 AND cs.cs_Seqno=cs1.cs_seqno
-AND cs1.dn_id = dn.dn_id;
+AND cs1.dn_id = dn.dn_id     ;
 
 
+--查询分钟量及流量使用明细（每号码每月一条数据） ， 每月汇总。
+SELECT
+tm.tmcode,
+tm.des,
+lnk.TM_GROUP_ID,
+Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
+a.custcode, a.co_id, a.msisdn, a.invoice_date, a.inter_voice_usage +a.intra_voice_usage, a.china_usage, Ceil(a.GPRS_USAGE/1024),Ceil(a.CHINA_GPRS_USAGE/1024)
+FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
+WHERE a.custcode IN ('1.6375924')
+AND a.invoice_date = To_Date('20170101','yyyymmdd')
+AND a.co_id = co.co_id
+AND co.customer_id = ca.customer_id
+AND ca.tmcode = tm.tmcode
+--AND Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') = 'Y'
+AND tm.tmcode = lnk.tmcode
+ORDER BY msisdn
+;
 SELECT * FROM contr_services WHERE co_id =   6379001;
 SELECT *FROM contract_history WHERE co_id =   6379001;
-SELECT *FROM USER_tab_columns WHERE column_name = 'CARRY_FORWARD';
+SELECT *FROM USER_tab_columns WHERE column_name = 'MODEL_ID';
 SELECT * FROM PTCBILL_FREE_UNIT WHERE pkg_id = 421 AND free_unit_id = 10598;
+
 
 SELECT * FROM master_occ;
 SELECT *FROM other_credits WHERE tmcode =728 ;
