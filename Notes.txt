@@ -541,3 +541,9 @@ UOM: 1, minutes, 2, charge , 3 call, 4, 6 secs
 社保信息查询： zhaojun1912/Qq398372
 
 wifi physical address: A0-88-B4-AC-78-C0
+天翼网关:http://192.168.1.1/cgi-bin/index2.asp
+http://192.168.1.1/login.cgi?username=telecomadmin&psd=nE7jA%255m
+telecomadmin/nE7jA%5m
+MERCURY_5G_47DF
+MERCURY_47DF
+ChinaNet-rCDx/pengliu13973559270
