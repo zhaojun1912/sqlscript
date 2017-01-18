@@ -538,12 +538,6 @@ UOM: 1, minutes, 2, charge , 3 call, 4, 6 secs
 接收短信 sncode = 3
 发送短信 sncode = 4
 1CMN MO Call Rating sncode = 283
-社保信息查询： zhaojun1912/Qq398372
-111111111111111111111111111111111111111111111111111111111
-222222222222222222222222222222222222222222222222222222222
-33333333333333333333333333333333333
-google:zhaojun1912@gmail.com/zhaojun_yan1912
-
 wifi physical address: A0-88-B4-AC-78-C0
 天翼网关:http://192.168.1.1/cgi-bin/index2.asp
 http://192.168.1.1/login.cgi?username=telecomadmin&psd=nE7jA%255m
