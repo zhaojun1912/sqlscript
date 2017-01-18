@@ -41,13 +41,8 @@ lnk.TM_GROUP_ID,
 Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 4 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id, a.msisdn, a.invoice_date, a.FREE_GPRS, a.GPRS_USAGE, a.EXTRA_GPRS_VOL, a.FREE_CHINA_GPRS, a.CHINA_GPRS_USAGE, a.EXTRA_CHINA_GPRS_VOL, a.CHINA_LOCAL_GPRS_USAGE, a.EXTRA_CHINA_LOCAL_GPRS_VOL
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-<<<<<<< HEAD
-WHERE a.custcode IN ('1.6061656')
-AND a.invoice_date = To_Date('20161201','yyyymmdd')
-=======
 WHERE a.custcode IN ('1.3875551')
 AND a.invoice_date = To_Date('20160806','yyyymmdd')
->>>>>>> 5fefeeb9ef16e0bd93d74371fbc1c8f1ca88c15d
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
@@ -74,11 +69,9 @@ AND cs1.dn_id = dn.dn_id;
 --CREATE SEQUENCE ppcom_roaming_cdr_file_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 
 --20161129 KwLi NOTE
-<<<<<<< HEAD
 SELECT * FROM ptcapp_usage_hist WHERE customer_id = 6238481 AND co_id =6432204;
-=======
 SELECT * FROM ptcapp_usage_hist WHERE customer_id = 5133893 AND co_id =6231559;
->>>>>>> 5fefeeb9ef16e0bd93d74371fbc1c8f1ca88c15d
+
 
 SELECT date_billed, Ceil(gprs_usg/60), Ceil(roamgprs_chn_usg/60)
  FROM ptcapp_usage_hist WHERE customer_id = 6227103 AND co_id = 6422401;
