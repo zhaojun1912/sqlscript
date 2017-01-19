@@ -545,3 +545,37 @@ telecomadmin/nE7jA%5m
 MERCURY_5G_47DF
 MERCURY_47DF
 ChinaNet-rCDx/pengliu13973559270
+
+GIT
+HEAD指向的版本就是当前版本，因此，Git允许我们在版本的历史之间穿梭，使用命令git reset --hard commit_id。
+
+穿梭前，用git log可以查看提交历史，以便确定要回退到哪个版本。
+
+要重返未来，用git reflog查看命令历史，以便确定要回到未来的哪个版本。
+
+最重要的就是称为stage（或者叫index）的暂存区
+撤销工作区修改：git checkout -- <FILE>  至最近git commit或者git add后状态。
+撤销暂存区修改：git reset <HEAD> <FILE> to unstage files.然后可撤销工作区修改。
+撤销已提交到版本库的修改： 版本回退. git reset --hard <version code>
+删除文件：rm file, 操作系统删除。
+git rm file, 版本库中删除。要commit.
+删错了， 版本库还有。 git checkout -- test.txt
+现在有了分支，就不用怕了。你创建了一个属于你自己的分支，别人看不到，还继续在原来的分支上正常工作，而你在自己的分支上干活，想提交就提交，直到开发完毕后，再一次性合并到原来的分支上，这样，既安全，又不影响别人工作。
+
+stash功能：
+并不是你不想提交，而是工作只进行到一半，还没法提交，预计完成还需1天时间。但是，必须在两个小时内修复该bug，怎么办？
+
+幸好，Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作。
+
+查看远程库信息，使用git remote -v；
+
+本地新建的分支如果不推送到远程，对其他人就是不可见的；
+
+从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+
+在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+
+建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+
+从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+TAG：所以，tag就是一个让人容易记住的有意义的名字，它跟某个commit绑在一起。
