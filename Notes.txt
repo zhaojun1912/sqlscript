@@ -579,3 +579,9 @@ stash功能：
 
 从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
 TAG：所以，tag就是一个让人容易记住的有意义的名字，它跟某个commit绑在一起。
+
+GIT SVN:
+git svn clone -r version_start:version_end svn_addr(contain account) : checkout version
+git add/commit : add or commit to local version repository.
+git svn rebase : pull up-to-date version.
+git svn dcommit : push local version to remote svn repository.
