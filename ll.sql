@@ -3,7 +3,7 @@ SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode,cs.spcode,
 dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
-dn.dn_num = '62189031'
+dn.dn_num = '56407060'
 --ca.custcode = '407060'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
@@ -12,7 +12,7 @@ AND cs.co_id = coa.co_id
 AND coa.customer_id = ca.customer_id     --ORDER BY csactivated
 AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
 
-SELECT * FROM customer_all ca WHERE custcode  = '1.5483165';
+SELECT * FROM customer_all ca WHERE custcode  = '1.5607861';
 SELECT * FROM ptcbill_main_sub_lnk WHERE sub_customer_id  =   5774155;
 
 SELECT *FROM equipment WHERE customer_id = 5747798;
@@ -184,8 +184,8 @@ lnk.TM_GROUP_ID,
 Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id, a.msisdn, a.invoice_date, a.FREE_GPRS, a.GPRS_USAGE,  a.EXTRA_GPRS_VOL,  a.FREE_CHINA_GPRS,  a.CHINA_GPRS_USAGE,  a.EXTRA_CHINA_GPRS_VOL, a.CHINA_LOCAL_GPRS_USAGE, a.EXTRA_CHINA_LOCAL_GPRS_VOL
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-WHERE a.custcode IN ('1.4392172')
-AND a.invoice_date = To_Date('20161201','yyyymmdd')
+WHERE a.custcode IN ('1.5607861')
+AND a.invoice_date = To_Date('20170106','yyyymmdd')
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
@@ -531,3 +531,36 @@ SELECT * FROM user_tab_columns WHERE column_name LIKE '%ADDR%';
 SELECT *FROM MIAP_SUBSCRIPTION
  WHERE email = 'zhaojun1912@yeah.net';
  SELECT *FROM PTCBILL_CHECK_PARTY;
+
+ SELECT
+Sum(LOCAL_FREE_MINS_INTER),Sum(LOCAL_FREE_MINS_INTRA),Sum(CHINA_FREE_MINS),Sum(INTER_VOICE_USAGE),Sum(INTRA_VOICE_USAGE),Sum(CHINA_USAGE)
+-- a.*
+FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
+WHERE a.custcode IN ('1.5607861')
+AND a.invoice_date = To_Date('20161106','yyyymmdd')
+AND a.co_id = co.co_id
+AND co.customer_id = ca.customer_id
+AND ca.tmcode = tm.tmcode
+--AND Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') = 'Y'
+AND tm.tmcode = lnk.tmcode
+AND lnk.TM_GROUP_ID=1
+ORDER BY 2
+;
+
+SELECT
+tm.tmcode,
+tm.des,
+--lnk.TM_GROUP_ID,
+--Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
+a.custcode, a.co_id, a.msisdn,  a.GPRS_USAGE,a.CHINA_GPRS_USAGE, a.GPRS_USAGE+ a.CHINA_GPRS_USAGE total FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
+WHERE a.custcode IN ('1.5607861')
+AND a.invoice_date = To_Date('20170106','yyyymmdd')
+AND a.co_id = co.co_id
+AND co.customer_id = ca.customer_id
+AND ca.tmcode = tm.tmcode
+--AND Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') = 'Y'
+AND tm.tmcode = lnk.tmcode
+ORDER BY msisdn
+;
+SELECT * FROM ptcbill_co_usage_summary WHERE invoice_date = To_Date('20161106', 'yyyymmdd') AND custcode = '1.5607861' AND co_id = '6151364';
+SELECT * FROM ptcbill_co_usage_summary WHERE invoice_date = To_Date('20160120', 'yyyymmdd') AND custcode = '2.11.52.64.100109';
