@@ -585,3 +585,7 @@ git svn clone -r version_start:version_end svn_addr(contain account) : checkout 
 git add/commit : add or commit to local version repository.
 git svn rebase : pull up-to-date version.
 git svn dcommit : push local version to remote svn repository.
+
+万州国本车站： 6：20开始有到开县的汽车。 23块。流水班。车站支持银联卡自动机器售票。 
+火车站到国本车站， 15路 。 6：00开始有。 票价2元， 坐车到老年大学下车。
+我来总结一下：1、火车出站右手100米，写着开县的那些饭馆问问黑车，80元/人（很难说到70元/人），开县城内包送到。不要人带去哦，带去的话要收10元。2、开县-----达州汽车南站，68元/人，时间1.5小时，临江上高速；达州汽车南站------达州火车站坐22路，1.5元/人，时间0.5小时。
