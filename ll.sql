@@ -81,12 +81,12 @@ SELECT *FROM other_credits WHERE tmcode =728 ;
 SELECT *FROM ptcbill_sub_psh_fu_cat  WHERE  main_customer_id =4308519 ;
 SELECT *FROM customer_all WHERE custcode = '1.4392172';  --6333805
 SELECT * FROM mputmtab WHERE tmcode = 739;
-
+SELECT * FROM customer_all WHERE custcode = '1.6051560';
 --查询主账号下所有子账号的流量限制
 SELECT dn.dn_num, volume/1024 "volume(GB)", l.sub_customer_id,  cvh.co_id, seq_no, cvh.ent_date, cs.tmcode, cs.spcode, cs.sncode FROM contr_volume_history cvh,
 ptcbill_main_sub_lnk l ,contr_services cs, directory_number dn
 WHERE l.sub_co_id = cvh.co_id
-AND l.main_customer_id = 3843789
+AND l.main_customer_id = 5987560
 AND seq_no = (SELECT Max(seq_no) FROM contr_volume_history hh WHERE hh.co_id = cvh.co_id)
 AND  cs.co_id = l.sub_co_id
 AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
