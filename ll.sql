@@ -566,3 +566,4 @@ ORDER BY msisdn
 ;
 SELECT * FROM ptcbill_co_usage_summary WHERE invoice_date = To_Date('20170116', 'yyyymmdd') AND msisdn = 67572883;
 SELECT * FROM ptcbill_co_usage_summary WHERE invoice_date = To_Date('20160120', 'yyyymmdd') AND custcode = '2.11.52.64.100109';
+##
