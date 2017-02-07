@@ -3,7 +3,7 @@ SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode,cs.spcode,
 dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
-dn.dn_num = '56407060'
+dn.dn_num = '67572883'
 --ca.custcode = '407060'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
@@ -13,10 +13,12 @@ AND coa.customer_id = ca.customer_id     --ORDER BY csactivated
 AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
 
 SELECT * FROM customer_all ca WHERE custcode  = '1.5607861';
-SELECT * FROM ptcbill_main_sub_lnk WHERE sub_customer_id  =   5774155;
+SELECT * FROM ptcbill_main_sub_lnk WHERE sub_customer_id  =   6350025;
 
 SELECT *FROM equipment WHERE customer_id = 5747798;
 SELECT * FROM rtx_050301 WHERE r_p_customer_id = 5803836 AND r_p_contract_id  =5979591  ;
+SELECT plcode, Sum(rounded_volume/60) FROM rtx_040401 WHERE r_p_customer_id = 6350025 AND r_p_contract_id  =6548123  AND rated_flat_amount <>0 GROUP BY plcode ;
+SELECT 11224882 - 1024*1024*6 FROM dual;
 SELECT * FROM rtx_070101 WHERE r_p_customer_id = 6238481 AND r_p_contract_id  =6432204  AND sncode = ;
 
 
@@ -94,7 +96,7 @@ AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
 and cs.dn_id = dn.dn_id
 ORDER BY dn_num;
 
-SELECT *FROM rtx_010401 WHERE r_p_customer_id =  6293607 AND r_p_contract_id =  6488825 AND sncode = 119 AND ;
+SELECT *FROM rtx_040101 WHERE r_p_customer_id =  6293607 AND r_p_contract_id =  6488825 AND sncode = 119 AND ;
 
 SELECT  rtx.r_p_customer_id, Sum(rounded_volume)/60/1024/1024 FROM  rtx_010401 rtx, ptcbill_main_sub_lnk l
 WHERE rtx.r_p_customer_id = l.sub_customer_id
@@ -562,5 +564,5 @@ AND ca.tmcode = tm.tmcode
 AND tm.tmcode = lnk.tmcode
 ORDER BY msisdn
 ;
-SELECT * FROM ptcbill_co_usage_summary WHERE invoice_date = To_Date('20161106', 'yyyymmdd') AND custcode = '1.5607861' AND co_id = '6151364';
+SELECT * FROM ptcbill_co_usage_summary WHERE invoice_date = To_Date('20170116', 'yyyymmdd') AND msisdn = 67572883;
 SELECT * FROM ptcbill_co_usage_summary WHERE invoice_date = To_Date('20160120', 'yyyymmdd') AND custcode = '2.11.52.64.100109';
