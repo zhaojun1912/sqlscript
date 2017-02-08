@@ -600,3 +600,10 @@ git svn dcommit : push local version to remote svn repository.
 海南东环铁路：308公里， 100块。1：26.
 	西环铁路：345公里，103块， 2：26.
 武广：1068公里，463.5. 3：43.
+
+python configuration:
+export PYTHONSTARTUP=pythonstartup.py
+jundev@debian:~/sqlscripts$ cat ~/pythonstartup.py
+import readline
+readline.parse_and_bind('tab: complete')
+readline.parse_and_bind('set editing-mode vi')
