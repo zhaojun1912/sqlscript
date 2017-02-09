@@ -283,7 +283,7 @@ ORDER BY A.TABLE_NAME, B.COLUMN_ID;
 
 szjyx/62398688
 香港号码：56407060
-大陆号码：
+大陆号码：14714920294
 
 --check duplication run
 select * from PTCBILL_MASTER_CONTROL order by total_customer desc;
