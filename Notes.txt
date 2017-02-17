@@ -618,3 +618,20 @@ git commit -m "Initial version"
 #push an existing repository from the command line
 git remote add origin git@github.com:zhaojun1912/programming.git
 git push -u origin master
+
+
+git alias configurations:
+jundev@debian:~/programming/goprogramming/go/bin$ cat ~/.gitconfig
+[push]
+    default = matching
+[user]
+    name = jundev
+    email = zhaojun1912@yeah.net
+[alias]
+    st=status
+    co=checkout
+    ci=commit
+    br=branch
+    unstage=reset HEAD
+    last=log -1
+    lg=log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
