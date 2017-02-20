@@ -596,6 +596,10 @@ git svn dcommit : push local version to remote svn repository.
 京津：120公里，G车54.5， 34分钟。
 广深：到福田。 107公里， 82块。 39分钟。
 厦深：514公里， 150.5块。3:28.
+<<<<<<< HEAD
+=======
+杭深：1464公里，432块。10小时。
+>>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9
 贵广：857公里， 267.5.  4：11。
 海南东环铁路：308公里， 100块。1：26.
 	西环铁路：345公里，103块， 2：26.
@@ -607,3 +611,33 @@ jundev@debian:~/sqlscripts$ cat ~/pythonstartup.py
 import readline
 readline.parse_and_bind('tab: complete')
 readline.parse_and_bind('set editing-mode vi')
+<<<<<<< HEAD
+=======
+
+sb1: 10.1.12.131 boss/boss78
+svn: 10.1.12.50 boss/boss78
+
+git init
+git add .
+git commit -m "Initial version"
+#push an existing repository from the command line
+git remote add origin git@github.com:zhaojun1912/programming.git
+git push -u origin master
+
+
+git alias configurations:
+jundev@debian:~/programming/goprogramming/go/bin$ cat ~/.gitconfig
+[push]
+    default = matching
+[user]
+    name = jundev
+    email = zhaojun1912@yeah.net
+[alias]
+    st=status
+    co=checkout
+    ci=commit
+    br=branch
+    unstage=reset HEAD
+    last=log -1
+    lg=log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+>>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9

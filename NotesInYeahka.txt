@@ -1,0 +1,3890 @@
+md5: 输出固定128-bits长。
+0eb3be2db3a534c192be5570c6c42f59->3df324afc6fbf9b7ce6bf722f73b9240
+
+shared_ptr<ResultSet> res(conn->query(oss.str()));
+if (!res)  return bret;
+res->next();
+if (!res->getInt32(0)) bret = true;
+
+	shared_ptr<ResultSet> res(conn->query(oss.str()));
+	// res 为null, 查询失败
+	if (!res) {
+		yk_api::log_error("select account fail, %s", oss.str().c_str());
+		return   error_code::e_mysql_error;
+	}
+	//空结果集
+	if (!res->next()) {
+		yk_api::log_error("account not found, %s", oss.str().c_str());
+		return  error_code::e_account_nofound;
+	}
+	
+//get account info
+error_code::type accountHandler::get_account_info(int64_t uid, account_type::type atype, 
+								  account_info &info, Connection *conn, bool block)
+{
+	//query
+	ostringstream oss;
+	oss<<"select F_acc_id, F_user_name, F_balance, F_frozen, F_state, F_parent ";
+	oss<<" from acc.t_user_account_"<<id_to_string_3(uid)<<" where F_uid="<<uid;
+	oss<<" and F_type="<<atype;  
+	//if lock
+	if (block) oss<<" for update";
+
+字符串转义：
+conn->escapeString(info.user_name)
+
+	//query
+	if (conn->update(oss.str()) < 0)
+	{
+		//check if already exsit
+		oss.str("");
+		oss<<"select F_acc_id from acc.t_biz_account where F_acc_id=";
+		oss<<aid;;
+		shared_ptr<ResultSet> res(conn->query(oss.str()));
+		if (!res || !res->next())
+		{
+			conn->rollback();
+
+			yk_api::log_error("mysql create account fail");
+			//return
+			return	error_code::e_mysql_error;
+		}
+
+		conn->rollback();
+
+		yk_api::log_error("account already exsit, %ld:%d", info.user_id, info.type);
+		return	error_code::e_account_already_exsit;
+	}
+	//check if exsit
+	// true表示没有重复deposit
+	bool bret = check_again(req.trans_id, req.account_id, 
+							req.amount, req.product_id, 
+							req.btype, operate_type::o_deposit,
+							conn.get());
+	//deposit again
+	if (!bret) {
+		yk_api::log_error("%ld alrady deposit, don't repeat deposit, amount=%ld, trans_id=%ld, user_id=%ld, account_id=%ld", req.amount, req.trans_id, req.user_id, req.account_id);
+		ret = error_code::e_already_happen;
+		return ret;
+	}
+	P2P_TIMEMARK("check_again");	
+	
+//检查是否在进行重复充值 ，查用户账户流水表，该事务id.
+/*check if happened*/
+bool accountHandler::check_again(int64_t transid, int64_t aid, int64_t amount, 
+									 int64_t product_id, bus_type::type btype, 
+									 operate_type::type otype, Connection* conn,
+									 int64_t daid, bool ifmiddle)
+{
+	bool bret = false;
+	//query
+	ostringstream oss;
+	if (!ifmiddle)	oss<<"select count(F_acc_id) from acc.t_user_acc_flow_" << id_to_string_3(aid);
+	else   oss<<"select count(F_acc_id) from acc.t_biz_acc_flow_" << id_to_string_2(aid);
+	oss<<" where F_bus_type="<<btype<<" and F_operation="<<otype<<" and F_trans_id="<<transid;
+	oss<<" and F_acc_id="<<aid<<" and F_amount=" <<amount<<" and F_loan_id="<<product_id << " and F_peer_acc_id="<<daid;
+
+	shared_ptr<ResultSet> res(conn->query(oss.str()));
+	if (!res)  return bret;
+
+	res->next();
+	if (!res->getInt32(0)) bret = true;
+	return bret;
+}	
+//普通的正常状态的账户才能充值
+	if (info.user_id != req.user_id  ||
+		info.type != account_type::t_account_common ||
+		info.state != account_state::s_account_normal)
+		
+	string desc;
+	if (req.__isset.desc) desc = conn->escapeString(req.desc);		
+	
+//父账户即为中间账户
+
+账户充值流程：accountHandler::account_deposit： 应该是充值系统回调的。改变普通账户和中间账户余额，
+并记录相应的流水表。
+
+校验请求信息，检查重做，-> 
+fetch flowid & parent_flowid; ->
+开事务->
+获取用户账户->check账户状态及类型-> update account -> 
+insert flow for the account ->
+get parent account of this common accout -> update parent account ->
+insert flow for the parent account ->
+close transaction
+
+| t_freeze_order_00 | CREATE TABLE `t_freeze_order_00` (
+  `F_order_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '冻结单号，调用者传入',
+  `F_acc_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '冻结账号id',
+  `F_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT '冻结用户id',
+  `F_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '冻结总金额',
+  `F_bus_type` int(11) NOT NULL DEFAULT '0' COMMENT '业务类型',
+  `F_unfrozen_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '已解冻金额',
+  `F_loan_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '标的ID',
+  `F_state` int(11) NOT NULL DEFAULT '0' COMMENT '状态：1-冻结，2-部分解冻，3-已全部解冻',
+  `F_trans_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '导致该流水的业务交易ID（和F_id一样）',
+  `F_remark` varchar(64) NOT NULL DEFAULT '' COMMENT '描述',
+  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '更新时间',
+  `F_create_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '创建时间',
+  PRIMARY KEY (`F_order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8  
+
+??? 提现为何要有冻结单号， 并且剩余冻结金额必须大于等于提现金额。
+//check
+	int64_t amount = res->getInt64(0);
+	int64_t unfreeze_amount = res->getInt64(1);
+	if (amount - unfreeze_amount < req.amount) 
+
+账户提现 ：为何account 只变动 freezon amount 而不变动 balance.
+???而parent account 只变动余额而不变动 freezon amount ?
+check amount -> check transation redo -> get flowid & parent flowid
+-> begin transation -> 
+query t_free_order_ (get frozen amount  & unfreeze_amount by freezon state  = 0)->
+check amount - unfreeze_amount < req.amount ->
+update t_free_order_ (F_unfrozen_amount=F_unfrozen_amount+"<<req.amount;)	
+ & update F_state state ->
+get account info & check state ->
+check account frozen amount >= withdraw amount ->
+update account set F_frozen = F_frozen-"<<req.amount ->
+insert user account flow by minus req.amount from frozen ->
+get parent account info ->
+check balance >= req.amount ->
+update parent account set F_balance = F_balance-"<<req.amount ->
+insert parent flow ->
+close transaction
+ 
+账户转账流程：不同账户才能转账，同一账户禁止转账， 
+common account but no userid , ->
+check amount > 0 ->
+check account & update account balance ->
+check middle account & update balance 
+
+账户冻结流程：
+if (!ifmiddle)
+		oss<<"update acc.t_user_account_"<<id_to_string_3(req.account_id);
+	else
+		oss<<"update acc.t_biz_account";
+	oss<<" set F_balance=F_balance-"<<req.amount<<", F_frozen=F_frozen+";
+	oss<<req.amount<<", F_update_time='"<<current<<"' where F_acc_id=";
+	oss<<req.account_id;
+
+	//insert freeze order
+	oss.str("");
+	oss<<"insert into t_freeze_order_"<<id_to_string_2(req.account_id)<<"(";
+	//add user id
+	if (!ifmiddle) oss<<"F_uid, "; 
+	oss<<"F_order_id, F_acc_id, F_amount, F_bus_type, F_unfrozen_amount, ";
+	oss<<"F_loan_id, F_trans_id, F_remark, F_update_time, F_create_time) values(";
+	//add user id
+	if (!ifmiddle) oss<<req.user_id<<", ";
+	oss<<freezeid<<", "<<req.account_id<<", "<<req.amount<<", "<<req.btype<<", ";
+	oss<<0<<", "<<req.product_id<<", "<<req.trans_id<<", ";
+	oss<<"'freeze oder', '"<<current<<"', '"<<current<<"')";	
+
+	freezeid作为trans_id
+	//insert flow
+	oss.str("");
+	if (!ifmiddle)
+		oss<<"insert into acc.t_user_acc_flow_" << id_to_string_3(req.account_id)<<"(";
+	else
+		oss<<"insert into acc.t_biz_acc_flow_"	<< id_to_string_2(req.account_id)<<"(";	
+	//user id
+	if(!ifmiddle) oss<<"F_uid, ";
+	oss<<"F_flow_id, F_acc_id, F_bus_type, F_operation, F_amount, ";
+	oss<<"F_balance, F_frozen, F_trans_id, F_loan_id, F_remark, F_freeze_id, ";
+	oss<<"F_create_time) values(";
+	//set user id 
+	if (!ifmiddle) oss<<req.user_id<<", ";
+	oss<<flowid<<", "<<req.account_id<<", "<<req.btype<<", ";
+	oss<<operate_type::o_freeze<<", "<<req.amount<<", ";
+	oss<<info.balance - req.amount<<", "<<info.frozen + req.amount<<", ";
+	oss<<req.trans_id<<", "<<req.product_id<<", '"<<desc<<"', "<<freezeid;
+	oss<<", '"<<current<<"')";
+
+解冻流程：
+check amount - unfreeze_amount >= req.amount ->
+	//update freeze order
+	oss.str("");
+	oss<<"update t_freeze_order_"<<id_to_string_2(req.account_id);
+	oss<<" set F_unfrozen_amount=F_unfrozen_amount+"<<req.amount;
+	//state
+	if (amount - unfreeze_amount == req.amount) oss<<", F_state=1";
+	oss<<", F_update_time='"<<current<<"'";
+	//where
+	oss<<" where F_order_id="<<req.freeid<<" and F_acc_id=";
+	oss<<req.account_id<<" and F_loan_id="<<req.product_id;
+	oss<<" and F_bus_type="<<req.btype;
+update account balance+= req.amount, frozen -= req.amount
+update account flow : info.balance + req.amount<<", "<<info.frozen - req.amount<<", ";
+
+user service:
+字符串比较 ：and F_user_name='"<<conn->escapeString(name)<<"'";
+name -> id: (((uint16_t)(uint8_t)name[0] << 8) | (uint8_t)name[1]);
+id -> table: id % 1000
+user_parnter_type::t_user_guarantor用户创建二个账户：
+1 为t_account_common , 2 为t_account_deposit
+
+internal transfer:
+source.info.balance < req.amount
+
+
+标地系统 ：
+| t_loan_000 | CREATE TABLE `t_loan_000` (
+  `F_loan_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '标的ID',
+  `F_lender_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT '借款人uid',
+  `F_guarantor_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT '担保人UID',
+  `F_guarantee_rate` int(11) NOT NULL DEFAULT '0' COMMENT '担保比例,单位万分之一，当前合理值:1000（10%），2000（20%），3000（30%）',
+  `F_title` varchar(32) NOT NULL DEFAULT '' COMMENT '产品标题',
+  `F_credit` tinyint(4) NOT NULL DEFAULT '0' COMMENT '信用评级',
+  `F_annual_rate` int(11) NOT NULL DEFAULT '0' COMMENT '年化利率(万分之）',
+  `F_monthly_rate` int(11) NOT NULL DEFAULT '0' COMMENT '月化利率(万分之）',
+  `F_state` int(11) NOT NULL DEFAULT '0' COMMENT '状态：1-生成标的，2-募集中，3-募集完毕，4-已放款，5-还款中，6-还款完毕',
+  `F_total_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '募资总额（分）',
+  `F_raised_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '已募集金额（分)',
+  `F_repaid_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '已返还金额（分）',
+  `F_loan_tenure` int(11) NOT NULL DEFAULT '0' COMMENT '贷款期限（单位：月）',
+  `F_bid_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '投标时间',
+  `F_expected_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '应还款日期',
+  `F_actual_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '实际清偿日期',
+  `F_repaid_principal` bigint(20) NOT NULL DEFAULT '0' COMMENT '已还本金',
+  `F_repaid_interest` bigint(20) NOT NULL DEFAULT '0' COMMENT '已还利息',
+  `F_receivable_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT '应收逾期罚金',
+  `F_paid_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT '已收罚金',
+  `F_phase_total` int(11) NOT NULL DEFAULT '0' COMMENT '还款总期数',
+  `F_repaid_phase` int(11) NOT NULL DEFAULT '0' COMMENT '已还款期数',
+  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '更新时间',
+  `F_create_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '创建时间',
+  PRIMARY KEY (`F_loan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
+//手续费金额
+		int64_t service_money = (loan.total_amount * loan.monthly_rate*loan.months_per_phase) / 10000;
+手续费交到BIZ_ACC_ID_INCOME  //收益待分成中间账户
+
+代理商：t_account_deposit
+		/**
+		 * 对代理商进行检查
+		 */
+		yeahka::account::account_get_rt guarantor_account;
+		if (GetAccountByUserID(info.guarantor_uid, guarantor_account,account_type::t_account_deposit) != 0) {
+			yk_api::log_error("call account server fail!,guarantor_account uid is %ld",info.guarantor_uid);
+			_return.__set_err(error_code::e_account_call_fail);
+			break;
+		}
+向mq发送：
+//发送mq成功
+p2p_api::Producer<yeahka::loan::loan_info> mq_loan_info; 	
+
+		int32_t res=g_ApplicationGlobalData.mq_loan_info.send(info);
+		if (res) {
+			yk_api::log_error("send loaninfo mq fail, res:%d,loan id is %ld", res,loan_id);
+			return res;
+		}
+| t_repayment_00 | CREATE TABLE `t_repayment_00` (
+  `F_repayment_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '单号',
+  `F_lender_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT '贷款人UID',
+  `F_lender_name` varchar(64) NOT NULL DEFAULT '' COMMENT '贷款人用户名',
+  `F_lender_acc_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '贷款人账户ID',
+  `F_loan_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '标的ID',
+  `F_loan_title` varchar(32) NOT NULL DEFAULT '' COMMENT '产品标题',
+  `F_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '还款金额',
+  `F_phase` int(11) NOT NULL DEFAULT '0' COMMENT '期数',
+  `F_principal` bigint(20) NOT NULL DEFAULT '0' COMMENT '本金（单位：分）',
+  `F_interest` bigint(20) NOT NULL DEFAULT '0' COMMENT '利息（单位：分）',
+  `F_receivable_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT '应收逾期罚金（单位：分）',
+  `F_expected_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '应还款日期',
+  `F_actual_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '实际清偿日期',
+  `F_repaid_principal` bigint(20) NOT NULL DEFAULT '0' COMMENT '已还本金',
+  `F_repaid_interest` bigint(20) NOT NULL DEFAULT '0' COMMENT '已还利息',
+  `F_paid_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT '已收罚金',
+  `F_guarantee_disburse` bigint(20) NOT NULL DEFAULT '0' COMMENT '代理商垫付还款金额',
+  `F_reserve_disburse` bigint(20) NOT NULL DEFAULT '0' COMMENT '准备金垫付还款金额',
+  `F_state` int(11) NOT NULL DEFAULT '0' COMMENT '状态：1-待还，2-已还，3-坏账',
+  `F_properties` int(11) NOT NULL DEFAULT '0' COMMENT '属性位：1-逾期，2-提前还款',
+  `F_create_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '创建时间',
+  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '更新时间',
+  PRIMARY KEY (`F_repayment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
+		
+		
+service type: 
+loan , invest, s_common
+business type: 
+factorage 手续费
+investment: 投资
+pay_loan: 还款
+refund: 退款,还款转账
+earnings: 赚到的钱，收益 
+deposit: 存款，充值
+settle: 结算
+common: 
+create: 
+
+deposit_type: 
+cash : 查表t_deposit_order_， check pay order 
+withhold : 代扣代缴   ,call http支付系统 
+offline: 一般只需提供卡号、有效期、CVV码、签名等  
+pos
+
+withdraw_type:
+
+online:
+offline:
+resend:
+
+account_state:
+normal, abnormal, frozen
+
+account type:
+common,  普通账户
+deposit, 代理商账户
+middle, 乐刷中间户
+
+operate_type:
+deposit,
+withdraw,
+transfer_in, 转账入
+transfer_out, 转账出
+freeze, 冻结
+unfreeze, 解冻
+unfreeze_transfer, 解冻转账
+create
+
+loan state:
+initial , 发起（未支付利息 )
+publish, 准备发布（已支付利息 )
+financing, 筹标中(标地已发布)
+full, 满标
+lending, 放款中， 提现处理中
+repay, 待还款
+disbursement, 垫付 ， 即逾期还款
+finish, 完标（已结清）
+bad_debt, 坏账
+invalid, 流标
+
+loan type:
+p2p 原系统标地
+newer  新手理财标地
+
+flow operate type:
+create loan
+service charge request
+service charge deposit request
+service charge deposit success
+service charge success
+service transfer request
+service transfer success
+
+
+invest deposit amount
+invest plan 
+invest order
+invest invalid
+invest success
+invest deposit request
+invest deposit success
+
+full loan
+invalid loan request
+invalid loan success
+
+withdraw transfer request
+withdraw transfer success
+withdraw request
+withdraw success
+
+repay request
+repay deposit request
+repay deposit success
+repay transfer request
+repay transfer success
+repay success
+repay fail
+repay phase success
+repay all success
+
+guarantor disburse request
+guarantor disburse success
+
+reserve disburse request
+reserve disburse success
+
+repay to guarantor request
+repay to guarantor success
+
+repay to reserve request
+repay to reserve success
+
+everday penalty  
+freeze account
+freeze account success
+
+unfreeze account
+unfreeze account success
+
+unfreeze transfer account
+unfreeze transfer account success
+
+prepare to repay 
+
+create repayment success
+transfer penalty request
+transfer penalty success
+
+service transfer settle request
+service transfer settle success
+repay transfer settle request
+repay transfer settle success
+set lend withdraw repay 
+
+pos service deposit req
+pos service deposit and transfer success
+
+pos repay deposit request
+pos repay deposit and transfer success
+
+repayment state:
+wait to repay 待还款 
+finish repay 已还款
+disburse 垫付 
+
+repayment property :
+repay 正常
+overdue 逾期未审核 
+verify 逾期忆审核 
+ahead 提前 还款
+
+investment state:
+initial  初始化
+order 下单成功
+invalid 投资失败
+success 投资成功
+
+payoff state: 收益状态 
+wait to repay 
+finish
+
+pos service type :
+pos service charge 从pos中缴手续费
+pos repay : 从pos 中还款 
+
+biz_acc_id_LESHUA 总账户
+biz_acc_id_REPAID  还款账户
+biz_acc_id_INVESTED 已募集资金账户
+biz_acc_id_INCOME 收益待分成账户
+biz_acc_id_REVENUE 收益账户
+biz_acc_id_RESERVE 准备金账户
+biz_acc_id_DISTRIBUE 待分配 账户
+biz_acc_id_correction 差错处理账户
+
+错误码：
+e_no_error 
+e_unknown_error
+e_already_happen
+e_invalid_parameter
+e_invalid_bustype
+e_invalid_servicetype
+e_mysql_error
+e_get_unique_id
+e_insert_order
+e_insert_flow
+e_create_order
+e_notfound_order
+e_time_call_fail
+e_get_connect_fail
+e_arg_not_valid
+
+e_get_index_error
+e_update_index_error
+
+e_user_notfound
+e_user_already_exist
+e_invalid_user_partner
+e_invalid_user_state
+
+e_account_notfound
+e_create_account_fail
+e_account_already_exsit
+e_invalid_account_type
+e_insufficient_balance
+e_insufficient_frozen
+e_transfer_error
+e_invalid_account_state
+e_invalid_amount
+e_invalid_card
+e_invalid_account
+e_account_freeze
+e_account_unfreeze,
+e_notfound_freeze
+
+e_account_withdraw
+e_notify_service,
+e_invalid_deposittype
+e_get_user_name,
+e_notfound_card
+e_invalid_cardtype,
+e_account_deposit,
+
+e_select_loan_fail
+e_update_loan_fail
+e_insert_loan_fail
+e_delete_loan_fail
+e_select_flow_fail
+e_update_flow_fail
+e_insert_flow_fail
+e_delete_flow_fail
+e_select_repayment_fail
+e_select_investment_fail
+e_penalty_fail   //还可设置罚金
+e_create_loan_fail
+e_money_not_equal  //数目 对不上， 金钱不相等
+e_withdraw_call_fail   //调用提现失败
+e_call_guarantor_disburse_fail  //代理商垫付失败 
+e_call_reserve_disburse_fail, 乐刷 垫付失败
+e_call_transfer_service_repayment_fail //转账到待分配账户失败
+e_invalid_state   错误的状态 
+e_service_transfer_to_distribute_fail //转账手续费失败
+e_repayment_transfer_to_distribute_fail //转账还款失败
+e_repay_to_reserve_fail //还款给乐刷失败
+e_repay_to_guarantor_fail //还款给代理商失败
+
+e_select_payoff_fail,
+e_insert_payoff_fail,
+e_service_deposit //金额不够，缴费失败，发起充值 
+e_invest_deposit  
+e_repay_deposit,
+e_deposit_call_fail,
+e_account_call_fail,
+e_user_call_fail,
+e_invest_call_fail,
+e_id_call_fail,
+e_invalid_user,
+e_not_full_loan,
+e_not_financing_loan,
+e_not_invalid_loan,
+e_not_initial_loan,
+e_error_service_amount,
+e_beyond_total_amount,  //超标
+e_invest_amount_not_equal_amount, //投资金额不等于标地
+e_error_request_arg,     //请求参数校验失败。
+e_get_investors_fail, //获取标地投资者失败
+
+e_call_pos_service_fail //pos流水cgi服务失败
+e_auth_fail //认证失败
+e_auth_queryfail  //查询接口调用失败
+e_auth_reqfail  //认证接口提交请求失败
+e_auth_timeout //超过最大查询次数 
+e_jsonparse_fail //json格式不对
+e_zookeeper_error, 
+e_httppost_error
+
+enum user_parnter_type{
+    t_user_yeahka,
+    t_user_p2p,
+    t_user_guarantor,
+}
+
+partner_type  用户类型
+
+从数据库中读取枚举值时， 要检查是否合法。
+	if (res->getInt32(3) == 0)
+		info.__set_state(user_state::s_user_normal);
+	else if (res->getInt32(3) == 1)
+		info.__set_state(user_state::s_user_abnormal);
+	else if (res->getInt32(3) == 2)
+		info.__set_state(user_state::s_user_deleted);
+	else {
+		yk_api::log_error("invalid user state fail, %d, uid=%d", res->getInt32(3), uid);
+		//return
+		_return.__set_err(error_code::e_invalid_user_state);
+		return;
+	}
+
+__set_err之间要写错误日志。
+oss<<" and F_user_name='"<<conn->escapeString(name)<<"'";
+
+	int64_t id = -1;
+	if (rt.err == error_code::e_no_error)
+	{
+		if (rt.__isset.id) {
+			id = rt.id;
+			yk_api::log_error("get id from service, %lu\n", (uint64_t)id);
+		}
+	}
+获取信息记录日志
+冻结 -> 提现 ->解冻
+提现 ：从冻结金额中减去提现金额。 从父账户中减去余额
+
+账务库：
+t_user_account_000;
+t_user_acc_flow_00;
+t_biz_account;
+t_biz_acc_flow_00;
+t_freeze_order_00;
+
+p2p库：
+t_bank_card_000;
+t_deposit_flow_00;
+t_deposit_order_00;
+t_investment_000;
+t_investment_flow_000;
+t_investment_payoff_000;
+t_invest_deposit_check;
+t_invest_deposit_flow;
+t_invest_loan_flow;
+t_loan_000;
+t_loan_flow_80;
+t_repayment_00;
+t_user_000;
+t_user_flow_000;
+t_withdraw_flow_00;
+t_withdraw_order_43;
+
+bill库：
+t_repayment_penalty_statement_99
+t_leshua_bill
+t_investor_bill
+t_guarantor_bill
+
+t_investor_summary_report
+t_investor_statement
+t_investor_report
+
+t_guarantor_summary_report
+t_guarantor_repayment_statement
+t_guarantor_repayment_payoff_statement
+t_guarantor_investor_payoff_statement
+
+t_investor_report
+
+标的系统：
+设置罚金：
+查出标的， 查出还款计划-> check -> 如果还款计划表已经还本金和利息，那么就不允许设置罚金
+-> 只有还款和垫付状态下，才可以进行罚金设置 -> 本金已经归还，那么不允许设置罚金 
+-> 查询今天是否已经设置了这个罚金 -> 设置罚金 t_repayment -> 设置新的罚金 t_loan 
+-> 记录罚金流水t_loan_flow
+
+结算：罚金　，　计算乐刷，　代理商，　投资人收益　，　转账
+充值：插入支付单， 插入支付流水， 下支付单， 
+
+salary DECIMAL(5,2)
+In this example, 5 is the precision and 2 is the scale. The precision represents the number of significant digits that are stored for values, and the scale represents the number of digits that can be stored following the decimal point.
+Standard SQL requires that DECIMAL(5,2) be able to store any value with five digits and two decimals, so values that can be stored in the salary column range from -999.99 to 999.99.
+If the scale is 0, DECIMAL values contain no decimal point or fractional part.
+
+　　mysql> SELECT * FROM table LIMIT 5,10; // 检索记录行 6-15
+
+　　//为了检索从某一个偏移量到记录集的结束所有的记录行，可以指定第二个参数为 -1：
+
+　　mysql> SELECT * FROM table LIMIT 95,-1; // 检索记录行 96-last.
+
+　　//如果只给定一个参数，它表示返回最大的记录行数目：
+
+　　mysql> SELECT * FROM table LIMIT 5; //检索前 5 个记录行
+
+　　//换句话说，LIMIT n 等价于 LIMIT 0,n。
+
+　　注意limit 10和limit 9，1的不同：
+	
+标的系统 ：还款　，　缴手续费，　流标， 投标，　创建标的，　满标， 放款, 还款, 获取标的信息 ， 获取所有 投资者，　查询标的列表，　垫付,更新滞纳金。修改标的。
+投资系统 ：投标，　生成收益计划表，　提供预计计息日期和预计收益日期， 查询投资记录
+提现系统　：提现 ，　提现回调
+充值系统　：发起充值 ，充值回调
+账户系统 ：转账，查询账户余额，　充值后账户余额变更　，查询投资者账户信息，　冻结账户余额，　解冻账户余额，　解冻转账　
+用户系统：获取用户信息
+结算系统：设置罚金， 计算投资人收益，计算乐刷和代理商收益， 发起转账（转账投资人本金和收益，转账乐刷和代理商收益）。
+
+申请贷款：用户系统　，　账户系统
+审核贷款：　标的系统　
+
+MQ: 标的变更， 提现结果， 充值结果， 投资记录变更，投资成功， 满标
+
+http://192.168.11.130/cgi-bin/bankaccountquery.cgi?cmd=query_balance&channel=CEB2&account_no=78180188000090175&sign=XXXXXXX
+$2 = "{\"balance\":\"50803205\",\"channel\":\"CEB2\",\"result\":\"0\"}\n"
+
+证书提取公钥：
+openssl x509 -outform PEM -in base64cer -pubkey -out srca.pubkey
+base64cer为base64格式的x509标准证书文件
+
+数字证书包含用户的身份信息及其公钥， CA用自己的私钥为数字证书加上了签名。
+CA相当于公安局， 数字证书相当于身份证。签名相当于公安印章。
+核心技术 ：加密和签名技术　。
+
+79 5e b6 77 b7 e2 52 83 43 ed c7 51 88 4c 63 85 2c 00 43 58
+79 5e b6 77 b7 e2 52 83 43 ed c7 51 88 4c 63 85 2c 00 43 58
+
+私钥用于进行解密和签名
+公钥用于加密和验证签名。
+发送方用对方的公钥对数据加密，　而接收方则用自己的私钥解密。（保证信息的安全性）
+
+购物者可用商家给的公开密钥对发送的信息进行加密，　安全地送给商家。
+用户可以通过数字签名实现数据的完整性和有效性，只需采用私钥对数据进行加密处理。
+文件本身的加密－>对称加密
+会话密钥的加密->非对称加密， 即为数字信封。
+
+对文件加密只解决了保密性问题。 为防止他人对传输的文件进行破坏以及确定发信人的身份还需要其它措施。
+数字签名：用于源鉴别， 完整性服务和不可否认服务。
+pkcs, digital signature, x.509, pgp
+
+发送方，从发送文本中提取128bit的摘要 。然后用自己的private key 对摘要其进行签名。并将签名作为附件同文本一同发出。
+接收方，从接收到的原始报文中计算出128bit的摘要 ， 接着用发送方的公钥来对报文附加的数字签名进行解密。若两个摘要相同， 那么 就能确认该数字签名是发送方的。
+so, 数字签名能鉴别原始报文。
+任何拥有发送方公开密钥的人都可以 验证数字签名的正确性。
+任何知道接收方公开密钥的人都可以向发送加密信息，只有唯一拥有
+接收方私有密钥的人才能对信息解密。
+DTS： digital timestamp service 数字时间戳服务 。
+如果在签名时加上一个时间标记， 即是有数字时间戳的数字签名。
+
+1、创建私钥：
+openssl genrsa -out private.pem 1024   //密钥长度，1024觉得不够安全的话可以用2048，但是代价也相应增大
+2、创建公钥：
+//为方便测试，还是需要公钥的。正常情况下，拿到证书就可以了
+openssl rsa -in private.pem -pubout -out public.pem
+3、创建证书请求：
+//使用私钥生成一个证书请求，证书请求提交到CA认证中心后会得到一份证书，当然，测试用时，就不必提交CA认证中心（收费）
+openssl req -new -out cert.csr -key private.pem
+4、自签署根证书：
+//自签署，就是不通过CA认证中心自行进行证书签名，这里用是x509
+openssl x509 -req -in cert.csr -out public.der -outform der -signkey private.pem -days 3650 //10年有效 
+
+将DER证书转换为pem格式 ：(CER格式就是DER格式)
+openssl x509 -in public.der -inform DER -out cert.pem -outform PEM
+
+SSL protocol ： 可以建立一个SSL通信的服务器和客户端 。
+SSL libssl.a
+密码算法库： libcrypto.a
+分组对称算法 是对数据块进行操作。des, 3des, aes,  rc2， idea.
+rc4 -> 为流加密算法 
+
+//************
+OPENSSL函数调用成功返回1， 否则返回0.
+*************//
+EVP_CIPHER_CTX ctx; //密码算法上下文关系句柄 。
+EVP_CIPHER_CTX_init(&ctx);
+
+EVP_EncryptInit_ex //设置密码算法，加密引擎，密钥，初始化向量
+EVP_EncryptUpdate
+EVP_EncryptFinal_ex
+
+
+unsigned char iv[8] = {0};
+EVP_EncryptInit_ex(&ctx, EVP_aes_128_ecb(), NULL, from_string(key), iv);
+EVP_aes_128_ecb(): 128位的ECB方式的aes算法 。
+iv: 初始化向量，当cipher为CBC方式的对称算法时才有效。
+
+*len = 0;
+int outl = 0;
+// 对于不定长的数据或者大数据可以不断循环调用该函数， 直到把数据处理完为止。
+EVP_EncryptUpdate(&ctx, out+*len, &outl, in+*len, inl);
+
+//若有分组补齐，则需要调用
+int test = inl >> 4;
+if ( inl != test << 4)
+//结束数据加密，返回最后分组的加密密文
+EVP_EncryptFinal_ex(&ctx,out+*len,&outl);
+
+EVP_CIPHER_CTX_cleanup(&ctx); //清理 
+在现代密码学中一般使用非对称算法 ， 利用对方的公钥加密该对称密钥， 达到安全传输的目的。
+
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <openssl/evp.h>
+#include <openssl/x509.h>
+
+void tEVP_Encrypt()
+{
+	unsigned char key[EVP_MAX_KEY_LENGTH];
+	unsigned char iv[EVP_MAX_KEY_LENGTH];
+	EVP_CIPHER_CTX ctx;
+	unsigned char out[1024];
+	int outl;
+	int outltmp;
+	char *msg = "Hello openSSL";
+	int rv;
+	int i;
+	
+	for (i = 0; i < 24; i++)
+	{
+		key[i] = i;
+	}
+	for (i = 0; i < 8; i++)
+	{
+		iv [i] = i;
+	}
+	
+	EVP_CIPHER_CTX_init(&ctx);
+	
+	rv = EVP_EncryptInit_ex(&ctx, EVP_des_ede3_cbc(), NULL,
+		key, iv);
+		
+	if ( rv != 1)
+	{
+		printf("Err\n");
+		return ;
+	}
+	
+	rv = EVP_EncryptUpdate(&ctx, out, &outl, msg, strlen(msg));
+	if ( rv != 1)
+	{
+		printf("Err\n");
+		return ;
+	}
+	
+	rv = EVP_EncryptFinal_ex(&ctx, out+outl, &outltmp);
+	if ( rv != 1)
+	{
+		printf("Err\n");
+		return ;
+	}
+	outl += outltmp;
+	printf("original text: %s\n", msg);
+	printf("encrypt text length: %d\n", outl);
+	
+	for (i = 0; i < outl; i++)
+	{
+		printf("%02x ", out[i]);
+	}
+	printf("\n");
+}
+
+int main()
+{
+	tEVP_Encrypt();
+	return 0;
+}
+
+BCD编码说明：
+编码过程，将数字69进行BCD编码（注：BCD编码低位在前，后面将不再注释）。
+
+1. 将6，9分别转换成二进制表示：6（00000110）9（00001001），大家可以看到，最大的数字9也只要4个位，在传输过程中白白浪费了4个位；
+
+2. 将69合并为一个字节，分别取6，9二进制编码的低4位，按照低位在前的原则，将9的低四位放前面6的低四位放后面得出新的字节二进制编码是10010110；
+
+3. 完成编码过程，69的BCD编码结果为10010110。
+
+Base64编码说明
+　　Base64编码要求把3个8位字节（3*8=24）转化为4个6位的字节（4*6=24），之后在6位的前面补两个0，形成8位一个字节的形式。 如果剩下的字符不足3个字节，则用0填充，输出字符使用'='，因此编码后输出的文本末尾可能会出现1或2个'='。
+　　为了保证所输出的编码位可读字符，Base64制定了一个编码表，以便进行统一转换。编码表的大小为2^6=64，这也是Base64名称的由来。
+Base64编码表
+
+码值	字符	 	码值	字符	 	码值	字符	 	码值	字符
+0	A	16	Q	32	g	48	w
+1	B	17	R	33	h	49	x
+2	C	18	S	34	i	50	y
+3	D	19	T	35	j	51	z
+4	E	20	U	36	k	52	0
+5	F	21	V	37	l	53	1
+6	G	22	W	38	m	54	2
+7	H	23	X	39	n	55	3
+8	I	24	Y	40	o	56	4
+9	J	25	Z	41	p	57	5
+10	K	26	a	42	q	58	6
+11	L	27	b	43	r	59	7
+12	M	28	c	44	s	60	8
+13	N	29	d	45	t	61	9
+14	O	30	e	46	u	62	+
+15	P	31	f	47	v	63	/
+
+消息摘要 ：
+就是把不定长的数据通过数学变换转化为固定长度的短数据。具有不可逆性。由于私钥运算速度 很慢，对消息的签名实际上就是对消息的摘要 进行的私钥加密。消息摘要主要 用来数据防篡改和数据签名。
+openSSL 提供 了md2, md4, md5, sha， sha1, dss, mdc2, ripemd160等。定义于evp.h中。
+EVP_MD_CTX_init
+EVP_DigestInit_ex
+EVP_DigestUpdate
+EVP_DigestFinal_ex
+以上三个用于计算比较长的消息摘要 
+EVP_Digest
+EVP_MD_CTX_cleanup
+
+以上一个用于计算比较短的消息摘要 。
+消息摘要的长度取决于摘要算法 ， 对于确定 的摘要算法 ，其输出是一定的。如md2, md5为16字节。而sha1为20字节。
+接收方收到消息， 并重新计算摘要。并与接收到的摘要进行对比 。确定是否在传输中被篡改了。当然， 还要防止 攻击者修改了原文并重新计算了摘要 。 只有通过 数字签名才能达到 这一目的 。
+
+#include <stdio.h>
+#include <string.h.
+#include <unistd.h>
+#include <openssl/evp.h>
+
+void tDigest()
+{
+	unsigned char md_value[EVP_MAX_MD_SIZE];
+	int md_len, i;
+	EVP_MD_CTX mdctx;
+	char msg1[] = "Test Message1";
+	char msg2[] = "Test Message2";
+	
+	EVP_MD_CTX_init(&mdctx);
+	EVP_DigestInit_ex(&mdctx, EVP_md5(), NULL);
+	EVP_DigestUpdate(&mdctx, msg1, strlen(msg1));
+	EVP_DigestUpdate(&mdctx, msg2, strlen(msg2));
+	EVP_DigestFinal_ex(&mdctx, md_value, &md_len);
+	EVP_MD_CTX_cleanup(&mdctx);
+	
+	printf("Original text : %s & %s :\n", msg1, msg2");
+	for ( i = 0; i < md_len; i++)
+	{
+		printf("%02x ", md_value[i]);
+	}
+	printf("\n");
+}
+
+int main()
+{
+	tDigest();
+	return 0;
+}
+
+openssl 签名和验证：
+对数据 的签名就是对数据 的摘要 进行私钥加密 。
+验证签名就是解密签名数据， 和原始的摘要是否一样。若不一样则说
+明原名或签名被篡改。
+数字签名结合数字证书可以实现 身份认证、防篡改、防抵赖的功能 。签名的数据格式pkcs#1
+签名：
+EVP_SignInit_ex、
+EVP_SignUpdate
+EVP_SignFinal :计算签名结束，输出签名值
+
+验证：
+EVP_VerifyInit_ex
+EVP_VerifyUpdate
+EVP_VerifyFinal
+
+其中： EVP_SignInit_ex、EVP_VerifyInit_ex为EVP_DigestInit_ex宏定义
+EVP_SignUpdate\EVP_VerifyUpdate为EVP_DigestUpdate宏定义
+
+获得私钥，一般从文件中读取有口令保护 。
+获得公钥 ， 实际开发中一般从证书中读取。
+验证用公钥：EVP_PKEY *_key;
+SSL_library_init();
+
+	OpenSSL_add_all_algorithms();
+	
+	SSL_load_error_strings();
+
+	BIO*  bp = BIO_new(BIO_s_file()) ;
+	if (bp){
+		BIO_read_filename(bp,  pszPEMKeyFileName);
+
+		X509 *cert=PEM_read_bio_X509(bp, NULL, NULL, NULL);
+		if (!cert) {
+			yk_api::log_error("PEM_read_bio_X509 fail, %s", ERR_reason_error_string(ERR_get_error()));
+		} else {
+			_key = X509_get_pubkey(cert);
+			_rsa = EVP_PKEY_get1_RSA(_key);
+			if (!_key || !_rsa) {
+				yk_api::log_error("X509_get_pubkey fail");
+			}
+
+			if (EVP_PKEY_RSA != EVP_PKEY_type(_key->type)) {
+				yk_api::log_error("EVP_PKEY_type fail, 44 %s", ERR_reason_error_string(ERR_get_error()));
+			}
+		}
+		BIO_free(bp);
+		if (cert){
+			X509_free(cert);
+		}
+	}
+
+签名用私钥： _key->pkey.rsa
+	BIO*  bp = BIO_new(BIO_s_file()) ;
+	BIO_read_filename(bp,  pszPEMKeyFileName);
+	_key = PEM_read_bio_PrivateKey(bp, NULL, NULL, (void*)pszPassword);
+	BIO_free(bp);
+
+实例 ：
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <openssl/evp.h>
+#include <openssl/x509.h>
+
+void tSign()
+{
+	unsigned char sign_value[1024];
+	int sign_len;
+	
+	EVP_MD_CTX mdctx;
+	char mess1[] = "Test Message";
+	RSA *rsa = NULL;
+	EVP_PKEY *evpKey = NULL;
+	
+	int i;
+	printf("Generating RSA private key ...\n");
+	rsa = RSA_generate_key(1024, RSA_F4, NULL, NULL);
+	if ( rsa == NULL)
+	{
+		printf("gen rsa err\n");
+		return ;
+	}
+	printf(" Success.\n");
+	evpKey = EVP_PKEY_new();
+	if ( evpKey == NULL)
+	{
+		printf("EVP_PKEY_new err\n");
+		RSA_free(rsa);
+		return ;
+	}
+	
+	// set rsa to evpkey
+	if ( EVP_PKEY_set1_RSA(evpKey, rsa) != 1)
+	{
+		printf("EVP_PKEY_set1_RSA err\n");
+		RSA_free(rsa);
+		EVP_PKEY_free(evpKey);
+		return ;
+	}
+	
+	EVP_MD_CTX_init(&mdctx);
+	if ( !EVP_SignInit_ex(&mdctx, EVP_md5(), NULL))
+	{
+		printf(" err\n");
+		RSA_free(rsa);
+		EVP_PKEY_free(evpKey);
+		return ;
+	}
+	
+	if ( !EVP_SignUpdate(&mdctx, mess1, strlen(mess1)))
+	{
+		printf(" err\n");
+		RSA_free(rsa);
+		EVP_PKEY_free(evpKey);
+		return ;
+	}
+	
+	if ( !EVP_SignFinal(&mdctx, sign_value, &sign_len, evpKey))
+	{
+		printf(" err\n");
+		RSA_free(rsa);
+		EVP_PKEY_free(evpKey);
+		return ;
+	}
+	
+	printf("Message: %s \n", mess1);
+	printf("Signature: \n");
+	for (i = 0; i < sign_len; i++)
+	{
+		if ( i%16 == 0)
+		{
+			printf("\n%08xH: ", i);
+		}
+		printf("%02x ", sign_value[i]);
+	}
+	
+	printf("\n");
+	EVP_MD_CTX_cleanup(&mdctx);
+	
+	printf("\n Verifying ...\n");
+	EVP_MD_CTX_init(&mdctx);
+	if (!EVP_VerifyInit_ex(&mdctx, EVP_md5(), NULL))
+	{
+		printf("EVP_VerifyInit_ex err\n");
+		RSA_free(rsa);
+		EVP_PKEY_free(evpKey);
+		return ;
+	}
+	
+	if (!EVP_VerifyUpdate(&mdctx, mess1, strlen(mess1)))
+	{
+		printf("EVP_VerifyUpdate err\n");
+		RSA_free(rsa);
+		EVP_PKEY_free(evpKey);
+		return ;
+	}
+	
+	if (!EVP_VerifyFinal(&mdctx, sign_value, sign_len, evpKey))
+	{
+		printf("EVP_VerifyFinal err\n");
+		RSA_free(rsa);
+		EVP_PKEY_free(evpKey);
+		return ;
+	}
+	else {
+		printf(" Signature is OK\n");
+	}
+	
+	EVP_PKEY_free(evpKey);
+	RSA_free(rsa);
+	EVP_MD_CTX_cleanup(&mdctx);
+	return;
+}
+
+int main()
+{
+	tSign();
+	return 0;
+}
+
+BASE64编解码：
+就是把二进制数据转换为可见的ASCII字符 。常用于web中传输以及可视化的复制 和粘贴。电子 邮件协议也通过 其编码进行数据传输。
+EVP_ENCODE_CTX ctx;
+EVP_EncodeInit(&ctx);
+
+EVP_EncodeInit
+EVP_EncodeUpdate
+EVP_EncodeFinal //编码结束，输出最后剩余的编码数据。
+以上三个适用于处理不定长数据
+EVP_EncodeBlock
+适用于处理短数据 
+EVP_DecodeInit
+EVP_DecodeUpdate //大数据为不定长或者 数据量非常长，不适合分配 定长内存来保存，故需要每次处理一小部分，重复调用 直到处理完毕为止。
+EVP_DecodeFinal // 
+以上三个适用于处理不定长数据
+EVP_DecodeBlock //返回编码数据的长度
+适用于处理短数据 
+
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <openssl/evp.h>
+#include <openssl/x509.h>
+
+void tEVP_Encode()
+{
+  EVP_ENCODE_CTX ctx;
+  unsigned char in[1024];
+  int inl;
+  char out[2048] = {0};
+  int outl;
+  FILE *infp;
+  FILE *outfp;
+
+  infp = fopen("test.dat", "rb");
+  if ( infp == NULL)
+  {
+    printf("Open file Test.dat for Read err.\n");
+    return;
+  }
+
+  outfp = fopen("test.txt", "w");
+  if ( outfp == NULL)
+  {
+    printf("Open file Test.txt for write err.\n");
+    return ;
+  }
+
+  EVP_EncodeInit(&ctx);
+  printf("Encoded: \n");
+
+  while (1)
+  {
+    inl = fread(in, 1, 1024, infp);
+    if ( inl <= 0)
+      break;
+    EVP_EncodeUpdate(&ctx, (unsigned char*)out, &outl, in , inl);
+
+    fwrite(out, 1, outl, outfp);
+    printf("%s", out);
+
+  }
+  EVP_EncodeFinal(&ctx, (unsigned char*)out, &outl);
+  fwrite(out, 1, outl, outfp);
+  printf("%s", out);
+  fclose(infp);
+  fclose(outfp);
+  printf("success\n");
+}
+
+
+void tEVP_Decode()
+{
+  EVP_ENCODE_CTX ctx;
+  char in [1024];
+  int inl;
+  unsigned char out[1024];
+  int outl;
+  FILE *infp;
+  FILE *outfp;
+
+  infp = fopen("test.txt", "r");
+  if (infp == NULL)
+    return;
+  outfp = fopen("test-1.dat", "wb");
+  if (outfp == NULL)
+    return;
+
+    EVP_DecodeInit(&ctx);
+    printf("Decoding...\n");
+    while (1)
+    {
+      inl = fread(in, 1, 1024, infp);
+      if ( inl <= 0)
+      break;
+      EVP_DecodeUpdate(&ctx,out, &outl, (unsigned char*)in, inl);
+      fwrite(out,1, outl, outfp);
+    }
+      fclose(infp);
+      fclose(outfp);
+      printf("success");
+}
+int main()
+{
+  tEVP_Encode();
+  tEVP_Decode();
+  return 0;
+}
+
+x.509证书：数字证书是身份证明，网上事务的各个环节， 参与各方
+都 需要验证对方证书的有效性， 从而 解决相互间的信任问题。
+版本号， 证书序列号， 有效期， 拥有者， 颁发者，拥有者公钥， CA对以上信息的签名。
+实际开发中， 主要用到证书的验证，证书的解析（如获得证书的版本， 公钥， 在效期等）。定义于x509.h中
+把der编码的证书转换为openSSL内部 结构体。X509类型。
+X509* d2i_X509(X509 **cert, unsigned char **d, int len);
+证书存储区函数主要用来 验证证书：
+X509_STORE_new
+X509_STORE_free
+
+X509_STORE_CTX *ctx = NULL;			//证书存储区句柄
+
+状态机：
+初始状态：
+struct Greeting;
+
+派生类必须要将自己作为基类模板的第一个参数。
+
+状态机必须要知道当其初始化后进入 的第一个状态。
+struct Machine : sc::state_machine< Machine, Greeting> {};
+
+对于每一个状态 ， 我们需要为其指明：它属于哪一个状态机，　它位于状态图的哪个位置。
+struct Greeting : sc::simple_state < Greeting, Machine>
+{
+	//一旦状态机进入 一个状态 的时候，它就要创建一个相应状态 类的对象 。只要状态机保持 在这个状态，这个对象就一直存在。最后，
+	//当状态机离开这个状态时， 对象被销毁。
+	//So， 一个状态 的进入动作就是这个状态类的构造器， 而它的退出动作就是这个状态类的析构器。
+	Greeting() {}
+	~Greeting(){}
+};
+
+int main()
+{
+	Machine m;
+	
+	//启动状态机，状态机进行每一个状态Greeting,
+	//SO, 执行Greeting的构造函数
+	m.initiate();
+	
+	//当我们离开main()函数时，machine将被销毁，导致执行其析构函数。
+	
+	return 0;
+}
+?61 87 d8 2f 00 00 00 00 00 06
+?61 87 d8 2f 00 00 00 00 00 06
+?61 80 b3 e0 00 00 00 00 00 04
+
+sha512
+signature
+https lib
+base64 
+configure items
+c++ public , private key algorithms
+
+    //新建X509证书存储区
+	rootCertStore = X509_STORE_new();
+	//添加根证书到证书存储区
+	X509_STORE_add_cert(rootCertStore,rootCert);
+	//设置检查CRL标志位，如果设置此标志位，则检查CRL，否则不检查CRL。
+	X509_STORE_set_flags(rootCertStore,X509_V_FLAG_CRL_CHECK);
+	//添加CRL到证书存储区
+	X509_STORE_add_crl(rootCertStore,Crl);
+	//新建证书存储区句柄
+	ctx = X509_STORE_CTX_new();
+	//初始化根证书存储区、用户证书1
+	rv = X509_STORE_CTX_init(ctx,rootCertStore,usrCert1,caCertStack);
+	if(rv != 1)
+	{
+		printf("X509_STORE_CTX_init err\n");
+		X509_free(usrCert1);
+		X509_free(usrCert2);
+		X509_free(rootCert);
+		X509_STORE_CTX_cleanup(ctx);
+		X509_STORE_CTX_free(ctx);
+		X509_STORE_free(rootCertStore);
+		return;
+	}
+
+多字节， 宽字符 ：
+Few programmers are aware that ANSI/ISO 9899-1990, the "American National Standard for Programming Languages—C" (also known as "ANSI C") supports character sets that require more than one byte per character through a concept called "wide characters." 
+
+wcstombs - convert a wide-character string to a multibyte string
+mbstowcs - convert a multibyte string to a wide-character string
+用于char与wchar_t之间转换。
+
+首先，%ls和%s的区别很简单，%ls意味着将对应的参数会被当作基于宽字符的字符串(wide chraracter string )看待，而%s则意味着对应的参数会被当作普通字符串(multi-byte string)看待。
+输出宽字符：
+    wchar_t wstr[] = L"中文";    
+    setlocale(LC_ALL, "zh_CN.UTF-8");       
+    wprintf(L"%s ",wstr);
+    wprintf(L"%ls ",wstr);
+但在Linux上并不一定成功。可能 是输出流格式混合了普通printf。
+    setlocale(LC_ALL, "zh_CN.UTF-8");
+    printf("%ls ", wch);
+可以正确输出 。
+
+method是用来告诉服务器做什么事情 。
+状态码则是用来告诉客户端发生了什么事情 。
+100-199：信息提示。
+200-299 ：表示成功。
+300-399：表示资源已经　被移走了。要么告知客户端使用替代位置来访问他们所感兴趣的资源， 要么就提供一个替代的响应而不是资源的的内容。 如果 资源已被移动，可发送一个重定向状态码和一个可选的Location首部来告知客户端资源已被移走，以及现在可以在哪里找到它。这样浏览器可以在不打扰使用者的情况下，透明地转入新的位置了。
+400-499: 客户端请求出错。
+500-599：服务器端 出错了。
+401：unauthorized ,需要输入用户名和密码。
+404：Not FOund， 服务器无法找到所请求的URL对应的资源 。
+GET：用于请求服务器发送某个资源 。
+HEAD：与GET类似，但服务器在响应中只返回首部， 不会返回实体的主体部分。允许客户端在未获取实际资源的情况下，对资源的首部进行检查。
+PUT：向服务器上传文档。
+POST： 向服务器发送表单数据 。
+400 ： bad request
+401 unauthorized
+402 payment required
+403 forbidden
+404 Not found
+405 Method not allowed
+406 not acceptable
+408 request timeout
+413 request entity too large
+414 request uri too long
+415 unsupported media type 
+
+500 internal server error
+501 not implemented 客户端发起的请求超出服务器的能力范围。比如不支持的请求方法。
+502 bad gateway
+503 service unavailable 服务器现在无法为请求提供服务。
+504 gateway timeout
+505 httpversion not supported 
+
+安全首部：
+Authorization: 
+Cookie : 客户端用它向 服务器传送一个令牌， 它并不是真正的安全商务部， 但确实隐含安全功能 。
+
+服务器端首部：
+安全首部：
+Set-Cookie: 可以在客户端设置一个令牌，以便服务器对客户端进行标识 。
+
+时延：DNS查询， 建立TCP连接， 发送HTTP请求，处理和服务器响应。
+
+持久连接：在事务处理结束之后仍然保持在打开状态的ＴＣＰ连接被称为持久连接。重用已对目标服务器打开的空闲持久连接，就可以　避开缓慢的连接建立　阶段，而且已经打开的连接还只可以避免慢启动的拥塞适应阶段　。
+并行持久连接：　现在很多ＷＥＢ应用程序　都　会打开少量的并行连接，　其中的每一个都是持久连接。如：
+http/1.0+ "keep-alive"
+Connection: Keep-Alive
+
+http/1.1  "persistent" 默认情况下是激活的
+Connection: close 显示关闭
+
+HTTP基本认证： 以明文形式传送，极不安全。唯一安全的使用方式 是将其与SSL配合。
+摘要认证：并不是最安全的协议。并不能满足安全HTTP事务的很多需求。对这些需求来说使用transport layer security and 
+secure http 协议更为合适一些 。箴言： 绝不通过网络传送密码。而是会发送一个指纹和密码的摘要 ，这是密码的不可逆扰码。
+客户端和服务器都知道这个密码， 因此服务器可以验证所提供的摘要是还口与密码相匹配。
+密码摘要 
+服务器发给客户端一个随机数作为令牌。WWW-Authenticate传去。
+客户端再通过Authorization报文发回摘要 给服务器。
+同样， 客户端也可以认证服务器端，给服务器传送客户端随机数。
+
+usec : 10-6秒
+time_t time(time_t *t);
+struct tm *localtime_r(const time_t *timep, struct tm *result);
+size_t strftime(char *s, size_t max, const char *format,
+                       const struct tm *tm);
+					   
+strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", t);
+time_t mktime(struct tm *tm);
+int gettimeofday(struct timeval *tv, struct timezone *tz);
+struct timeval {
+    time_t      tv_sec;     /* seconds */
+    suseconds_t tv_usec;    /* microseconds */
+};
+
+格式串："%Y-%m-%d %H:%M:%S"
+
+CommonUtil::Time::operator timeval() const
+{
+	timeval tv;
+	tv.tv_sec = static_cast<long>(_usec / 1000000);
+	tv.tv_usec = static_cast<long>(_usec % 1000000);
+	return tv;
+}
+02:06:01
+20000+600+1 = 20601
+99-02-01
+19990000+300+1 = 19990301
+
+CommonUtil::Time CommonUtil::Time::fromYMDHMS(int y, int m, int d, int H, int M, int S)
+{	
+	struct tm ts;
+	memset(&ts, 0, sizeof(ts));
+	ts.tm_year = y-1900;
+	ts.tm_mon  = m-1;
+	ts.tm_mday  = d;
+	ts.tm_hour  = H;
+	ts.tm_min  = M;
+	ts.tm_sec  = S;
+	return (mktime(&ts) * COMMONUTIL_INT64(1000000));
+}
+#include <CommonUtil/Timer.h>
+#include <CommonUtil/Time.h>
+#include <stdio.h>
+
+using namespace CommonUtil;
+class Task : public TimerTask
+{
+	void runTimerTask()
+	{
+		printf("Task run.\n");
+	}
+};
+
+int main()
+{
+	Timer timer;
+	CommonUtil::Time time = CommonUtil::Time::now();
+	time += CommonUtil::Time::seconds(3);
+	
+	TimerTaskPtr ttptr (new Task());
+	
+	/* void schedule(const TimerTaskPtr&, const CommonUtil::Time&);*/
+	timer.schedule(ttptr, time);
+	return 0;
+}
+
+[jun@p2p-dev service]$ curl "http://192.168.10.107/cgi-bin/lepos_SegmentationTrade.cgi?cmd=checkbydate&enddate=2015-11-26&startdate=2015-11-26&trade_type=10001&sign=CF58D204278BCAD06DE99F3F9AA032BC"
+<?xml version="1.0" ?>
+<root>
+        <data>{"data":[{"amount":"50000","merchant_id":"6000201090","state":0,"trade_id":"5302","trade_type":"10001","update_time":"2015-12-10 18:12:09"},{"amount":"50000","merchant_id":"6000201090","state":0,"trade_id":"5304","trade_type":"10001","update_time":"2015-12-10 18:12:09"},{"amount":"100","merchant_id":"1000001070","state":0,"trade_id":"656011","trade_type":"10001","update_time":"2015-12-10 18:12:08"},{"amount":"1","merchant_id":"1000001070","state":0,"trade_id":"5310","trade_type":"10001","update_time":"2015-12-10 18:12:08"},{"amount":"100","merchant_id":"1000001070","state":0,"trade_id":"5312","trade_type":"10001","update_time":"2015-12-10 18:12:08"},{"amount":"1","merchant_id":"1000001070","state":0,"trade_id":"5317","trade_type":"10001","update_time":"2015-12-10 18:12:08"},{"amount":"100","merchant_id":"1000001070","state":0,"trade_id":"5319","trade_type":"10001","update_time":"2015-12-10 18:12:08"},{"amount":"1","merchant_id":"1000001070","state":0,"trade_id":"5324","trade_type":"10001","update_time":"2015-12-10 18:12:08"},{"amount":"50000","merchant_id":"6000201090","state":0,"trade_id":"656016","trade_type":"10001","update_time":"2015-12-10 18:12:09"},{"amount":"28","merchant_id":"0000000018","state":0,"trade_id":"20140919010000000003","trade_type":"10001","update_time":"2015-12-07 11:29:36"},{"amount":"28","merchant_id":"0000000018","state":0,"trade_id":"201409190100003","trade_type":"10001","update_time":"2015-12-07 11:29:36"},{"amount":"5000","merchant_id":"6000201090","state":0,"trade_id":"201409190100004","trade_type":"10001","update_time":"2015-12-10 18:12:09"},{"amount":"5000","merchant_id":"6000201090","state":0,"trade_id":"5352","trade_type":"10001","update_time":"2015-12-10 18:12:09"},{"amount":"80000","merchant_id":"6000201090","state":0,"trade_id":"656027","trade_type":"10001","update_time":"2015-12-10 18:12:09"},{"amount":"2","merchant_id":"6000201090","state":0,"trade_id":"656038","trade_type":"10001","update_time":"2015-12-10 18:12:09"},{"amount":"200","merchant_id":"6000201090","state":0,"trade_id":"656041","trade_type":"10001","update_time":"2015-12-10 18:12:09"},{"amount":"1","merchant_id":"5000900070","state":0,"trade_id":"656042","trade_type":"10001","update_time":"2015-12-10 18:12:10"}],"mediacy_amount":"0","mediacy_count":0,"success_amount":"240562","success_count":17}</data>
+        <result>0</result>
+</root>
+
+SELECT '%s',t1.F_trans_id,t1.F_amount,t1.F_order_id, t1.F_acc_id, t1.F_uid, t1.F_create_time "
+								   "FROM p2p.t_withdraw_flow_%02d t1 "
+								   "WHERE  t1.F_create_time >= '%s 00:00:00' AND t1.F_create_time <= '%s 23:59:59' AND t1.F_operation=%d AND t1.F_withdraw_type != %d
+								   
+scp -P 37600 outside_check p2p@192.168.11.171:/tmp/
+[127.0.0.1][20160104 10:52:59.545298][biz][depositservice.cpp:181][deposit_online][139830154479360]-- ###### deposit_online begin ##############, request=deposit_req(trans_id=2613, dtype=3, btype=1, account_id=201509220000000593, user_id=201509220000000593, amount=100, product_id=201511300000100013, card=card_info(card_no=, user_name=, identify_id=, card_type=0, bank_name=, bank_type=, card_cvv=, card_valid_date=, card_mobile=), desc=, stype=0, cb_ip=, cb_port=0, out_merchant_id=0000000018, pos_operator=p2p)
+[127.0.0.1][20160104 10:52:59.637242][trace][depositservice.cpp:262][deposit_online][139830154479360]-- deposit_online succ, amount=100, trans_id=2613, btype=1, account_id=201509220000000593
+[127.0.0.1][20160104 11:09:26.356432][biz][depositservice.cpp:181][deposit_online][139830152374016]-- ###### deposit_online begin ##############, request=deposit_req(trans_id=2614, dtype=0, btype=1, account_id=201509220000000593, user_id=201509220000000593, amount=400, product_id=201511300000100013, card=card_info(card_no=, user_name=, identify_id=, card_type=0, bank_name=, bank_type=, card_cvv=, card_valid_date=, card_mobile=), desc=投资 201511300000100013, stype=0, cb_ip=127.0.0.1, cb_port=12009, out_merchant_id=, pos_operator=)
+[127.0.0.1][20160104 11:09:26.403687][trace][depositservice.cpp:262][deposit_online][139830152374016]-- deposit_online succ, amount=400, trans_id=2614, btype=1, account_id=201509220000000593
+				
+const uint8_t DESC[]={0xE6, 0x8A, 0x95, 0xE8, 0xB5, 0x84, 0x0};
+[jun@p2p-dev ~]$ od -x FILE
+0000000 8ae6 e895 84b5 000a
+0000007
+
+极客学院VIP： ［免费福利1枚］领极客学院30天的VIP，平时30元，现在免费。可以看全站7500节视频课程，想学编程的小伙伴速来。时间有限：http://e.jikexueyuan.com/invite/index.html?ZnJvbV9jb2RlPUVCUTNHMCZ1bmFtZT1qaWtlXzA4MjI3MDkmY2hhbm5lbD1pbnZpdGVfc2hhcmVidXR0b25fZGlyZWN0MDQ=			
+
+/usr/local/activemq_2/data
+Program terminated with signal 6, Aborted.
+#0  0x0000003245232625 in raise () from /lib64/libc.so.6
+Missing separate debuginfos, use: debuginfo-install p2p-cpp-0.0-1.x86_64 p2p-cpp-1.0-1.x86_64 p2p-cpp-1.0.3-1.x86_64 p2p-cpp-1.0.4-1.x86_64
+(gdb) where
+#0  0x0000003245232625 in raise () from /lib64/libc.so.6
+#1  0x0000003245233e05 in abort () from /lib64/libc.so.6
+#2  0x00000032482bea7d in __gnu_cxx::__verbose_terminate_handler() () from /usr/lib64/libstdc++.so.6
+#3  0x00000032482bcbd6 in ?? () from /usr/lib64/libstdc++.so.6
+#4  0x00000032482bcc03 in std::terminate() () from /usr/lib64/libstdc++.so.6
+#5  0x00000032482bd55f in __cxa_pure_virtual () from /usr/lib64/libstdc++.so.6
+#6  0x00000000005b79f2 in decaf::util::concurrent::Lock::~Lock() ()
+#7  0x00000000008fe888 in activemq::threads::CompositeTaskRunner::wakeup() ()
+#8  0x00000000006e472d in activemq::transport::inactivity::InactivityMonitor::readCheck() ()
+#9  0x0000000000764302 in decaf::util::TimerImpl::run() ()
+#10 0x0000000000575c5f in (anonymous namespace)::runCallback(void*) ()
+#11 0x00000000005759d4 in (anonymous namespace)::threadEntryMethod(void*) ()
+#12 0x0000003245a07a51 in start_thread () from /lib64/libpthread.so.0
+#13 0x00000032452e893d in clone () from /lib64/libc.so.6
+
+-rw------- 1 root root 394866688 1月   6 23:28 core.loan_service.1452094118.9998
+-rw------- 1 root root 394870784 1月   7 13:15 core.loan_service.1452143750.61350
+	
+Program terminated with signal 6, Aborted.
+#0  0x0000003245232625 in raise () from /lib64/libc.so.6
+Missing separate debuginfos, use: debuginfo-install p2p-cpp-0.0-1.x86_64 p2p-cpp-1.0-1.x86_64 p2p-cpp-1.0.3-1.x86_64 p2p-cpp-1.0.4-1.x86_64
+(gdb) where
+#0  0x0000003245232625 in raise () from /lib64/libc.so.6
+#1  0x0000003245233e05 in abort () from /lib64/libc.so.6
+#2  0x00000032482bea7d in __gnu_cxx::__verbose_terminate_handler() () from /usr/lib64/libstdc++.so.6
+#3  0x00000032482bcbd6 in ?? () from /usr/lib64/libstdc++.so.6
+#4  0x00000032482bcc03 in std::terminate() () from /usr/lib64/libstdc++.so.6
+#5  0x00000032482bd55f in __cxa_pure_virtual () from /usr/lib64/libstdc++.so.6
+#6  0x00000000005b79f2 in decaf::util::concurrent::Lock::~Lock() ()
+#7  0x00000000008fe876 in activemq::threads::CompositeTaskRunner::wakeup() ()
+#8  0x00000000006e671e in activemq::transport::inactivity::InactivityMonitor::writeCheck() ()
+#9  0x0000000000764302 in decaf::util::TimerImpl::run() ()
+#10 0x0000000000575c5f in (anonymous namespace)::runCallback(void*) ()
+#11 0x00000000005759d4 in (anonymous namespace)::threadEntryMethod(void*) ()
+#12 0x0000003245a07a51 in start_thread () from /lib64/libpthread.so.0
+#13 0x00000032452e893d in clone () from /lib64/libc.so.6
+
+IIRC, __cxa_pure_virtual() is a crash function, it is only meant to be called when the linker made a broken binary, in user apps it prints to stderr and aborts, in the kernel you'll just want to print an error and panic.
+
+(The actual mechanism is if a pure virtual function is called without being overridden in the class that inherited it)
+
+[127.0.0.1][20160107 15:48:19.408716][biz][withdrawservice.cpp:157][withdraw_online][140258511410944]-- ###### withdraw_online begin ##########
+####, request=withdraw_req(trans_id=7117, account_id=201508070000002593, user_id=201508070000001593, btype=8, stype=2, amount=155, card=card_in
+fo(card_no=, user_name=, card_type=2), product_id=0, bank_branch=, bank_branch_no=, desc=用户线上提现, cb_ip=127.0.0.1, cb_port=0, orig_trans_i
+d=0, orig_btype=0)
+
+ntpdate 1.cn.pool.ntp.org
+-rw-r--r--    1 503      503            94 Jan 07 01:05 ACC_19090_2016-01-06.txt
+226 Directory send OK.
+
+-rw-r--r--    1 503      503           841 Jan 06 01:05 ACC_19090_2016-01-05.txt
+-rw-r--r--    1 503      503            94 Jan 07 01:05 ACC_19090_2016-01-06.txt
+-rw-r--r--    1 503      503            94 Jan 08 01:05 ACC_19090_2016-01-07.txt
+226 Directory send OK.
+ftp>
+
+telnet脚本自动化繁锁， 可用netcat。
+
+cgicc:
+	cgicc::Cgicc formData;
+	for (cgicc::const_form_iterator iter = formData.getElements().begin(); iter != formData.getElements().end(); ++iter) 
+	{
+		m_reqData.SetPara(iter->getName(),iter->getValue());
+	}
+	const cgicc::CgiEnvironment& env = formData.getEnvironment();
+     * This function is not usually called directly; instead, an object of type
+     * CgiEnvironment is retrieved by calling the \c getEnvironment() method
+     * on Cgicc.
+
+m=0
+n=0
+l=0
+mysql_exec="mysql -usearch -psearch@p2p -h192.168.51.177  -A"
+
+db=p2p	
+ 
+for i in {0..999}
+do	
+	m=$(($i/100))
+	n=$(($i%100/10))
+	l=$(($i%10))
+	$mysql_exec $db  -e "select t.* from t_investment_${m}${n}${l} t 
+	where F_expected_payoff = 0 
+	and F_state =3 
+	order by F_create_time limit 1000;
+	"
+done > payoffis0
+
+m=0
+n=0
+l=0
+mysql_exec="mysql -usearch -psearch@p2p -h192.168.51.177  -A"
+
+db=p2p	
+ 
+for i in {0..999}
+do	
+	m=$(($i/100))
+	n=$(($i%100/10))
+	l=$(($i%10))
+	$mysql_exec $db -e "update t_investment_${m}${n}${l} t1
+		set F_expected_payoff = 
+		(
+			select F_interest from t_investment_payoff_${m}${n}${l} t2
+			where t2.F_investment_id = t1.F_investment_id 
+			and t2.F_investor_uid = t1.F_investor_uid
+		)
+		where t1.F_expected_payoff = 0 and
+		t1.F_state = 3;
+	"
+done >> payoffis0
+
+m=0
+n=0
+l=0
+mysql_exec="mysql -usearch -psearch@p2p -h192.168.51.177  -A"
+
+db=p2p
+for i in {0..999}
+do	
+	m=$(($i/100))
+	n=$(($i%100/10))
+	l=$(($i%10))
+	$mysql_exec $db  -e "select t2.* from t_investment_${m}${n}${l} t1, t_investment_payoff_${m}${n}${l} t2
+	where t1.F_expected_payoff = 0 and 
+	t1.F_state = 3 and
+	t2.F_investment_id = t1.F_investment_id and
+	t2.F_investor_uid = t1.F_investor_uid
+	order by t2.F_create_time;"
+done > payoffdetail
+
+发布后，再申请修改db:
+m=0
+n=0
+l=0
+#mysql_exec="mysql -up2p_admin -pp2p_admin@yeahka.com -h192.168.51.177  -A"
+
+db=p2p	
+ 
+for i in {0..999}
+do	
+	m=$(($i/100))
+	n=$(($i%100/10))
+	l=$(($i%10))
+	$mysql_exec $db -e "update t_investment_${m}${n}${l} t1
+		set F_expected_payoff = 
+		(
+			select F_interest from t_investment_payoff_${m}${n}${l} t2
+			where t2.F_investment_id = t1.F_investment_id 
+			and t2.F_investor_uid = t1.F_investor_uid
+		)
+		where t1.F_expected_payoff = 0 and
+		t1.F_state = 3;
+	"
+done
+
+
+	m=$(($i/10))
+	n=$(($i%10))
+	
+m=0
+n=0
+l=0
+mysql_exec="mysql -usearch -psearch@p2p -h192.168.51.177  -A"
+
+db=acc	
+ 
+for i in {0..99}
+do	
+	m=$(($i/10))
+	n=$(($i%10))
+	$mysql_exec $db -e "select * from acc.t_biz_acc_flow_${m}${n};"
+done	
+
+[p2p@p2p-server-1 ~]$ logout
+编码转换：
+[jun@p2p-dev ~]$ iconv -f GBK -t UTF-8 utf8.txt > utf8UTF8.txt
+
+	const uint8_t DESC[]={0xE6, 0x8A, 0x95, 0xE8, 0xB5, 0x84, 0x0};
+	char tmp[32]={0,};
+
+	yeahka::deposit::deposit_req invest_deposit_req;
+	invest_deposit_req.__set_trans_id(trans_id);
+	invest_deposit_req.__set_dtype(dtype);										//充值方式
+	invest_deposit_req.__set_btype(bus_type::b_investment);						//投资充值
+	invest_deposit_req.__set_account_id(account_id);							//投资用户的account id
+	invest_deposit_req.__set_user_id(user_id);									//投资用户的uid
+	invest_deposit_req.__set_amount(amount);									//充值金额
+	invest_deposit_req.__set_product_id(loan_id);								//标的id
+
+	snprintf(tmp, sizeof(tmp), "%s %ld", DESC, loan_id);
+
+[jun@p2p-dev ~]$ iconv -f UTF-8 -t GBK utf8UTF8.txt > utf8GBK.txt
+[jun@p2p-dev ~]$ cat FILE
+投资
+[jun@p2p-dev ~]$ od -c FILE
+0000000 346 212 225 350 265 204  \n
+0000007
+[jun@p2p-dev ~]$ od -x FILE
+0000000 8ae6 e895 84b5 000a
+0000007
+2016年 03月 15日 星期二 18:22:11 CST
+152C8F65F8E272DEBEAC935235E089E287DD9FCAE5B0CC07E91F760D06F23E2FE8BF21F9452992F6CB5E49BEDB875698
+40BFAB8643D839B662FDBB88B0ADC465A994BCB5B57E1D39160DCE298D77494FEFDC8B4C00680A0B
+设置表后缀：
+        stringstream table_suffix;
+        table_suffix.fill('0');
+        table_suffix.width(3);
+        table_suffix << i;
+将整型转为字符串有必要吗？		
+		stringstream sql;
+		sql << " select ";
+		sql << InvestmentTableCols;
+		sql << " from ";
+		sql << " p2p.t_investment_" << table_suffix.str();
+		sql << " where ";
+		sql << " F_loan_id=" << CommonUtil::int64ToString(loan_id) << " and ";
+		sql << " F_state="
+				<< CommonUtil::intToString(investment_state::invest_order);		
+
+-rw------- 1 root root 394981376 3月  15 00:25 core.loan_service.1457972755.22140
+-rw------- 1 root root 394985472 3月  15 21:06 core.loan_service.1458047178.6329
+				
+[127.0.0.1][20160111 16:26:31.417273][error][yk_api_mysql.cpp:122][execute][139907892176640]-- mysq_error(1062):Duplicate entry '2-17-722012' f
+or key 'i_btype_operation_transid'  insert into p2p.t_loan_flow_93 ( F_flow_id,F_loan_id,F_loan_title,F_repayment_id,F_bus_type,F_amount,F_loan
+_state,F_uid,F_name,F_operation,F_investor_uid,F_investor_name,F_remark,F_trans_id,F_create_time )  values  ( 201601110000030093,20160111000000
+0093,'速贷-201601110000',0,2,1000000,4,201507170000104593,'',17,0,'','withdraw_transfer_request',722012,'2016-01-11 16:26:31' )
+[127.0.0.1][20160111 16:26:31.417337][error][Loan_Lend/Loan_Lend_For_P2P.cpp:126][lend_for_p2p_loan_type][139907892176640]-- insert withdraw_tr
+ansfer_request flow fail,loan id is 201601110000000093,bus_type::b_pay_loan,loan total amount is 5ld,loan state is 1000000, loan lender uid is
+4,trans id is 201507170000104593
+
+
+delete from p2p.t_loan_flow_93 where F_bus_type = 2 and F_operation = 17 and F_trans_id = 722019;
+
+正式环境的发布流程：
+正常流程：
+1、1）开发自测、2）转测和代码review、3）viktor出具测试报告、4）开发发出发布申请邮件、5）globe审批、6）运维组（ricky）执行发布。
+
+紧急发布：
+2、对于严重问题执行紧急发布流程：1）开发直接发布申请（邮件），2）代码review问题修正情况，3）globe批，4）开发执行发布流程。
+
+每次发布都要有发布邮件（包含改配置），紧急情况可后补，但不能缺，私下不允许发布。
+发布申请邮件包含：1）改动点描述及影响范围。2）代码review结果及修正情况。3）打包位置及升级步骤，发布失败的回退步骤。4）其他开发人员认为需要补充的注意事项。
+
+有意见今天提出，没意见按此执行。
+mysql> update dbtest set id = 6 where id = 6;
+Query OK, 0 rows affected (0.00 sec)
+Rows matched: 1  Changed: 0  Warnings: 0
+
+mysql> update dbtest set id = 7 where id = 6;
+Query OK, 1 row affected (0.03 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+show variables like '%auto%';
+ENGINE=InnoDB DEFAULT CHARSET=utf8;"
+
+mysql> create table tcount_tbl
+    -> (
+    -> tutorial_author varchar(40) NOT NULL,
+    -> tutorial_count  INT
+    -> ) TYPE=InnoDB;
+设置“自动提交”模式
+SET AUTOCOMMIT = 0
+每条SQL都是同一个事务的不同命令，之间由 COMMIT 或 ROLLBACK隔开
+掉线后，没有 COMMIT 的事务都被放弃	
+
+[zk: localhost:2181(CONNECTED) 1] ls /
+[dubbo, zookeeper, p2p]
+[zk: localhost:2181(CONNECTED) 2] ls /dubbo
+[com.yeahka.fundmanager.service.PayOffInfoService, com.yeahka.loan.loanmanager.service.LoanApplyService, com.yeahka.fundmanager.service.SettlementService, com.yeahka.usermanager.service.PermissionService, com.yeahka.user.service.UserIncomeFlowService, com.yeahka.fundmanager.service.AccountFlowService, com.yeahka.usermanager.service.RoleService, com.yeahka.loan.loanmanager.service.LoanPaymodeService, com.yeahka.loan.deposit.service.WithdrawApplyService, com.yeahka.financing.service.AdvertisementService, com.yeahka.workflow.service.AuditService, com.yeahka.fundmanager.service.AccountService, com.yeahka.user.service.UserConfigService, com.yeahka.workflow.service.WorkflowService, com.yeahka.financing.service.FinancingLoanService, com.yeahka.loan.loanmanager.service.LoanService, com.yeahka.fundmanager.service.RepaymentService, com.yeahka.loan.loanmanager.service.LoanPayRemarkService, com.yeahka.user.service.UserExtService, com.yeahka.usermanager.service.UserService, com.yeahka.user.service.UserInfoService, com.yeahka.financing.service.NewHandInvestmentService, com.yeahka.usermanager.service.UserActionService, com.yeahka.user.service.UserCreditService, com.yeahka.loan.deposit.service.DepositApplyService, com.yeahka.fundmanager.service.DelaySettlementService, com.yeahka.loan.loanmanager.service.LoanContractService, com.yeahka.user.service.MerchantPosFlowService, com.yeahka.fundmanager.service.CheckService]
+[zk: localhost:2181(CONNECTED) 3] ls /zookeeper
+[quota]
+[zk: localhost:2181(CONNECTED) 4] ls /p2p
+[SettlementService, UserService, IDService, DepositService, WithdrawService, InvestMentService, TestProxyService, AccountService, LoanService, MsgService]
+
+       ·   --silent, -s
+
+           Silent mode. Produce less output. This option can be given multiple times to produce less and less output.
+
+           This option results in nontabular output format and escaping of special characters. Escaping may be disabled by using
+           raw mode; see the description for the --raw option.
+
+       ·   --skip-column-names, -N
+
+           Do not write column names in results.
+
+mysql -uroot -pAndy@yeahka.com p2p -e "select * from t_loan_93" > /tmp/test.csv	
+
+mysql -uroot -pAndy@yeahka.com p2p -e "select * from t_loan_93" -N -s |sed -e 's/^/"/g;s/$/"\n/g';> /tmp/test.csv2		   
+mysql -uroot -pAndy@yeahka.com p2p -e "select * from t_loan_93" -N -s |sed -e 's/^/"/g;s/$/"\n/g' > /tmp/test.csv2
+
+mysqldump -u root -pAndy@yeahka.com -t  -T/tmp p2p t_loan_93 --fields-terminated-by=','
+
+每月还款包含还本金和还息。
+等额本息：每月还款数额相同。
+ 使用说明：
+1、本计算结果以“等额本息”还款方式计算。
+2、本月还息=本月余额×月利率
+3、本月还本=每月还款额-本月还息
+4、本表计算结果有关数据仅供参考，不作为扣款依据。
+
+scale=8
+500000*(0.07/12)*(1+0.07/12)^120
+5861.50664639
+(1+(0.07/12))^120-1
+1.00966057
+5861.50664639/1.00966057
+5805.42295158  //每月应还本息。
+还息： 500000*0.07/12
+500000*0.07/12
+2916.6666666
+还本： 5805.42 - 2916.67
+
+[127.0.0.1][20160111 20:18:02.257731][trace][yk_api_logger.cpp:49][init_log][140272925079520]-- deposit.cgi start:-----------------------------
+------------
+[127.0.0.1][20160111 20:18:02.257842][debug][depositCGITrans.cpp:140][Run][140272925079520]-- deposit key 52655478899517887019790697172259
+[127.0.0.1][20160111 20:18:02.257896][trace][depositCGITrans.cpp:55][CheckSHA1][140272925079520]-- strDataForSHA1:device_version=2202&merchant_
+order_id=201601110000002000&merchant_uid=19090&notify_args=6163636F756E745F69643D323031353039313830303030303030373937267472616E735F69643D333430
+34266F726465725F69643D323031363031313130303030303032303030&pay_time=2016-01-11 20:18:01&pay_type=3&
+[127.0.0.1][20160111 20:18:02.257917][trace][depositCGITrans.cpp:57][CheckSHA1][140272925079520]-- strNeedSHA1Data:device_version=2202&merchant
+_order_id=201601110000002000&merchant_uid=19090&notify_args=6163636F756E745F69643D323031353039313830303030303030373937267472616E735F69643D33343
+034266F726465725F69643D323031363031313130303030303032303030&pay_time=2016-01-11 20:18:01&pay_type=3&key=52655478899517887019790697172259
+[127.0.0.1][20160111 20:18:02.257940][trace][depositCGITrans.cpp:71][CheckSHA1][140272925079520]-- sha1str:2C97C6BCDB35C0830AD2CEB70E4629F3F266
+A259
+[127.0.0.1][20160111 20:18:02.257969][trace][depositCGITrans.cpp:190][Run][140272925079520]-- notify para account_id=201509180000000797&trans_i
+d=3404&order_id=201601110000002000, merchant_order_id=201601110000002000
+
+DepositService.CashKey=52655478899517887019790697172259
+DepositService.WithholdKey=67110781899517887019790697174943
+DepositService.WhitelistKey=67110781899517887019790697174943
+
+	req.__set_trans_id(atoll(map_para["trans_id"].c_str()));
+	req.__set_account_id(atoll(map_para["account_id"].c_str()));
+	req.__set_order_id(atoll(map_para["order_id"].c_str()));
+
+	req.__set_dtype(bIsCashDepCallback ? deposit_type::pay_cash : deposit_type::pay_withhold);
+	req.__set_result(true);
+	req.__set_pay_time(m_pReqData->GetPara("pay_time"));
+	req.__set_pay_type(bIsCashDepCallback ? m_pReqData->GetPara("pay_type") : 0);
+
+withhold_orderquery
+whitelist_submit
+统计上的城市化水平为59.8%
+
+（数据由受访专家提供）
+
+●2014年深圳常住人口1077 .8 9万，其中户籍人口为332 .21万人，非户籍人口745 .68万人，户籍人口仅为常住人口的30 .8%
+
+深圳非户籍常住人口加暂住及未办证的，称之为流动人口，达1500万
+
+总人口约1800万
+
+●深圳常住人口占总人口的比例，即统计上的人口城市化水平为59 .8%
+
+而户籍人口占总人口的比例，即真实的人口城市化水平只有18 .4%
+
+按照深圳十二五规划，2015年户籍人口达到400万人，人口城市化水平也只有22%	
+
+
+	//response
+	string response = client.GetData();
+	yk_api::log_error("recv response %s", response.c_str());
+	//check result
+	string result = client.GetValueByPath("/root/result");
+	if (result != "0") {
+		yk_api::log_error("get response from deposit order fail");
+		return false;
+	}
+	//get pay order id
+	pay_order_id = client.GetValueByPath("/root/order_id");
+	if (pay_order_id.empty()) {
+		yk_api::log_error("get pay order id fail");
+		return false;
+	}
+	
+struct deposit_mq{
+    1: required i64 trans_id,         /*充值传进来的事务id*/
+    2: required i64 order_id,         /*deposit order id*/
+    4: required i64 account_id,       /*account id*/
+    5: required i64 user_id,          /*user id*/
+    6: required i64 amount
+}	
+
+struct withhold_mq{
+	1: required i64 trans_id,  /*充值传进来的事务id*/
+	2: required i64 order_id, 	/* deposit order id */ 
+	3: required i64 account_id, /*account id*/
+	4: required i32 withhold_result /*代扣结果 */
+}
+
+
+struct withhold_callback_info{
+	int64_t partner_id;
+	int64_t req_no;		/* order id */
+	string channel;		/* 代扣通道 */
+	int32_t amount;		/* 代扣金额,单位分 */
+	string account_no;	/* 银行卡号 */
+	string account_name;/* 持卡人姓名 */
+	string account_cert_id;	/* 身份证号码 */
+	int32_t account_type;  /* 账号类型：0借记卡，2信用卡*/
+	string bankname; /* 银行名称 */
+	string banktype; /* 银行编码(字母简写) */
+	string cvv; /* 信用卡CVV*/
+	string valid_date; /* 信用卡有效期(YYMM) */
+	string card_mobile; /* 银行卡手机号码 */
+};
+
+178     deposit_req req;
+179     req.__set_trans_id(trans_id);
+180     req.__set_dtype(deposit_type::pay_cash);
+181     req.__set_btype(bus_type::b_common);
+182     req.__set_account_id(201507230003000123);
+183     req.__set_user_id(201507230005000123);
+184     req.__set_amount(1234);
+185     req.__set_product_id(1000000001);
+186     req.__set_desc("test deposit");
+187
+188     req.__set_stype(service_type::s_common);
+189     req.__set_cb_ip("");
+190     req.__set_cb_port(0);
+191
+192     deposit_ptr client = get_deposit_client("127.0.0.1", 12005);
+193     if (!client) return -1;
+194
+195     deposit_rt rt;
+196     /*error_code::type err = */client->deposit_online(rt, req);
+197     if (rt.err != error_code::e_no_error) {
+198        log_error("deposit failed\n");
+199        return -1;
+200     }
+201
+202     log_error("return pay order id %s\n", rt.order.pay_order_id.c_str());
+http://192.168.21.243/cgi-bin/deductpay.cgi
+?abstract=&account_cert_id=&account_name=&account_no=&account_type=0&amount=1&bank_name=&bank_type=&callback_args=6163636F756E745F69643D3230313
+53039313730303135303133303030267472616E735F69643D31313131266F726465725F69643D323031363031313930303031303034303030&callback_url=http%3A%2F%2F192
+.168.21.50%2Fcgi-bin%2Fdeposit.cgi&channel=CHINAPAY&partner_id=4000000001&req_no=201601190001004000&sign=F857D68DBE9EF4F2D48C5F9B2760FE81B5FBC6
+FC
+
+<root>
+        <partner_id>4000000001</partner_id>
+        <req_no>201601190003005000</req_no>
+        <retcode>0</retcode>
+</root>
+GET /userReg.do?method=initReg HTTP/1.1
+Host: ipcrs.pbccrc.org.cn
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36
+Referer: https://ipcrs.pbccrc.org.cn/top1.do
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,fr;q=0.4,id;q=0.2,ja;q=0.2,ko;q=0.2,zh-TW;q=0.2
+Cookie: BIGipServerpool_ipcrs_app=IfTDuQ8GFYnAMLWoTJ1hAFFRD1wHx8ZuY3U1MR1pNEFol2TzvMVXPUQAY0p+M7JxxryqJGW5YKDOj7j9CSp0PsDoRjIoL/y+SKDgY+3x8XzMS3ooDos5+j1L7fFlheewERp2HsAK62px71hBo2a6hwNFDYhiRQ==; BIGipServerpool_ipcrs_web=iu1lyPPRH4sqqwCoTJ1hAFFRD1wHxw60P7caoQJgHWwf3m2C6xrakG5dhXzsoJADEi3GljRsqfMT; open_details=0c; JSESSIONID=RBKcWg1QhjkyL32TvRtnHjnvTbzxTxj9Tt452fld2SBgKcFXTG1r!-93770802; Secure; TSf75e5b=48c8aa312e34b813bb9f1d839984c10e91fb370ff234712156a03500
+
+GET /index1.do HTTP/1.1
+Host: ipcrs.pbccrc.org.cn
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36
+Referer: https://ipcrs.pbccrc.org.cn/
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,fr;q=0.4,id;q=0.2,ja;q=0.2,ko;q=0.2,zh-TW;q=0.2
+Cookie: BIGipServerpool_ipcrs_app=IfTDuQ8GFYnAMLWoTJ1hAFFRD1wHx8ZuY3U1MR1pNEFol2TzvMVXPUQAY0p+M7JxxryqJGW5YKDOj7j9CSp0PsDoRjIoL/y+SKDgY+3x8XzMS3ooDos5+j1L7fFlheewERp2HsAK62px71hBo2a6hwNFDYhiRQ==; BIGipServerpool_ipcrs_web=iu1lyPPRH4sqqwCoTJ1hAFFRD1wHxw60P7caoQJgHWwf3m2C6xrakG5dhXzsoJADEi3GljRsqfMT; open_details=0c; JSESSIONID=RBKcWg1QhjkyL32TvRtnHjnvTbzxTxj9Tt452fld2SBgKcFXTG1r!-93770802; Secure; TSf75e5b=322b63230b8a966e4d4f3704b1b58cf491fb370ff234712156a036ed
+
+GET /index1.do HTTP/1.1
+Host: ipcrs.pbccrc.org.cn
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,fr;q=0.4,id;q=0.2,ja;q=0.2,ko;q=0.2,zh-TW;q=0.2
+Cookie: BIGipServerpool_ipcrs_app=IfTDuQ8GFYnAMLWoTJ1hAFFRD1wHx8ZuY3U1MR1pNEFol2TzvMVXPUQAY0p+M7JxxryqJGW5YKDOj7j9CSp0PsDoRjIoL/y+SKDgY+3x8XzMS3ooDos5+j1L7fFlheewERp2HsAK62px71hBo2a6hwNFDYhiRQ==; BIGipServerpool_ipcrs_web=iu1lyPPRH4sqqwCoTJ1hAFFRD1wHxw60P7caoQJgHWwf3m2C6xrakG5dhXzsoJADEi3GljRsqfMT; open_details=0c; JSESSIONID=RBKcWg1QhjkyL32TvRtnHjnvTbzxTxj9Tt452fld2SBgKcFXTG1r!-93770802; Secure; TSf75e5b=322b63230b8a966e4d4f3704b1b58cf491fb370ff234712156a036ed
+
+GET /index1.do HTTP/1.1
+Host: ipcrs.pbccrc.org.cn
+Connection: keep-alive
+Cache-Control: max-age=0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,fr;q=0.4,id;q=0.2,ja;q=0.2,ko;q=0.2,zh-TW;q=0.2
+
+HTTP/1.1 200 OK
+Date: Thu, 21 Jan 2016 02:02:14 GMT
+X-Frame-Options: SAMEORIGIN
+Pragma: no-cache
+Content-Length: 3549
+Expires: 0
+Set-Cookie: Secure;HttpOnly;
+Set-Cookie: JSESSIONID=3pFTWg8G2krnn0JlnS2qd0VNbVdbLdhBmd7ndZCmCnntpB1CSyQM!-93770802; path=/
+x-frame-options: SAMEORIGIN
+x-frame-options: SAMEORIGIN
+x-frame-options: SAMEORIGIN
+Cache-Control: no-cache
+Set-Cookie: BIGipServerpool_ipcrs_app=IiIsmxZFeBpL8QmoTJ1hAFFRD1wHxx2Qh37N2Mb7l0YOejfN6LSczJUOau+cG0CzDOsomHeHe7DLOOaEiI7oU4klfl+CLwhz8Vosi2YFp4ilC2zMKvl3P0h4cn/ra4Uhn5jhoNaoBoXel9B8W1gg5kEISULY+w==; Secure; HttpOnly; path=/
+Keep-Alive: timeout=15, max=100
+Connection: Keep-Alive
+Content-Type: text/html;charset=GBK
+Set-Cookie: BIGipServerpool_ipcrs_web=R4xF11bNX1FWUpOoTJ1hAFFRD1wHx477DtguoOidssixoMhKlQlAV7t7pm+2tPSfOyfgZsNPpKhC; Secure; HttpOnly; path=/
+Set-Cookie: TSf75e5b=8604fc41fff4b3cbdb726a749254a9cb1d13161467a37bcb56a03c26; Path=/
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">var _BASEPATH_='https://ipcrs.pbccrc.org.cn/';</script>
+<script src="https://ipcrs.pbccrc.org.cn/js/pe.js" type="text/javascript"></script>
+
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="https://ipcrs.pbccrc.org.cn/css/new.css" />
+<title>个人信用信息服务平台</title>
+</head>
+<body style="background:#EEE;">
+<div>
+    <!--页面Banner-->
+    <div id="banner">
+    	<img src="https://ipcrs.pbccrc.org.cn/images/new_images/banner1.jpg" alt="Slideshow Image 1" class="active" />
+    </div>
+    <div class="banner_bot">
+       <a href="https://ipcrs.pbccrc.org.cn/login.do?method=initLogin" class="startBtn">马上开始</a><span class="guide">（验证试用版）</span>
+    </div>
+    
+	<!--页面主体-->
+    <div id="content">
+    <!--查询-->
+      <div class="query">
+          <ul>
+              <li>
+                <h2><span class="icon-q2"></span>三种信用信息产品</h2>
+                <p>针对不同的用户需求，提供个人信用信息提示，个人信用信息概要，个人信用报告三种信用信息产品。</p>
+              </li>
+              <li class="pb"><h2><span class="icon-q3"></span>多种验证方式</h2><p>采用银行卡验证、数字证书验证、问题验证等多种验证方式，确保每位用户都能获得便捷验证体验。</p></li>
+              <li class="pb"><h2><span class="icon-q1"></span>以保护信息安全为前提</h2><p>严格的身份验证，多因子校验措施，确保信用信息安全。</p></li>
+          </ul>
+          <div class="clearfix"></div>
+      </div>
+	</div>
+    
+	<div class="bottom">
+        <div class="wrap">
+            <h3>系统公告</h3>
+            <ul>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center.html" target="_blank">系统公告</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center2.html" target="_blank">温馨提示</a></li>
+            </ul>
+        </div>
+    	<div class="wrap">
+            <h3>使用说明</h3>
+            <ul>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center3.html" target="_blank">服务指南</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center4.html" target="_blank">平台介绍</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center5.html" target="_blank">操作手册</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center6.html" target="_blank">常见问题解答</a></li>
+            </ul>
+        </div>
+        <div class="wrap">
+            <h3>问题反馈</h3>
+            <ul>
+            	<li><a href="https://ipcrs.pbccrc.org.cn/html/help_center8.html" target="_blank">联系我们</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center7.jsp" target="_blank">问题反馈单</a></li>
+            </ul>
+        </div>
+        <div class="wrap">
+            <h3>友情链接</h3>
+            <ul>
+                <li><a href="http://www.pbc.gov.cn" target="_blank">中国人民银行</a></li>
+                <li><a href="http://www.shanghai-cis.com.cn" target="_blank">上海资信有限公司</a></li>
+                <li><a href="http://a1502057.oinsite.yh.mynet.cn" target="_blank">中征(北京)征信有限责任公司</a></li>
+                <li><a href="http://www.zhongdengwang.com" target="_blank">中征动产融资登记公司</a></li>
+            </ul>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div style="clear:both"></div>
+</div>    
+</body>
+</html>
+
+
+GET /userReg.do?method=initReg HTTP/1.1
+Host: ipcrs.pbccrc.org.cn
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36
+Referer: https://ipcrs.pbccrc.org.cn/top1.do
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,fr;q=0.4,id;q=0.2,ja;q=0.2,ko;q=0.2,zh-TW;q=0.2
+Cookie: JSESSIONID=jQXhWg4JsnzcF7Zy3hyg1rypsW32vzYn3Fwdp2nzpx06dhQzRQKy!1227803802; BIGipServerpool_ipcrs_app=0Oy6X7Dhj9LY8LgF9TwayuIh5sFUdtfWo1WCGLlySdqYuBKoWkPOpx6GJxPg9v2smiJmv0225GWIWUw0KsJ2HJpHEZoXRbyasqSHlZvfX7nndlTeNnkON8zHeoiQ6j5Xo2NROdXzBJlgDL7dxjgTPWDcE5raJQ==; BIGipServerpool_ipcrs_web=/TuubvanGne/KG4F9TwayuIh5sFUdpTk428DJWSVl+slN1f4CkFJqeAEaieJg9ZakTwd9aNVxK7k; Secure; TSf75e5b=56371eb61cd95028ff7eb9a5e266ad798a92b8d8f60759bd56a03d11
+
+https://cashier.95516.com/b2c/showIdVerify.action?transNumber=31fabb83fc94485582233891655a2c12
+
+curl -H 'Host: 157.166.226.25' -H 'Accept-Language: es' -H 'Cookie: ID=1234' http://cnn.com
+
+#1 访问首页，获取cookies
+curl -c cookies -k \
+     -H 'Accept: text/html, application/xhtml+xml, */*'                                     \
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -sS "https://ipcrs.pbccrc.org.cn/"
+
+GET https://ipcrs.pbccrc.org.cn/ HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Connection: Keep-Alive
+
+GET https://ipcrs.pbccrc.org.cn/userReg.do?method=initReg HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://ipcrs.pbccrc.org.cn/top1.do
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Connection: Keep-Alive
+Cookie: Secure; JSESSIONID=VZVhWhMHVQf1mDJgHWPhhtXDJxbMZK3VXmCd0yMX1g8JpxZnGLXr!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=d11fd9ae42e57ae1b71c428fca8511753291f064ef7631f656a18c07
+
+#2 访问注册页面
+curl -b cookies -c cookies -k \
+     -H 'Accept: text/html, application/xhtml+xml, */*'                                     \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/top1.do'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -sS https://ipcrs.pbccrc.org.cn/userReg.do?method=initReg
+
+POST https://ipcrs.pbccrc.org.cn/userReg.do HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://ipcrs.pbccrc.org.cn/userReg.do?method=initReg
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Content-Length: 199
+Connection: Keep-Alive
+Cache-Control: no-cache
+Cookie: Secure; JSESSIONID=VZVhWhMHVQf1mDJgHWPhhtXDJxbMZK3VXmCd0yMX1g8JpxZnGLXr!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=1f6b75afa204486b0193e24c1a8311b83291f064ef7631f656a18e94
+
+org.apache.struts.taglib.html.TOKEN=9dde2eb6c81a0f2dd8569f97e4fc1688&method=checkIdentity&userInfoVO.name=%D5%D4%BF%A1&userInfoVO.certType=0&userInfoVO.certNo=50023419871203353X&_@IMGRC@_=sa5b7h&1=on	 
+
+#3 post身份信息
+curl -b cookies -c cookies -k \
+	 -H 'Accept: text/html, application/xhtml+xml, */*'                                     \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do?method=initReg'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 199' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	\
+	 https://ipcrs.pbccrc.org.cn/userReg.do -d "org.apache.struts.taglib.html.TOKEN=72091183d29e46f2e25981ce4793dd9c&method=checkIdentity&userInfoVO.name=%D5%D4%BF%A1&userInfoVO.certType=0&userInfoVO.certNo=50023419871203353X&_@IMGRC@_=arrx7q&1=on"
+	 
+                                                        </label> 验证码：</font>
+                                                        <input class = "login_input yzm_input" maxLength="6" type="text" id="_@IMGRC@_" name="_@IMGRC@_" onfocus="if(document.getElementById('_@MSG@_')!=null)document.getElementById('_@MSG@_').innerHTML='';">
+<img src="/imgrc.do?0.08804188397584467" id="imgrc" class = "yzm_img"/>
+<a class = "yzm_a" href="###" onclick="document.getElementById('imgrc').src='/imgrc.do?a='+new Date().getTime()+';'">看不清，换一个</a>
+<script>document.getElementById('imgrc').style.display='';</script>
+
+GET https://ipcrs.pbccrc.org.cn/imgrc.do?a=1453432282058; HTTP/1.1
+Accept: image/png, image/svg+xml, image/*;q=0.8, */*;q=0.5
+Referer: https://ipcrs.pbccrc.org.cn/userReg.do?method=initReg
+
+获取验证码：
+curl -b cookies -c cookies -k \
+     -H 'Accept: image/png, image/svg+xml, image/*;q=0.8, */*;q=0.5'                                     \
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do?method=initReg'	\
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 "https://ipcrs.pbccrc.org.cn/imgrc.do?a=1453432282058;" > 1.png
+	 
+GET https://ipcrs.pbccrc.org.cn/imgrc.do?a=1453432282058; HTTP/1.1
+Accept: image/png, image/svg+xml, image/*;q=0.8, */*;q=0.5
+Referer: https://ipcrs.pbccrc.org.cn/userReg.do?method=initReg
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Connection: Keep-Alive
+Cookie: Secure; JSESSIONID=HLCvWhpBP2h8gSm6zlcdL2QvQgnnm9wR2r42Pv2QQNLS64rFg819!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=a88278ad2b6c86e0e4c103c199e626053291f064ef7631f656a19e01
+
+
+#4 post用户信息：
+curl -b cookies -c cookies -k \
+	 -H 'Accept: text/html, application/xhtml+xml, */*'                                     \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 322' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	\
+	 https://ipcrs.pbccrc.org.cn/userReg.do -d "org.apache.struts.taglib.html.TOKEN=8229211e25aeeadeb12b5448c3759e5d&method=saveUser&counttime=19&tcId=73498411&userInfoVO.loginName=zhaojun1917&userInfoVO.password=zhaojunyan1912&userInfoVO.confirmpassword=zhaojunyan1912&userInfoVO.email=zhaojun1912@gmail.com&userInfoVO.mobileTel=18520822709&userInfoVO.verifyCode=b7378k"
+	 
+POST https://ipcrs.pbccrc.org.cn/userReg.do HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://ipcrs.pbccrc.org.cn/userReg.do
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Content-Length: 322
+Connection: Keep-Alive
+Cache-Control: no-cache
+Cookie: Secure; JSESSIONID=HLCvWhpBP2h8gSm6zlcdL2QvQgnnm9wR2r42Pv2QQNLS64rFg819!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=6da85838fd6345b84c265e544e0c992d3291f064ef7631f656a1a320
+
+org.apache.struts.taglib.html.TOKEN=703f0590162f8e2504e7d797fdb83d56&method=saveUser&counttime=54&tcId=73446435&userInfoVO.loginName=zhaojun1915&userInfoVO.password=zhaojunyan1912&userInfoVO.confirmpassword=zhaojunyan1912&userInfoVO.email=zhaojun1912@gmail.com&userInfoVO.mobileTel=18520822709&userInfoVO.verifyCode=fif8h3	 
+
+获取手机动态码：返回tcId：8位数字 
+curl -b cookies -c cookies -k \
+	 -H 'Accept: text/text/plain, */*; q=0.01'                                     \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+	 -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do' \
+	 -H 'X-Requested-With: XMLHttpRequest' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 44' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	\
+	 -sS https://ipcrs.pbccrc.org.cn/userReg.do -d "method=getAcvitaveCode&mobileTel=18520822709"
+	
+	
+POST https://ipcrs.pbccrc.org.cn/userReg.do HTTP/1.1
+Accept: text/plain, */*; q=0.01
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+X-Requested-With: XMLHttpRequest
+Referer: https://ipcrs.pbccrc.org.cn/userReg.do
+Accept-Language: zh-CN
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Host: ipcrs.pbccrc.org.cn
+Content-Length: 44
+Connection: Keep-Alive
+Cache-Control: no-cache
+Cookie: Secure; JSESSIONID=HLCvWhpBP2h8gSm6zlcdL2QvQgnnm9wR2r42Pv2QQNLS64rFg819!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=6da85838fd6345b84c265e544e0c992d3291f064ef7631f656a1a320
+
+method=getAcvitaveCode&mobileTel=18520822709
+
+检查登录名：返回0表示用户名未使用
+curl -b cookies -c cookies -k \
+	 -H 'Accept: text/plain, */*; q=0.01'                                      \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+	 -H 'X-Requested-With: XMLHttpRequest' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 53' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://ipcrs.pbccrc.org.cn/userReg.do?num=0.9922304467918929" -d "method=checkRegLoginnameHasUsed&loginname=zhaojun1917"
+	 
+POST https://ipcrs.pbccrc.org.cn/userReg.do?num=0.9922304467918929 HTTP/1.1
+Accept: text/plain, */*; q=0.01
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+X-Requested-With: XMLHttpRequest
+Referer: https://ipcrs.pbccrc.org.cn/userReg.do
+Accept-Language: zh-CN
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Host: ipcrs.pbccrc.org.cn
+Content-Length: 53
+Connection: Keep-Alive
+Cache-Control: no-cache
+Cookie: Secure; JSESSIONID=xld8WhGKPL2lLLFTr2h2pHq3P2Hydn2vnmK5601WJN8jQQ9QxdKP!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=2dcb8258a2810d733d6bac1ae5d099c73291f064ef7631f656a1c6aa
+
+method=checkRegLoginnameHasUsed&loginname=zhaojun1914
+
+#5登录 ：
+登录获取验证码：
+获取验证码：
+curl -b cookies -c cookies -k \
+     -H 'Accept: image/png, image/svg+xml, image/*;q=0.8, */*;q=0.5'                                     \
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do?method=initReg'	\
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 "https://ipcrs.pbccrc.org.cn/imgrc.do?0.5724695249680378" > 1.png
+
+	 登录：
+curl -b cookies -c cookies -k \
+	 -H 'text/html, application/xhtml+xml, */*'                                      \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/page/login/loginreg.jsp'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'X-Requested-With: XMLHttpRequest' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 94' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://ipcrs.pbccrc.org.cn/login.do" -d "method=login&date=1455781275287&loginname=zhaojun1912&password=zhaojunyan1912&_@IMGRC@_=ggbjax"
+	1455767177	
+POST https://ipcrs.pbccrc.org.cn/login.do HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://ipcrs.pbccrc.org.cn/page/login/loginreg.jsp
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Content-Length: 94
+Connection: Keep-Alive
+Cache-Control: no-cache
+Cookie: Secure; JSESSIONID=2mlNWhcQnMvM9z1xRsLNSr962NGNvhQ1L1NF6nx411jpBvlSznly!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=2f3ed557de8e9563c8896e6a258a201c3291f064ef7631f656a1dcb0
+
+method=login&date=1453448368916&loginname=zhaojun1917&password=zhaojunyan1912&_@IMGRC@_=n8xpkr
+
+点确定：
+curl -b cookies -c cookies -k \
+	 -H 'text/html, application/xhtml+xml, */*'                                      \
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://ipcrs.pbccrc.org.cn/setSafetyLevel.do?method=index&isnew=true"
+	
+GET https://ipcrs.pbccrc.org.cn/setSafetyLevel.do?method=index&isnew=true HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Connection: Keep-Alive
+Cache-Control: no-cache
+
+点下一步：
+curl -b cookies -c cookies -k \
+	 -H 'text/html, application/xhtml+xml, */*'                                      \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do?method=index&isnew=true'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 26' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://ipcrs.pbccrc.org.cn/setSafetyLevel.do" -d "method=setSafetyLevelStep2"
+	
+POST https://ipcrs.pbccrc.org.cn/setSafetyLevel.do HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do?method=index&isnew=true
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Content-Length: 26
+Connection: Keep-Alive
+Cache-Control: no-cache
+Cookie: Secure; JSESSIONID=JwK2WhpVm6jjv9dQmMNqVYqZrkHfR8bRnNtB2Kvhb5nmggCZK0tv!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=d7592ce34d0536046df20a9479985cc83291f064ef7631f656a1deb5
+
+method=setSafetyLevelStep2
+
+再次点下一步：
+curl -b cookies -c cookies -k \
+	 -H 'text/html, application/xhtml+xml, */*'                                      \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 100' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://ipcrs.pbccrc.org.cn/setSafetyLevel.do" -d "org.apache.struts.taglib.html.TOKEN=00946899bcb6bc0fdd24a241627af491&method=chooseCertify&authtype=3"
+	
+POST https://ipcrs.pbccrc.org.cn/setSafetyLevel.do HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Content-Length: 100
+Connection: Keep-Alive
+Cache-Control: no-cache
+Cookie: Secure; JSESSIONID=JwK2WhpVm6jjv9dQmMNqVYqZrkHfR8bRnNtB2Kvhb5nmggCZK0tv!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=d7592ce34d0536046df20a9479985cc83291f064ef7631f656a1deb5
+
+org.apache.struts.taglib.html.TOKEN=195ab63eceab932747883680afcee33c&method=chooseCertify&authtype=3
+
+访问unionpayaction.do:
+
+curl -b cookies -c cookies -k \
+	 -H 'text/html, application/xhtml+xml, */*'                                      \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 22' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://ipcrs.pbccrc.org.cn/unionpayAction.do" -d "method=getunionpaycode"
+	
+POST https://ipcrs.pbccrc.org.cn/unionpayAction.do HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Content-Length: 22
+Connection: Keep-Alive
+Cache-Control: no-cache
+Cookie: Secure; JSESSIONID=JwK2WhpVm6jjv9dQmMNqVYqZrkHfR8bRnNtB2Kvhb5nmggCZK0tv!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=d7592ce34d0536046df20a9479985cc83291f064ef7631f656a1deb5
+
+method=getunionpaycode
+
+访问银联验证Verify.action:
+curl -b cookiesyl -c cookiesly -k \
+	 -H 'text/html, application/xhtml+xml, */*'                                      \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/unionpayAction.do'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: gateway.95516.com'                                                         \
+	 -H 'Content-Length: 1158' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://gateway.95516.com/crfront/api/Verify.action" -d "version=1.0.0&charset=GBK&certorgcode=0000000001&receiveorgcode=1000000001&encrypmethod=RSA&encrypmessage=905ff45362c503ef1697d0b7d1fbd43dad64829a6d453406f4803bf8cda8acd66742724dd8829064bfe103d18cb4a3f60710347d3d2d0c86df916329e3f3a4aaa17d01e907f5a3de432a7629c55912a3e48d49a00059afe1552ba9805453f56c62f92ae0cfcad1c30e9d92b19373699a3f5522a706697544807d584019061a2b73e9913eaa756699bfae8cceedbc8c442e3d463c52cf3d5d1a9d0d778e72efb39a52cfb38a5b29be0052c5a5e61d459d869fb03beabb539e1602930ea3907215a0293e185a6d91a176eed46348eb2f832a664b9273171850e5e6c891a800643b914da0302ceee80797d42c0ade86138c7f6777809315a5b78d3efbf6f3907fcd&signmethod=RSA&signmessage=f6625ffa50855f8bc428c34ec875405ef1dbf34ed6d1bfc92f0c174a67599cd630a3d78c257b029cfdf4a4b5b82258de94cdaa917eb541fc3704b200d5d909fecb56057e6d8618f6f2399a0007c8ff7a0c960c15fd54c09bfa82d363f3a821168963372d1cce47163fa693ccd124c244567217d4a59d09e01ba6814dda519096f1b69122448b8342ab33e6db0ae3e040c30583934eedcbaa18251c47d22327b4ee9a95a57da838f7e3a4c95e6fd649baedcc53b728c232812c6b6e32fe0a5e23fd2e2b45b6044a5d62cc09442c06dcc7671914e74b7ce4ca18f0fcf4f668643cdb3b9596f924c3258e7261072b392ac1cfd1afdb77985e80dabfd32119642121"
+	
+POST https://gateway.95516.com/crfront/api/Verify.action HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://ipcrs.pbccrc.org.cn/unionpayAction.do
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate
+Host: gateway.95516.com
+Content-Length: 1158
+Connection: Keep-Alive
+Cache-Control: no-cache
+
+version=1.0.0&charset=GBK&certorgcode=0000000001&receiveorgcode=1000000001&encrypmethod=RSA&encrypmessage=aba3ab6c46f3213bd5fc10675d7056d837d4ce923d99676ea2f63c22cc504c2ad3c8935af1ab95a245c794354383404aa12c09124ac8733f360540c7ea1ed0a1ce54075a6cbe670cfcbf91177118168fa0a1ab66bcd92fabb2b68a57aefa66c5c64108e5efa617146a90b64e9f568346d2137195cedcf35b8aecd0bd38a74a6fb12479212556d26e828bdbb58f425e8890e0f039351465ec4d439fcac2a18a2685eee5820601d4fa94d0578b14d0ad25b846c86b16aaa6bf65fabd64ba5eb775d074f694f9bca4586e998ccddd8d50decec1ca0cdf890b6983d5f19673228cd6e5b9c4a261f8000eb23a7f8a7abe3aec2053b412bf31cb149eb593c28ea24244&signmethod=RSA&signmessage=1bfc9d0c1b9c44357846f29e30b447c04d666a8369b696bfb214d0de81d945736a6b78b84543c2c1c9a24b576f7c5cd43a3f7a47e178cde39703220bb986e680a38c0e9dfc76d140e30062cd846f2368765098535dac29030e448cb557f2b89f6517af2c680e798d56f93aad6e603b0f8ccc1a8d94b8e809428e9ff37bdb051619e6e6966ae1956af0433b6c7d8e3f2a7665a494f3673a6c7e676815acc10c5c98a864cc832b704bd9634238aa3b3e77e20001f230fd52ad45b5a64856dcd254dd09c7a6f5f52e13006f70926d3cae9b933b1085404060a1056de0b15d650b25c23d75b0b4a8b1de027826f7873a10ce3849e1a032b0baa316be9a21ebddc5f3
+
+访问银联AuthId.action:
+
+curl -b cookiesyl -c cookiesly -k \
+	 -H 'text/html, application/xhtml+xml, */*'                                      \
+     -H 'Referer: https://gateway.95516.com/crfront/api/Verify.action'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: cashier.95516.com'                                                         \
+	 -H 'Content-Length: 1300' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://cashier.95516.com/b2c/api/AuthId.action" -d "accessType=0&backUrl=http%3A%2F%2Fwww.specialUrl.com&bizType=000000&certId=0&channelType=07&customerIp=61.141.235.66&encoding=UTF-8&frontUrl=http%3A%2F%2Fwww.95516.com%2F&internal.logId=1679407583&internal.merReferer=https%3A%2F%2Fipcrs.pbccrc.org.cn%2FunionpayAction.do&internal.origReqInfo=%7C07%7C0100&merId=898440373210003&orderId=20160126142814016738aec02d9bdf&payTimeout=20160126145814&reserved=%7BcheckFlag%3D11100%26deriveCode%3DyZneoYQohA2Jq2AJjNGqShFAjx4%3D%26vCode%3DjH1W5ugIrie3WSuellSsi87IUbOLHEsBFcSxY9qe8g8KU1x2vNRVJL4U0YZsxEXmMWbqN0ElComLCE%2FD%2FzJWDDK9K%2Bi52%2B33CMGragYP5IF07cCvahgTKinKoXSafzDf82xzvtj8VLlXch5ZyfzAkU2233hBbRNvjeWXn%2FOAPkdXbsSNhnjKtecDX%2Ffaxn%2FSrXo8NFRKPPGYjKo2LZNzuxrabVjDb4hUiokOZTRxCrKQMASgxre4pk2QYYvWNyWz4lMbzvT4gasuFyjkbJPO5f5GSUABq21VsJ2%2Bi8THCzDTjj4KTZLVqmuOfHQf4DwwRMDqfwCnzNyqeEbhKUjXjA%3D%3D%7D&signMethod=01&signature=lO65Q92hvBl5OlxIYUzMyTsQmX24z2ZiVZ452XutAX9L9zMQH00x%2F6RvJPm4qwaCvJ%2F8Rg1kEVsjZC2ABnsevVp74CVj6DLTw49oDOQ7w8aMiNAe%2BekB2dGO5ItoQV7kbX%2BWpLr%2FKPr5LJTBWtsBo6zIWIpLl0GMfpOucKND3CHoh9NkSiMA5LkPv71vxj5l68aG1Dr%2BBTIxgD%2FrXWv4f8M7FsdS0YlLg9NMyMpYFwnCYew15BPCqb19lu27PCHRUFaB%2Fj0sE0Udblb6bjnknEM025XWo%2FtkqCbAL%2BjwXPltoO9hsM36BgIOyHegkUnnhNGtv0jgNS1EguSu0pBJXw%3D%3D&txnSubType=10&txnTime=20160122161732&txnType=72&version=1.0.0"
+	
+POST https://cashier.95516.com/b2c/api/AuthId.action HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://gateway.95516.com/crfront/api/Verify.action
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate
+Host: cashier.95516.com
+Content-Length: 1300
+Connection: Keep-Alive
+Cache-Control: no-cache
+
+accessType=0&backUrl=http%3A%2F%2Fwww.specialUrl.com&bizType=000000&certId=0&channelType=07&customerIp=218.17.162.165&encoding=UTF-8&frontUrl=http%3A%2F%2Fwww.95516.com%2F&internal.logId=325957100&internal.merReferer=https%3A%2F%2Fipcrs.pbccrc.org.cn%2FunionpayAction.do&internal.origReqInfo=%7C07%7C0100&merId=898440373210003&orderId=2016012216173203227a93e845dc4b&payTimeout=20160122164732&reserved=%7BcheckFlag%3D11100%26deriveCode%3DyZneoYQohA2Jq2AJjNGqShFAjx4%3D%26vCode%3DjH1W5ugIrie3WSuellSsi87IUbOLHEsBFcSxY9qe8g8KU1x2vNRVJL4U0YZsxEXmMWbqN0ElComLCE%2FD%2FzJWDDK9K%2Bi52%2B33CMGragYP5IF07cCvahgTKinKoXSafzDf82xzvtj8VLlXch5ZyfzAkU2233hBbRNvjeWXn%2FOAPkdXbsSNhnjKtecDX%2Ffaxn%2FSrXo8NFRKPPGYjKo2LZNzuxrabVjDb4hUiokOZTRxCrKQMASgxre4pk2QYYvWNyWz4lMbzvT4gasuFyjkbJPO5f5GSUABq21VsJ2%2Bi8THCzDTjj4KTZLVqmuOfHQf4DwwRMDqfwCnzNyqeEbhKUjXjA%3D%3D%7D&signMethod=01&signature=lO65Q92hvBl5OlxIYUzMyTsQmX24z2ZiVZ452XutAX9L9zMQH00x%2F6RvJPm4qwaCvJ%2F8Rg1kEVsjZC2ABnsevVp74CVj6DLTw49oDOQ7w8aMiNAe%2BekB2dGO5ItoQV7kbX%2BWpLr%2FKPr5LJTBWtsBo6zIWIpLl0GMfpOucKND3CHoh9NkSiMA5LkPv71vxj5l68aG1Dr%2BBTIxgD%2FrXWv4f8M7FsdS0YlLg9NMyMpYFwnCYew15BPCqb19lu27PCHRUFaB%2Fj0sE0Udblb6bjnknEM025XWo%2FtkqCbAL%2BjwXPltoO9hsM36BgIOyHegkUnnhNGtv0jgNS1EguSu0pBJXw%3D%3D&txnSubType=10&txnTime=20160122161732&txnType=72&version=1.0.0
+
+访问银联verifyAuth.action：
+
+5: 设置安全级别
+curl -b cookies -c cookies -k \
+	 -H 'text/html, application/xhtml+xml, */*'                                      \
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'X-Requested-With: XMLHttpRequest' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 94' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://ipcrs.pbccrc.org.cn/setSafetyLevel.do?method=index&isnew=true" 
+	
+GET https://ipcrs.pbccrc.org.cn/setSafetyLevel.do?method=index&isnew=true HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Connection: Keep-Alive
+Cache-Control: no-cache
+Cookie: Secure; JSESSIONID=2mlNWhcQnMvM9z1xRsLNSr962NGNvhQ1L1NF6nx411jpBvlSznly!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=2f3ed557de8e9563c8896e6a258a201c3291f064ef7631f656a1dcb0
+
+
+	 
+setSafetyLevel.do?method=index&isnew=true
+
+获取银联验证码：
+curl -b cookies -c cookies -k \
+	 -H 'text/html, application/xhtml+xml, */*'                                      \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do'	\
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 22' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://ipcrs.pbccrc.org.cn/login.do" -d "method=getunionpaycode"
+	
+POST https://ipcrs.pbccrc.org.cn/unionpayAction.do HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Content-Type: application/x-www-form-urlencoded
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Content-Length: 22
+Connection: Keep-Alive
+Cache-Control: no-cache
+Cookie: Secure; JSESSIONID=JwK2WhpVm6jjv9dQmMNqVYqZrkHfR8bRnNtB2Kvhb5nmggCZK0tv!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=d7592ce34d0536046df20a9479985cc83291f064ef7631f656a1deb5
+
+method=getunionpaycode
+
+./deposit_service >>/data/p2p/deposit_service.out 2>&1 &
+
+urlencode大写
+银联认证码：8k6hj3
+提交后返回错误信息及提交时异常信息处理。
+验证码， 短信验证码自动 处理。及异常处理。
+cookie的处理
+html解析 ：获取表单数据 ， TOKEN
+response body默认压缩：getMethod.setRequestHeader("Accept-Encoding","gzip, deflate");  
+
+public string UrlEncode(string str)
+{
+    StringBuilder builder = new StringBuilder();
+    foreach (char c in str)
+    {
+        if (HttpUtility.UrlEncode(c.ToString()).Length > 1)
+        {
+            builder.Append(HttpUtility.UrlEncode(c.ToString()).ToUpper());
+        }
+        else
+        {
+            builder.Append(c);
+        }
+    }
+    return builder.ToString();
+}
+
+Request sent 450 bytes of Cookie data:
+
+	Secure
+	Secure
+	JSESSIONID=synfWykCNG726gV9Gb7xwkZVpTbh71qy71gpLVVHhLV6Jwp1trhQ!-1301997820
+	BIGipServerpool_ipcrs_app=
+		pv0yUVLKJucsSMmoTJ1hAFFRD1wHx3/fiFZ3+wzNLq31acaC0Id4v0lPxyY50gMzu531ud7zxD4amaz4Tg86ZhSB/5iW71aSGOVt/aId8AVeaoLG/r4vPa6MVARQcypUi+rRzl5xq2y7GhClsW2MmNe/jcmEQQ==
+
+	BIGipServerpool_ipcrs_web=5N3sGL02PPvgBz6oTJ1hAFFRD1wHx0jH209ZJJfhwJigx7NGGLPOuHR2hkBDyBjN26FWIsZHS3xs
+	TSf75e5b=b8d16a8cbc5336e8c7c6f6b74d28d82208387ab38bb9bd7c56a864c2
+Secure; Secure; JSESSIONID=synfWykCNG726gV9Gb7xwkZVpTbh71qy71gpLVVHhLV6Jwp1trhQ!-1301997820; BIGipServerpool_ipcrs_app=pv0yUVLKJucsSMmoTJ1hAFFRD1wHx3/fiFZ3+wzNLq31acaC0Id4v0lPxyY50gMzu531ud7zxD4amaz4Tg86ZhSB/5iW71aSGOVt/aId8AVeaoLG/r4vPa6MVARQcypUi+rRzl5xq2y7GhClsW2MmNe/jcmEQQ==; BIGipServerpool_ipcrs_web=5N3sGL02PPvgBz6oTJ1hAFFRD1wHx0jH209ZJJfhwJigx7NGGLPOuHR2hkBDyBjN26FWIsZHS3xs; TSf75e5b=b8d16a8cbc5336e8c7c6f6b74d28d82208387ab38bb9bd7c56a864c2
+	
+请教一个问题，用sed命令，从文件中读入含字符串“ASD”的行，并用“9981”替换掉这些行中的第4、5、6、7个字符的内容。例：
+ASDvaerafderfa  替换成
+ASD9981afderfa  
+怎么写呀？
+sed -r '/ASD/s/(...).{4}(.*)/\19981\2/' INFILE
+ASD9981afderfa
+
+用户登录成功后， 会打开提示今天第几次登录 。
+访问reportAction.do
+GET https://ipcrs.pbccrc.org.cn/reportAction.do?method=queryReport HTTP/1.1
+Accept: text/html, application/xhtml+xml, */*
+Referer: https://ipcrs.pbccrc.org.cn/menu.do
+Accept-Language: zh-CN
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Accept-Encoding: gzip, deflate
+Host: ipcrs.pbccrc.org.cn
+Connection: Keep-Alive
+Cookie: Secure; JSESSIONID=G262WpvFbJbJYQg01vpxTCHZdQXyJhKbtRMYJmWZFnytRXRB1QYc!-1301997820; BIGipServerpool_ipcrs_app=pv0yUVLKJucsSMmoTJ1hAFFRD1wHx3/fiFZ3+wzNLq31acaC0Id4v0lPxyY50gMzu531ud7zxD4amaz4Tg86ZhSB/5iW71aSGOVt/aId8AVeaoLG/r4vPa6MVARQcypUi+rRzl5xq2y7GhClsW2MmNe/jcmEQQ==; BIGipServerpool_ipcrs_web=5N3sGL02PPvgBz6oTJ1hAFFRD1wHx0jH209ZJJfhwJigx7NGGLPOuHR2hkBDyBjN26FWIsZHS3xs; TSf75e5b=797157ec9b39f3a1d704f357601ef8c308387ab38bb9bd7c56a9afe5
+
+reportAction.do返回pdf 的response header:
+HTTP/1.1 200 OK
+Date: Thu, 28 Jan 2016 06:17:55 GMT
+X-Frame-Options: SAMEORIGIN
+ContentType: application/octet-stream;charset=utf-8
+Set-Cookie: Secure;HttpOnly;
+x-frame-options: SAMEORIGIN
+Content-disposition: attachment;filename=%E4%B8%AA%E4%BA%BA%E4%BF%A1%E7%94%A8%E6%8A%A5%E5%91%8A.pdf
+Keep-Alive: timeout=15, max=98
+Connection: Keep-Alive
+Content-Type: application/octet-stream;charset=utf-8
+Set-Cookie: TSf75e5b=8d27a8bad588b737fc82187921239f3308387ab38bb9bd7c56a9b18a; Path=/
+Content-Length: 12646
+	
+curl的easy接口中提供了5个与cookie有关的option，其中，CURLOPT_COOKIEFILE，CURLOPT_COOKIEJAR，CURLOPT_COOKIELIST都会打开curl的cookie引擎，使得curl在收到http response时解析header field中的cookie。
+
+设置CURLOPT_COOKIEFILE会使curl下一次发请求时从指定的文件中读取cookie。 
+设置CURLOPT_COOKIEJAR会使curl在调用 curl_easy_cleanup的时候把cookie保存到指定的文件中。
+设置CURLOPT_COOKIELIST会把指定的cookie字符串列表加入easy handle维护的cookie列表中。每个cookie字符串要么符合HTTP response header的"Set-Cookie: NAME=VALUE;..."格式，要么符合Netscape cookie格式。
+
+CURLOPT_COOKIE用于设置一个分号分隔的“NAME=VALUE”列表，用于在HTTP request header中设置Cookie header。
+error_code::e_createtempfile_error
+
+curl内部使用Cookie和CookieInfo两个struct保存cookie信息。 为一个easy handle设置CURLOPT_SHARE选项，并且指定的share handle启用了cookie共享功能， 则easy handle会使用share handle中的共享cookie列表。
+	
+	
+	struct ipcrs_conn_ret{
+	1: required types.error_code err,
+	2: string sessionid
+	}
+
+
+	
+	struct ipcrs_securitycode_ret{
+	1: required types.error_code err,
+	2: string picture
+	}
+	
+
+	struct register_info{
+	1: required string name,
+	2: required string cert_type,
+	3: required string cert_no,
+	4: required string security_code
+	5: required bool agree,
+	6: required string sessionid,
+	}
+	
+
+	
+	struct supplement_info{
+	1: required string name,
+	2: required string password,
+	3: optional string mail_address,
+	4: required string mobile_no,
+	5: required string activecode,
+	6: required string sessionid
+	}
+	
+	
+	struct check_unionpaycode_info{
+	1: required string unionpaycode,
+	2: required string securitycode,
+	3: required string sessionid
+	}
+	
+	struct check_unionpaycode_ret{
+	1: required types.error_code err,
+	} 
+
+	
+	struct userinfo {
+	1: required string loginname,
+	2: required string password,
+	3: required string securitycode,
+	4: required string sessionid
+	}
+
+	struct reportquery_ret{
+	1: required types.error_code err,
+	2: optional string report
+	}
+	
+	struct reportquery_req{
+	1: required string querycode,
+	2: required string sessionid,
+	3: required string cert_no,
+	}
+	
+	/* 发起到人行的连接，获取cookie信息保存并返回一个sessionid给app */
+	ipcrs_conn_ret get_ipcrs_conn(),
+	/* 通过sessionid获取一个相关联的验证码 , 返回形式为图片的二进制字符串*/
+	ipcrs_securitycode_ret get_securitycode(1: string sessionid),
+	
+	/* 通过sessionid,向人行发起短信验证码请求 */
+	types.error_code get_mobile_activecode(1: string sessionid),
+	/* 用户注册 */
+	types.error_code user_register(1: register_info info),
+	/* 用户补充用户信息 */
+	types.error_code user_supplement(1: supplement_info info),
+	/* 将从银联获取的认证码提交到人行系统 */
+	check_unionpaycode_ret check_unionpaycode(1: check_unionpaycode_info info),	
+	/* 用户登录人行系统 */
+	types.error_code user_login(1: userinfo info),
+		/* 用户获取信用报告， 返回为pdf文件的二进制字符串 */
+	/* 并且将其用cert_no命名保存到文件系统中,方便后续查询使用 */
+	reportquery_ret report_query(1: reportquery_req req),
+	
+	
+	std::map< string, string> cookiesmap; //sessionid, cookies
+	std::map<string,string > tokenmap; //sessionid, token
+	std::map< string, string> certnomap; // sessionid, cert_no
+	
+	struct sessioninfo {
+		string cookies,
+		string token,
+		string cert_no
+	}
+	std::map<string, sessioninfo> sessioninfomap;
+	sessionlock;
+	
+	
+#如果存在该脚本,那么替换server前,暂停所有server
+chmod a+x /var/www/ /var/www/cgi-bin
+chmod a+x /usr/local/p2p /usr/local/p2p/service/
+mkdir -p /data
+mkdir -p /home/p2p/log
+ln -s /home/p2p/log /data/p2p
+chown p2p /data
+chgrp p2p /data
+chown p2p /home/p2p/log
+chgrp p2p /home/p2p/log
+chown p2p /data/p2p
+chgrp p2p /data/p2p
+if [ -f "/usr/local/p2p/service/start_services.sh" ] ; then
+        cd /usr/local/p2p/service/
+        chmod a+x start_services.sh
+        su - p2p -c"cd /usr/local/p2p/service/;./start_services.sh s"
+fi
+　　同时继续执行2015年春运的各项措施：对开车前15天（不含）以上退票的，不收取退票费；开车前48小时（不含）以上，可改签预售期内的其他列车；开车前48小时以内，可改签开车前的其他列车，也可改签开车后至票面日期当日24:00之间的其他列车，不办理票面日期次日及以后的改签；开车之后，旅客仍可改签当日其他列车，但只能在票面发站办理改签；改签（含变更到站）后的车票乘车日期在春运期间的，退票时一律按开车时间前不足24小时标准核收退票费。 
+	
+		curl_easy_setopt(curl, CURLOPT_ENCODING , "UTF-8");
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
+		curl_easy_setopt(curl, CURLOPT_POST, 0);
+		curl_easy_setopt(curl, CURLOPT_URL, strUrl.c_str());
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, nCnnTimeout);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 600);	
+		
+		curl = curl_easy_init();
+		curl_easy_setopt(curl, CURLOPT_ENCODING , "UTF-8");
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
+		curl_easy_setopt(curl, CURLOPT_POST, 0);
+		curl_easy_setopt(curl, CURLOPT_URL, strUrl.c_str());
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 200);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 600);
+		g_ptrCurlInit->SetShareHandle(curl);		
+		
+		
+				curl = curl_easy_init();
+		curl_easy_setopt(curl, CURLOPT_ENCODING , "UTF-8");
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
+		curl_easy_setopt(curl, CURLOPT_POST, 1);
+		curl_easy_setopt(curl, CURLOPT_URL, strUrl.c_str());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, strData.c_str());
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 200);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 600);
+		g_ptrCurlInit->SetShareHandle(curl);
+		
+		 curl = curl_easy_init();
+        
+        curl_easy_setopt(curl, CURLOPT_ENCODING , "UTF-8");
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_easy_setopt(curl, CURLOPT_POST, 1);
+        curl_easy_setopt(curl, CURLOPT_URL, strUrl.c_str());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, strData.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 200);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 600);
+        g_ptrCurlInit->SetShareHandle(curl);
+		
+curl -b cookies -c cookies -k \
+	 -H 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'                                      \
+	 -H 'Accept-Language:zh-CN,zh;q=0.8,en;q=0.6,fr;q=0.4,id;q=0.2,ja;q=0.2,ko;q=0.2,zh-TW;q=0.2' \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/reportAction.do?method=downloadwelcome'	\
+	 -H 'Origin:https://ipcrs.pbccrc.org.cn' \
+	 -H 'Accept-Language: zh-CN'                                                            \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 43' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://ipcrs.pbccrc.org.cn/reportAction.do" -d "method=download&count=&_%40IMGRC%40_=cptak3"
+	
+	method=download&count=&_%40IMGRC%40_=bivuef
+Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Encoding:gzip, deflate
+Accept-Language:zh-CN,zh;q=0.8,en;q=0.6,fr;q=0.4,id;q=0.2,ja;q=0.2,ko;q=0.2,zh-TW;q=0.2
+Cache-Control:max-age=0
+Connection:keep-alive
+Content-Length:43
+Content-Type:application/x-www-form-urlencoded
+Cookie:BIGipServerpool_ipcrs_app=2SJ6LtuslNaha5gF9TwayuIh5sFUdkZ8XypX+q0FT3kmO4/XGbXGgZcJ+6JN7MpI4pCQ5oz06AerdrCyy3VWKd4DqYYUABc07owIqLH4id1g300qmTpKnQ3Qq6xHfDX/HBjl/63h1f4JJ5WpXI7M5jauNW2K6A==; BIGipServerpool_ipcrs_web=vk2mvgWDTZkd+scF9TwayuIh5sFUdjRF4v0sAOoTEx/S3vKIIP0bSDsOdUdoN2nd1CqUxi5P0o4K; JSESSIONID=c2KnWF9RKHKXf4ptGJPKn4LQBYvL48JLlc6xLLbz4mT1GSfQT1Gr!1062660698; Secure; TSf75e5b=35396a08d7e264e3c50707924a713e69122f0a06a7b2dee156c540ce
+Host:ipcrs.pbccrc.org.cn
+Origin:https://ipcrs.pbccrc.org.cn
+Referer:https://ipcrs.pbccrc.org.cn/reportAction.do?method=downloadwelcome
+Upgrade-Insecure-Requests:1
+User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.97 Safari/537.36
+
+method:download
+count:
+_@IMGRC@_:bivuef
+
+curl -b cookies -c cookies -k \
+	 -H 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'                                      \
+	 -H 'Accept-Language:zh-CN,zh;q=0.8,en;q=0.6,fr;q=0.4,id;q=0.2,ja;q=0.2,ko;q=0.2,zh-TW;q=0.2' \
+     -H 'Referer: https://ipcrs.pbccrc.org.cn/reportAction.do?method=queryReport'	\
+	 -H 'Origin:https://ipcrs.pbccrc.org.cn' \
+	 -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'  \
+	 -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+	 -H 'Accept-Encoding: gzip, deflate'                                                    \
+	 -H 'Host: ipcrs.pbccrc.org.cn'                                                         \
+	 -H 'Content-Length: 49' \
+	 -H 'Connection: Keep-Alive'                                                            \
+	 -H 'Cache-Control: no-cache'	         \
+	"https://ipcrs.pbccrc.org.cn/reportAction.do" -d "method=checkTradeCode&code=4qcjbt&reportformat=21"
+	
+POST https://ipcrs.pbccrc.org.cn/reportAction.do HTTP/1.1
+Host: ipcrs.pbccrc.org.cn
+Connection: keep-alive
+Content-Length: 49
+Accept: text/plain, */*; q=0.01
+Origin: https://ipcrs.pbccrc.org.cn
+X-Requested-With: XMLHttpRequest
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.97 Safari/537.36
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Referer: https://ipcrs.pbccrc.org.cn/reportAction.do?method=queryReport
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,fr;q=0.4,id;q=0.2,ja;q=0.2,ko;q=0.2,zh-TW;q=0.2
+Cookie: BIGipServerpool_ipcrs_app=2SJ6LtuslNaha5gF9TwayuIh5sFUdkZ8XypX+q0FT3kmO4/XGbXGgZcJ+6JN7MpI4pCQ5oz06AerdrCyy3VWKd4DqYYUABc07owIqLH4id1g300qmTpKnQ3Qq6xHfDX/HBjl/63h1f4JJ5WpXI7M5jauNW2K6A==; BIGipServerpool_ipcrs_web=vk2mvgWDTZkd+scF9TwayuIh5sFUdjRF4v0sAOoTEx/S3vKIIP0bSDsOdUdoN2nd1CqUxi5P0o4K; JSESSIONID=tzvkWFjKSsL2983sfjVYJLPJ4h2LxdTSn2FzLS64JpKpZLvx49q9!1062660698; Secure; TSf75e5b=4a4877d521a01287cf04ed1a980ab3cf122f0a06a7b2dee156c564b4
+
+method=checkTradeCode&code=4qcjbt&reportformat=21
+
+SELECT '2016-02-18',F_trans_id,F_repayment_id,F_amount,F_acc_id,F_create_time FROM acc.t_biz_acc_flow_00 WHERE F_create_time >= '2016-02-17 00:00:00' AND F_create_time <= '2016-02-17 23:59:59' AND ((F_operation=2 AND F_bus_type=3 AND F_acc_id IN (2015070100002005, 2015070100002003)) OR (F_operation=2 AND F_bus_type=9 AND F_acc_id IN (2015070100002005))
+ OR (F_operation=3 AND F_bus_type=3 AND F_acc_id IN (2015070100002005))
+
+获取申请信用信息动态码
+/*
+ * POST https://ipcrs.pbccrc.org.cn/reportAction.do?num=0.8172506992705166 HTTP/1.1
+Host: ipcrs.pbccrc.org.cn
+Connection: keep-alive
+Content-Length: 23
+Accept: text/plain, */*; q=0.01
+Origin: https://ipcrs.pbccrc.org.cn
+X-Requested-With: XMLHttpRequest
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.97 Safari/537.36
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Referer: https://ipcrs.pbccrc.org.cn/reportAction.do?method=applicationReport
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,fr;q=0.4,id;q=0.2,ja;q=0.2,ko;q=0.2,zh-TW;q=0.2
+Cookie: BIGipServerpool_ipcrs_app=2SJ6LtuslNaha5gF9TwayuIh5sFUdkZ8XypX+q0FT3kmO4/XGbXGgZcJ+6JN7MpI4pCQ5oz06AerdrCyy3VWKd4DqYYUABc07owIqLH4id1g300qmTpKnQ3Qq6xHfDX/HBjl/63h1f4JJ5WpXI7M5jauNW2K6A==; BIGipServerpool_ipcrs_web=vk2mvgWDTZkd+scF9TwayuIh5sFUdjRF4v0sAOoTEx/S3vKIIP0bSDsOdUdoN2nd1CqUxi5P0o4K; JSESSIONID=6mKVWGJKk7rqnR7yPkzqvcWyJJSF7vj93lNshTp06W8hQyp6zZtf!1062660698; Secure; TSf75e5b=a17dcdb391e1095366409469c6969f58122f0a06a7b2dee156c689ea
+
+method=send&verifyCode=
+		*/
+-rwxr-xr-x 1 root root 4184812 7月  17 2015 libxml2.so.2.7.2
+lrwxrwxrwx 1 root root      16 7月  17 2015 libxml2.so.2 -> libxml2.so.2.7.2
+lrwxrwxrwx 1 root root      16 7月  17 2015 libxml2.so -> libxml2.so.2.7.2
+		
+P2P用户账户流水对账: 正确
+P2P中间账户流水对账: 正确
+P2P乐刷总账户流水对账: 正确
+P2P充值和账户对账: 正确
+P2P提现和账户对账: 正确
+P2P充值和标的(缴费)对账: 正确
+P2P充值和投资对账: 正确
+P2P充值和标的(还款)对账: 正确
+P2P标的系统(还款,垫付,转分配)和账户对账: 正确
+P2P提现和标的(放款)对账: 正确
+P2P投资(满标)和标的(满标)对账: 正确
+P2P投资(投资)和标的(投资成功)对账: 正确
+P2P充值和外部系统对账: 正确
+P2P提现和外部系统对账: 正确
+对账数量错误，应对账：15, 实际对账：14		
+
+P2P用户账户流水对账: 正确
+P2P中间账户流水对账: 正确
+P2P乐刷总账户流水对账: 正确
+P2P充值和账户对账: 正确
+P2P提现和账户对账: 正确
+P2P充值和标的(缴费)对账: 正确
+P2P充值和投资对账: 正确
+P2P充值和标的(还款)对账: 正确
+P2P标的系统(还款,垫付,转分配)和账户对账: 正确
+P2P提现和标的(放款)对账: 正确
+P2P投资(满标)和标的(满标)对账: 正确
+P2P投资(投资)和标的(投资成功)对账: 正确
+P2P充值和外部系统对账: 正确
+P2P提现和外部系统对账: 正确
+P2P充值(POS流水)和外部系统对账: 正确
+
+http://127.0.0.1:16823/proxy_on.pac
+https://pac.itzmx.com/abc.pac
+
+redis-cli -h machine -p port -n db
+
+[root@p2p-dev fastdfs-master]# ps -ef |grep fdfs
+root     27141     1  0  2015 ?        00:25:17 bin/fdfs_trackerd conf/tracker.conf
+root     27150     1  0  2015 ?        00:25:01 bin/fdfs_storaged conf/storage.conf
+fastfs根目录 ：/usr/local/fastdfs
+
+
+userinfo.userid   
+[name: ,
+ password, 
+ pdfreport,
+ //registered, 
+ reportapplyed,
+ quickqueryed,
+ ]
+ 
+rpm2cpio xxx.rpm | cpio -div 
+mysqldump  --databases test  --skip-opt --quick --extended-insert=false --lock-all-tables --master-data=2  -u root -p123456 >  /tmp/test.sql
+mysqldump  --databases test  --skip-opt --quick --extended-insert=false  --single-transaction   --master-data=2  -u root -p123456 >  /tmp/test.sql
+[root@p2p-dev x86_64]# ls -l ./usr/local/p2p/service/custinfoauth_service
+-rwxrwxrwx 1 root root 3591873 3月   3 14:43 ./usr/local/p2p/service/custinfoauth_service
+-rwxr-xr-x 1 root root 10507867 3月   3 14:39 custinfoauth_service
+
+myisam: 不支持事务， 表锁。但支持全文索引 。OTAP。
+缓冲池只缓冲索引文件不缓冲数据文件。
+NDB： share nothing.  数据全部放内存中。
+
+	p2p_api::Client<yeahka::withdraw::withdrawClient> g_withdraw;
+	g_withdraw.init(ptrProperties, "WithdrawService", 1);
+
+	//get client
+	p2p_api::Client<yeahka::withdraw::withdrawClient>::Scoped client(g_withdraw);
+	if (!client) {
+		yk_api::log_error("get withdraw client failed");
+		return -1;
+	}
+
+	error_code::type eret;
+	try{
+		eret = client->withdraw_callback(req);
+	}
+	catch(...) {
+		yk_api::log_error("callback withdraw service failed");
+		return -2;
+	}
+
+	连接池：
+	int withdraw_callback(const withdraw_callback_req& req, CommonUtil::PropertiesPtr& ptrProperties) {
+	int ret = 0;
+
+	yeahka::withdraw::withdrawClientPool g_withdraw;
+	g_withdraw.init(ptrProperties, "WithdrawService", 1);
+
+	error_code::type eret = g_withdraw.withdraw_callback(req);
+	if (eret == error_code::e_no_error) ret = 0;
+	else ret = (int) eret;
+
+	return ret;
+}
+
+::error_code::type depositClientPool::deposit_online(deposit_rt& _return, const deposit_req& req)
+{
+  ::error_code::type ret_;
+  p2p_api::Client<depositClient>::Scoped client_(pool_);
+  if (!client_) {
+    return error_code::e_get_connect_fail;
+  }
+  try {
+    client_->send_deposit_online(req);
+    client_->recv_deposit_online(_return);
+    ret_ = _return.err;
+  } catch (TException& e) {
+    ret_ = error_code::e_call_exception;
+    yk_api::log_error("exception, %s", e.what());
+  }
+  return ret_;
+}
+
+	if (jsonFile.empty()) {
+		yk_api::log_error("jsonFile is empty,can't parse");
+		_return.__set_err(error_code::e_custinfoauth_jsonparse_fail);
+		return _return;
+	}
+
+	Json::Reader reader;
+	Json::Value value;
+	if (!reader.parse(jsonFile, value)) {
+		yk_api::log_error("parse jsonFile fail,json is %s",jsonFile.c_str());
+		_return.__set_err(error_code::e_custinfoauth_jsonparse_fail);
+		return _return;
+	}
+
+	if (value["error_no"].asString() != "0") {
+		yk_api::log_error("https request failed: %s", value["error_info"].asCString());
+		_return.__set_err(error_code::e_custinfoauth_auth_reqfail);
+		_return.__set_err_info(value["error_info"].asString());
+		return _return;
+	}
+
+	Json::Value results = value["results"][k_results_index];
+	
+data for sha1: amount=1&command_type=create_pay_or
+der&merchant_order_id=201603080000002000&merchant_uid=&notify_args=&notify_url=&pay_type=11&product_amount=1&product_args=withhold deposit&product_desc=withh
+old deposit&product_id=100525&uin=&key=67110781899517887019790697174943
+[127.0.0.1][20160308 10:26:31.313622][trace][depositservice.cpp:1070][withhold_order][139990033995520]-- withhold order url : http://192.168.10.115/cgi-bin/d
+eductpay.cgi?amount=1&command_type=create_pay_order&merchant_order_id=201603080000002000&merchant_uid=&notify_args=&notify_url=&pay_type=11&product_amount=1&
+product_args=withhold deposit&product_desc=withhold deposit&product_id=100525&uin=&sign=7ED19EF11FBCECDDC59E2CA86082813E0EDD1805
+[127.0.0.1][20160308 10:26:31.313703][trace][depositservice.cpp:1208][get_withhold_url][139990033995520]-- data for sha1: account_name=谢越津&account_no=6214
+830251362967&account_type=0&bank_name=招商银行&bank_type=CMB&cmd=pay&id_card=460025198801253032&merchant_order_id=201603080000002000&merchant_uid=CHINAPAY&ke
+y=67110781899517887019790697174943
+[127.0.0.1][20160308 10:26:31.313742][trace][depositservice.cpp:1137][withhold_request][139990033995520]-- withhold request url: http://192.168.10.115/cgi-bi
+n/deductpay.cgi?account_name=谢越津&account_no=6214830251362967&account_type=0&bank_name=招商银行&bank_type=CMB&cmd=pay&id_card=460025198801253032&merchant_o
+rder_id=201603080000002000&merchant_uid=CHINAPAY&sign=3C5D42C5DCEC7EA45F75012CD23A4B43AC2FC267
+	
+data for sha1: amount=1&command_type=create_pay_or
+der&merchant_order_id=201603080000003000&merchant_uid=19090&notify_args=&notify_url=&pay_type=11&product_amount=1&product_args=withhold_deposit&product_desc=
+withhold_deposit&product_id=100525&uin=ykfinance&key=52655478899517887019790697172259
+[127.0.0.1][20160308 10:57:46.971559][trace][depositservice.cpp:1070][withhold_order][140605084628736]-- withhold order url : http://192.168.21.243/cgi-bin/d
+eductpayitf.cgi?amount=1&command_type=create_pay_order&merchant_order_id=201603080000003000&merchant_uid=19090&notify_args=&notify_url=&pay_type=11&product_a
+mount=1&product_args=withhold_deposit&product_desc=withhold_deposit&product_id=100525&uin=ykfinance&sign=1A19DAD3A78A3AF5411C50B60F85B566C0A00163
+[127.0.0.1][20160308 10:57:46.971618][trace][depositservice.cpp:1208][get_withhold_url][140605084628736]-- data for sha1: account_name=谢越津&account_no=6214
+830251362967&account_type=0&bank_name=招商银行&bank_type=CMB&channel=CHINAPAY&cmd=pay&id_card=460025198801253032&merchant_order_id=201603080000003000&merchan
+t_uid=19090&key=52655478899517887019790697172259
+[127.0.0.1][20160308 10:57:46.971652][trace][depositservice.cpp:1138][withhold_request][140605084628736]-- withhold request url: http://192.168.21.243/cgi-bi
+n/deductpayitf.cgi?account_name=谢越津&account_no=6214830251362967&account_type=0&bank_name=招商银行&bank_type=CMB&channel=CHINAPAY&cmd=pay&id_card=460025198
+801253032&merchant_order_id=201603080000003000&merchant_uid=19090&sign=CCD827D248A9F14445940026F574C6FFC3CBAAA3
+
+baron测试过的：
+curl "http://127.0.0.1/cgi-bin/payorder.cgi?command_type=create_pay_order&merchant_uid=19090&merchant_order_id=920160224092500001&product_id=100526移卡P2P_debit&product_desc=deduct_p2p&product_args=22222&amount=1&product_amount=1&notify_url=&notify_args=&pay_type=11&sign=FAABE68F259FB26299F1BD22C0306056"
+http://192.168.21.243/cgi-bin/payorder.cgi?amount=1&comma
+nd_type=create_pay_order&merchant_order_id=201603080000005000&merchant_uid=19090&notify_args=&notify_url=&pay_type=11&product_amount=1&product_args=deduct_p2
+p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&sign=A7D7F9F61C9A18D8162350C5BF50CD683282C5E9
+
+http://192.168.21.243/cgi-bin/payorder.cgi?amount=1&command_type=create_pay_order&merchant_order_id=201603080000004000&merchant_uid=19090&notify_args=&notify_url=&pay_type=11&product_amount=1&product_args=deduct_p2p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&sign=53AA465D4C22549E89D95C53E4C9822420285A99
+
+curl "http://127.0.0.1/cgi-bin/deductpayitf.cgi?cmd=pay&merchant_uid=19090&channel=CHINAPAY&bank_name=招商银行&bank_type=CMB&merchant_order_id=920160224092500001&account_name=谢越津&account_no=6214830251362967
+&id_card=460025198801253032&account_type=1&sign=FAABE68F259FB26299F1BD22C0306056"
+http://192.168.21.243/cgi-bin/deductpayitf.cgi?account_name=谢越津&account_no=6214830251362967&account_type=0&bank_name=招商银行&bank_type=CMB&channel=CHINAPAY&cmd=pay&id_card=460025198801253032&merchant_order_id=201603080000004000&merchant_uid=19090&sign=D76C3F19E230BA16E6F177C038E84866CFBB5151
+
+http://192.168.10.115/cgi-bin/deductpay.cgi?abstract=&account_cert_id=43042119841009053X&account_name=姚胜&account_no=622909337382411014&account_type=0&amount=1000000&bank_name=兴业银行&bank_type=CIB&callback_args=6163636F756E745F69643D323031353038313130303030333337363937267472616E735F69643D38303538266F726465725F69643D323031363032323930303030303034303030&callback_url=http://192.168.33.50/cgi-bin/deposit.cgi&channel=CHINAPAY&partner_id=4000000001&req_no=201602290000004000&sign=8A6EDE0D8E0594B206D8D8AA7ABB5D2545464573
+
+http://192.168.21.243/cgi-bin/payorder.cgi?amount=1&comma
+nd_type=create_pay_order&merchant_order_id=201603080000005000&merchant_uid=19090&notify_args=&notify_url=&pay_type=11&product_amount=1&product_args=deduct_p2
+p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&sign=A7D7F9F61C9A18D8162350C5BF50CD683282C5E9
+---------------------------
+RTX
+---------------------------
+操作超时
+
+
+---------------------------
+确定   
+---------------------------
+
+
+[127.0.0.1][20160308 11:46:33.496268][trace][HttpUtil.cpp:138][GetByHttp][139837831091968]-- Back:<?xml version="1.0" ?>
+<root>
+        <result>-2</result>
+</root>
+
+amount=1&command_type=create_pay_order&merchant_order_id=201603080000005000&merchant_uid=19090&pay_type=11&product_amount=1&product_args=deduct_p2p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&key=52655478899517887019790697172259
+amount=1&command_type=create_pay_order&merchant_order_id=201603080000008000&merchant_uid=19090&pay_type=11&product_amount=1&product_args=deduct_p2p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&key=52655478899517887019790697172259
+http://192.168.21.243/cgi-bin/payorder.cgi?amount=1&command_type=create_pay_order&merchant_order_id=201603080000008000&merchant_uid=19090&pay_type=11&product_amount=1&product_args=deduct_p2p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&sign=0D9A620F31FC0150231EE75EF0E3972CFD35A1C8
+
+无clientpool
+libDepositService.a
+
+g++ -I../../../ -I../../../CommonBusiness/include/depositservice -I../../../CommonBusiness/include/types -I../../../CommonInclude -I/usr/include/mysql/ -I/usr/local/mysql/include/mysql/ -I/usr/include/libxml2/ -I../ -I./ -I../                                         -Wall -Werror -DTEST_SERVER -DLEPOSPAY_SHOULD_SENDSMS -std=c++0x -Wno-pmf-conversions -g -DDEBUG_GLOBAL   -c -o deposit.o deposit.cpp
+g++ -I../../../ -I../../../CommonBusiness/include/depositservice -I../../../CommonBusiness/include/types -I../../../CommonInclude -I/usr/include/mysql/ -I/usr/local/mysql/include/mysql/ -I/usr/include/libxml2/ -I../ -I./ -I../ -I/root/rpmbuild/BUILD/CommonInclude/  -Wall -Werror -DTEST_SERVER -DLEPOSPAY_SHOULD_SENDSMS -std=c++0x -Wno-pmf-conversions -g -DDEBUG_GLOBAL   -c -o deposit.o deposit.cpp
+
+
+http://192.168.21.243/cgi-bin/deductpayitf.cgi?account_na
+me=姚胜&account_no=622909337382411014&account_type=0&bank_name=兴业银行&bank_type=CIB&channel=CHINAPAY&cmd=pay&id_card=43042119841009053X&merchant_order_id=2
+01603100000001000&merchant_uid=19090&notify_arg=6163636F756E745F69643D323031353038303730303030303032353933267472616E735F69643D38383038266F726465725F69643D323
+031363033313030303030303031303030&notify_url=http://192.168.33.50/cgi-bin/deposit.cgi&sign=16FE7666EDD0E88BC5BD3E4A44E9DE9E5FE50F40
+
+Baron(谢越津) 03-10 17:04:55
+curl "http://mobileykpay.yeahka.com/cgi-bin/payorder.cgi?command_type=create_pay_order&merchant_uid=19090&uin=ykfinance&merchant_order_id=820160310092500004&product_id=100525&product_desc=deduct_p2p&product_args=22222&amount=1&product_amount=1&notify_url=&notify_args=&pay_type=11&sign=FAABE68F259FB26299F1BD22C0306056"
+
+curl "http://mobileykpay.yeahka.com/cgi-bin/deductpayitf.cgi?cmd=pay&merchant_uid=19090&channel=CHINAPAY&bank_name=招商银行&bank_type=CMB&merchant_order_id=820160310092500004&account_name=谢越津
+Baron(谢越津) 03-10 17:04:55
+&account_no=6214830251362967&id_card=460025198801253032&account_type=0&notify_url=http://192.168.21.243/cgi-bin/deductpay_notifytest.cgi&notify_arg=hahahaxxxx&sign=FAABE68F259FB26299F1BD22C0306056"
+
+
+mysql> show variables like 'log_error';
++---------------+-----------------------------------------+
+| Variable_name | Value                                   |
++---------------+-----------------------------------------+
+| log_error     | /usr/local/mysql/data/yeahka.com001.err |
++---------------+-----------------------------------------+
+1 row in set (0.00 sec)
+
+mysql> show variables like 'long_query%';
++-----------------+-----------+
+| Variable_name   | Value     |
++-----------------+-----------+
+| long_query_time | 10.000000 |
++-----------------+-----------+
+1 row in set (0.00 sec)
+
+mysql> show variables like 'log_slow%';  
++------------------+-------+
+| Variable_name    | Value |
++------------------+-------+
+| log_slow_queries | OFF   |
++------------------+-------+
+1 row in set (0.00 sec)
+
+mysql> show variables like 'log_quer%'; 
++-------------------------------+-------+
+| Variable_name                 | Value |
++-------------------------------+-------+
+| log_queries_not_using_indexes | OFF   |
++-------------------------------+-------+
+1 row in set (0.00 sec)
+
+| slow_query_log            | OFF                                    |
+| slow_query_log_file       | /usr/local/mysql/data/p2p-dev-slow.log |
+
+account_id=201603100000001000&trans_id=8808&order_id=201603100000001000
+22005B42CFDC45953B7F9B458479D426909E54B4
+47AFA3FFD5342666A69EA46484E9E7FF16D23EE2
+
+  int64_t trans_id;
+  int64_t account_id;
+  int64_t user_id;
+   ::bus_type::type btype;
+   ::service_type::type stype;
+  int64_t amount;
+   ::card_info card;
+  int64_t product_id;
+  std::string bank_branch;
+  std::string bank_branch_no;
+  std::string desc;
+  std::string cb_ip;
+  int32_t cb_port;
+  int64_t orig_trans_id;
+   ::bus_type::type orig_btype;
+   
+     int64_t trans_id;
+  int64_t account_id;
+  int64_t user_id;
+   ::bus_type::type btype;
+   ::service_type::type stype;
+  int64_t amount;
+  std::string desc;
+  
+alter table chck.t_inside_deposit_flow add F_deposit_type tinyint not null default 0 comment '充值类型';
+alter table chck.t_outside_deposit_flow add F_deposit_type tinyint not null default 0 comment '充值类型';
+
+INSERT INTO chck.t_deposit_check (F_date,F_amount_l,F_order_id_l,F_acc_id_l,F_uid_l,F_create_time_l,F_amount_r,F_order_id_r,F_payorder_id_r,F_uid_r,F_create_time_r) 
+(SELECT '2016-03-11',t1.F_amount,t1.F_order_id,t1.F_acc_id,t1.F_uid,t1.F_create_time,t2.F_amount,t2.F_order_id,t2.F_payorder_id,t2.F_uid,t2.F_create_time FROM chck.t_inside_deposit_flow t1 LEFT JOIN chck.t_outside_deposit_flow t2 ON t1.F_date=t2.F_date And t1.F_order_id=t2.F_order_id And t1.F_order_id!=0 And t2.F_order_id!=0 WHERE t1.F_date='2016-03-11') 
+UNION 
+(SELECT '2016-03-11',t1.F_amount,t1.F_order_id,t1.F_acc_id,t1.F_uid,t1.F_create_time,t2.F_amount,t2.F_order_id,t2.F_payorder_id,t2.F_uid,t2.F_create_time FROM chck.t_inside_deposit_flow t1 RIGHT JOIN chck.t_outside_deposit_flow t2 ON t1.F_date=t2.F_date  And t1.F_order_id=t2.F_order_id And t1.F_order_id!=0 And t2.F_order_id!=0 WHERE t2.F_date='2016-03-11')
+
+g++ -I../ -I../../ -I./ -I../ -I../../ -I../../../ -I../../../CommonBusiness/include/types -I../../../CommonInclude/ -I/usr/include/mysql/ -I/usr/local/mysql/include/mysql/ -I/usr/include/libxml2/ -I../ -I./ -I../  -Wall -Werror -DTEST_SERVER -DLEPOSPAY_SHOULD_SENDSMS -std=c++0x -Wno-pmf-conversions -g -DDEBUG_GLOBAL   -c -o setpenalty.o setpenalty.cpp
+
+g++  ./setpenalty.o ../../../libs/libSecurity.a ../../../libs/libCommonUtil.a ../../../libs/libCommonUtil.a ../../../libs/libCommonNet.a ../../../libs/libCommonUtil.a ../../../CommonBusiness/lib/libAccountService.a ../../../CommonBusiness/lib/libLoanService.a ../../../CommonBusiness/lib/libTypes.a ../../../libs/libthriftnb.a ../../../libs/libthrift.a ../../../libs/libevent.a ../../../libs/libjsoncpp.a ../../../libs/libCommonUtil.a ../../../libs/libCommonNet.a ../../../CommonBusiness/lib/libTypes.a ../../../libs/libthriftnb.a ../../../libs/libthrift.a  -L/usr/lib64/mysql/  -lpthread -lrt -lz -lssl -lcurl -lxml2 -lmysqlclient ../../../libs/libCommonNet.a ../../../libs/libCommonUtil.a  -o setpenalty 
+
+select * from  p2p.t_loan_93 where   f_loan_type = 0 and f_loan_id = 201601120005000093 order by F_create_time \G;
+select * from  p2p.t_loan_93 where   f_loan_type = 0 and F_state = 3;
+
+p 'ApplicationGlobalData.h'::mq_ip
+
+
+eclipse c++:
+先安装 mingw ，然后新建c/c++项目。compiler index 选择mingw. 从makefile project from exsiting code.
+if (!res || res->next())  return false; //存在
+
+/home/jun/internetfinancialserver_test/p2p/Service/loanservice/src/: 成功.
+(gdb) where
+#0  0x00000032452e8f33 in epoll_wait () from /lib64/libc.so.6
+#1  0x0000000000afbcf2 in epoll_dispatch (base=0x1e112c0, tv=<value optimized out>) at epoll.c:407
+#2  0x0000000000af5336 in event_base_loop (base=0x1e112c0, flags=0) at event.c:1625
+#3  0x0000000000addb10 in apache::thrift::server::TNonblockingIOThread::run (this=0x1e0f390) at src/thrift/server/TNonblockingServer.cpp:1520
+#4  0x0000000000ade3f5 in apache::thrift::server::TNonblockingServer::serve (this=0x1e0ee30) at src/thrift/server/TNonblockingServer.cpp:1261
+#5  0x00000000004ebc08 in p2p_api::Server<yeahka::loan::LoanServiceHandler, yeahka::loan::loanProcessor>::start (this=0x1166348)
+    at ../../../CommonInclude/callservice.h:279
+#6  0x00000000004e7f78 in p2p_api::Server<yeahka::loan::LoanServiceHandler, yeahka::loan::loanProcessor>::start (this=0x1166348, properties=..., server_name=
+    "LoanService") at ../../../CommonInclude/callservice.h:224
+#7  0x00000000004df7c2 in main (argc=1, argv=0x7ffc9be706c8) at main.cpp:96
+(gdb) print main.cpp::g_App
+A syntax error in expression, near `g_App'.
+(gdb) print 'main.cpp'::g_App
+
+$1 = {ptrProperties = {<CommonUtil::HandleBase<CommonUtil::Properties>> = {_ptr = 0x1dcce50}, <No data fields>}, g_pool = {<PoolFunction<yk_api::mysql::Connection>> = {
+      _vptr.PoolFunction = 0xb92010}, m_conninfo = {host = "127.0.0.1", user = "mysqluser", pwd = "1234", db = "p2p", charset = "utf8", client_ip = "127.0.0.1", 
+      port = 3306, flag = 0, unix_socket = ""}, m_max_conn = 10, m_min_conn = 0, m_inc_conn = 1, m_nr_conn = 1, m_env = 0x1dfd850, 
+    m_busy_connections = std::set with 0 elements, m_idle_connections = std::deque with 1 elements = {0x7fa0b4016da0}, m_deleter = {m_pool = 0x1165d88}, m_lock = {
+      _mutex = {__data = {__lock = 0, __count = 0, __owner = 0, __nusers = 0, __kind = 2, __spins = 0, __list = {__prev = 0x0, __next = 0x0}}, 
+        __size = '\000' <repeats 16 times>, "\002", '\000' <repeats 22 times>, __align = 0}}}, g_account = {pool_ = {<PoolFunction<yeahka::account::accountClient>> = {
+        _vptr.PoolFunction = 0xb39710}, host_ = "", port_ = 0, service_name_ = "", timeout_ = 60, max_client_ = 10, min_client_ = 1, inc_client_ = 1, nr_client_ = 1, 
+      busy_clients_ = std::set with 0 elements, idle_clients_ = std::deque with 1 elements = {0x1dff230}, zoo_ = {px = 0x1dfd960, pn = {pi_ = 0x1dfd4e0}}, deleter = {
+        m_pool = 0x1165e98}, lock_ = {_mutex = {__data = {__lock = 0, __count = 0, __owner = 0, __nusers = 0, __kind = 2, __spins = 0, __list = {__prev = 0x0, 
+              __next = 0x0}}, __size = '\000' <repeats 16 times>, "\002", '\000' <repeats 22 times>, __align = 0}}}}, g_deposit = {
+    pool_ = {<PoolFunction<yeahka::deposit::depositClient>> = {_vptr.PoolFunction = 0xb39650}, host_ = "", port_ = 0, service_name_ = "", timeout_ = 60, 
+      max_client_ = 10, min_client_ = 1, inc_client_ = 1, nr_client_ = 1, busy_clients_ = std::set with 0 elements, idle_clients_ = std::deque with 1 elements = {
+        0x1e025c0}, zoo_ = {px = 0x1e00c30, pn = {pi_ = 0x1e00d80}}, deleter = {m_pool = 0x1165f88}, lock_ = {_mutex = {__data = {__lock = 0, __count = 0, __owner = 0, 
+            __nusers = 0, __kind = 2, __spins = 0, __list = {__prev = 0x0, __next = 0x0}}, __size = '\000' <repeats 16 times>, "\002", '\000' <repeats 22 times>, 
+          __align = 0}}}}, g_id = {pool_ = {<PoolFunction<yeahka::IDService::IDClient>> = {_vptr.PoolFunction = 0xb394b0}, host_ = "", port_ = 0, service_name_ = "", 
+      timeout_ = 60, max_client_ = 10, min_client_ = 1, inc_client_ = 1, nr_client_ = 1, busy_clients_ = std::set with 0 elements, 
+      idle_clients_ = std::deque with 1 elements = {0x1e00bf0}, zoo_ = {px = 0x1dff270, pn = {pi_ = 0x1dff3c0}}, deleter = {m_pool = 0x1166078}, lock_ = {_mutex = {
+          __data = {__lock = 0, __count = 0, __owner = 0, __nusers = 0, __kind = 2, __spins = 0, __list = {__prev = 0x0, __next = 0x0}}, 
+          __size = '\000' <repeats 16 times>, "\002", '\000' <repeats 22 times>, __align = 0}}}}, g_invest = {
+    pool_ = {<PoolFunction<yeahka::investment::investmentClient>> = {_vptr.PoolFunction = 0xb393b0}, host_ = "", port_ = 0, service_name_ = "", timeout_ = 60, 
+      max_client_ = 10, min_client_ = 1, inc_client_ = 1, nr_client_ = 1, busy_clients_ = std::set with 0 elements, idle_clients_ = std::deque with 1 elements = {
+        0x1e05500}, zoo_ = {px = 0x1e03c50, pn = {pi_ = 0x1e03cc0}}, deleter = {m_pool = 0x1166168}, lock_ = {_mutex = {__data = {__lock = 0, __count = 0, __owner = 0, 
+            __nusers = 0, __kind = 2, __spins = 0, __list = {__prev = 0x0, __next = 0x0}}, __size = '\000' <repeats 16 times>, "\002", '\000' <repeats 22 times>, 
+          __align = 0}}}}, g_withdraw = {pool_ = {<PoolFunction<yeahka::withdraw::withdrawClient>> = {_vptr.PoolFunction = 0xb39570}, host_ = "", port_ = 0, 
+      service_name_ = "", timeout_ = 60, max_client_ = 10, min_client_ = 1, inc_client_ = 1, nr_client_ = 0, busy_clients_ = std::set with 0 elements, 
+      idle_clients_ = std::deque with 0 elements, zoo_ = {px = 0x1e02600, pn = {pi_ = 0x1e02750}}, deleter = {m_pool = 0x1166258}, lock_ = {_mutex = {__data = {
+            __lock = 0, __count = 0, __owner = 0, __nusers = 0, __kind = 2, __spins = 0, __list = {__prev = 0x0, __next = 0x0}}, 
+          __size = '\000' <repeats 16 times>, "\002", '\000' <repeats 22 times>, __align = 0}}}}, server = {port_ = 12008, thread_num_ = 10, io_thread_num_ = 10, 
+    timeout_ = 60, service_handler_ = {px = 0x1e074d0, pn = {pi_ = 0x1e074f0}}, server_ = {px = 0x1e0ee30, pn = {pi_ = 0x1e0f0e0}}, thread_manager_ = {px = 0x1e075b0, 
+      pn = {pi_ = 0x1e06e50}}, zoo_ = {px = 0x1e05540, pn = {pi_ = 0x1e07000}}, zoo_thread_ = {px = 0x1e0c180, pn = {pi_ = 0x1e0dcc0}}, thread_factory_ = {
+      px = 0x1e07020, pn = {pi_ = 0x1e0dca0}}}, msg_receiver = "globe", mq_ip = "127.0.0.1", mq_port = 61616, loan_info_topic = "loan_mq_loan_topic", 
+  repayment_info_topic = "loan_mq_repayment_topic", mq_loan_info = {host_ = "127.0.0.1", port_ = 61616, identify_ = "loan_mq_loan_topic", use_topic_ = true, 
+    timeout_ = 0, ack_mode_ = cms::Session::AUTO_ACKNOWLEDGE, delivery_mode_ = cms::DeliveryMode::NON_PERSISTENT, sess_ = 0x1dec458, dest_ = 0x1dec530, producer_ = 
+    0x1ded8b0, conn_ = 0x1de2ad0, conn_factory_ = 0x1ddf3d0, lock_ = {_mutex = {__data = {__lock = 0, __count = 0, __owner = 0, __nusers = 0, __kind = 2, __spins = 0, 
+          __list = {__prev = 0x0, __next = 0x0}}, __size = '\000' <repeats 16 times>, "\002", '\000' <repeats 22 times>, __align = 0}}}, mq_repayment_info = {host_ = 
+    "127.0.0.1", port_ = 61616, identify_ = "loan_mq_repayment_topic", use_topic_ = true, timeout_ = 0, ack_mode_ = cms::Session::AUTO_ACKNOWLEDGE, 
+    delivery_mode_ = cms::DeliveryMode::NON_PERSISTENT, sess_ = 0x1dfc3f8, dest_ = 0x1dfc4d0, producer_ = 0x1dfab50, conn_ = 0x1df16c0, conn_factory_ = 0x1ded540, 
+    lock_ = {_mutex = {__data = {__lock = 0, __count = 0, __owner = 0, __nusers = 0, __kind = 2, __spins = 0, __list = {__prev = 0x0, __next = 0x0}}, 
+        __size = '\000' <repeats 16 times>, "\002", '\000' <repeats 22 times>, __align = 0}}}}
+
+#include <stdio.h>
+
+int func(int n)
+{
+int sum=0,i;
+for(i=0; i<n; i++)
+{
+sum+=i;
+}
+ return sum;
+ }
+
+
+ main()
+ {
+ int i;
+ long result = 0;
+ for(i=1; i<=100; i++)
+ {
+ result += i;
+ }
+
+ printf("result[1-100] = %d n", result );
+ printf("result[1-250] = %d n", func(250) );
+ }
+ 
+ 
+ gdb finish 完成函数。返回上层。
+ break +offset 
+break -offset 
+在当前行号的前面或后面的offset行停住。offiset为自然数。 break filename:linenum 
+在源文件filename的linenum行处停住。 break filename:function 
+在源文件filename的function函数的入口处停住。 break *address
+在程序运行的内存地址处停住。 break 
+break命令没有参数时，表示在下一条指令处停住。 break ... if <condition>
+...可以是上述的参数，condition表示条件，在条件成立时停住。比如在循环境体中，可以设置break if i=100，表示 当i为100时停住程序。 查看断点时，可使用info命令，如下所示：（注：n表示断点号）
+
+
+命令行工具的一些简单操作如下：
+
+1. 显示根目录下、文件： ls / 使用 ls 命令来查看当前 ZooKeeper 中所包含的内容
+2. 显示根目录下、文件： ls2 / 查看当前节点数据并能看到更新次数等数据
+3. 创建文件，并设置初始内容： create /zk "test" 创建一个新的 znode节点“ zk ”以及与它关联的字符串
+4. 获取文件内容： get /zk 确认 znode 是否包含我们所创建的字符串
+5. 修改文件内容： set /zk "zkbak" 对 zk 所关联的字符串进行设置
+6. 删除文件： delete /zk 将刚才创建的 znode 删除
+7. 退出客户端： quit
+8. 帮助命令： help
+
+[zk: localhost:2181(CONNECTED) 8] get /p2p/custinfoauth_sessionkey
+2015-12-10 14:23:52|TmilI3ZP4v2BhUjl2UNPsqZF8y8RHYZ6|0ee92121e5aebf2240a263d24b049311
+cZxid = 0x4000023e9
+ctime = Thu Dec 10 18:49:46 CST 2015
+mZxid = 0x400002420
+mtime = Thu Dec 10 19:04:34 CST 2015
+pZxid = 0x4000023e9
+cversion = 0
+dataVersion = 4
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 85
+numChildren = 0
+
+create /p2p/custinfoauth_sessionkey "2015-12-10 14:23:52|TmilI3ZP4v2BhUjl2UNPsqZF8y8RHYZ6|0ee92121e5aebf2240a263d24b049311"
+
+insert into p2p.t_withdraw_flow_93(F_flow_id, F_order_id, F_acc_id, F_ui
+d, F_trans_id, F_amount, F_bus_type, F_operation, F_withdraw_type, F_loan_id, F_free_id, F_create_time) values(3521011, 0, 201507300120339593, 201507170000104593, 776006,
+2000000, 2, 1, 1, 0, 776006, '2016-03-17 14:45:20')
+
+./zkCli.sh -server 127.0.0.1:2181
+
+> var cursor = db.things.find();
+> while ( cursor .hasNext()) printjson(cursor.next());
+
+bjam toolset=msvc-11.0 variant=debug,release threading=multi link=static
+
+// KEY_DATA : 加密密钥。长度24字节。
+try {
+????byte[] KEY_DATA = {1,8,-49,-31,77,90,10,121,-14,109,107,38,29,68,59,5,82,49,31,42,-25,67,96,15};
+????Cipher cipher = Cipher.getInstance("DESede/ECB/PKCS5Padding");
+????SecretKeySpec key = new SecretKeySpec(KEY_DATA, "DESede");//生成加密解密需要的Key
+????cipher.init(Cipher.ENCRYPT_MODE, key);
+????byte[] res = cipher.doFinal(data.getBytes());
+} catch (Exception e) {
+????e.printStackTrace();
+}
+
+'532129198412150719'： aes 加密：
+ADEG9h0rrfISxSBwMiwQeXqjbMmRJW5k1ATNIyWNH00=
+ADEG9h0rrfISxSBwMiwQeXqjbMmRJW5k1ATNIyWNH00= 
+
+	WjO6JwvKwogZfb7z9w+bbG0dT9uEcm9L+JhxDRpNd20=
+	
+	
+[14, -23, 33, 33, -27, -82, -65, 34, 64, -94, 99, -46, 75, 4, -109, 17]	
+把一个PKCS#7文件从PEM格式转换成DER格式：
+[cpp] view plain copy
+openssl pkcs7 -in file.pem -outform DER -out file.der   
+
+打印文件所有证书
+[cpp] view plain copy
+openssl pkcs7 -in file.pem -print_certs -out certs.pem  
+phabricator
+
+
+ 用openssl命令生成证书
+标签： 加密工作算法ssl服务器脚本
+2008-06-21 21:17 10652人阅读 评论(1) 收藏 举报
+ 分类：  Security（38）  
+版权声明：本文为博主原创文章，未经博主允许不得转载。
+也许很多人和本人一样深有体会，使用OpenSSL库写一个加密通讯过程，代码很容易就写出来了，可是整个工作却花了了好几天。除将程序编译成功外（没有可以使用的证书文件，编译成功了，它并不能跑起来，并不表示它能正常使用，所以......）,还需生成必要的证书和私钥文件使双方能够成功验证对方。
+找了n多的资料，很多是说的很模糊，看了n多的英文资料，还是没有办法（不知道是不是外国朋友都比较厉害，不用说明得太清？），无意间找到yawl(yawl@nsfocus.com)写的文章，难得的汉字（呵呵）。里面有生成证书部分，说到生成了Certificate Signing Request (CSR)文件后，就有点不太清楚了。后面生成自签字证书在很多地方都可以找到的，签名这部分，yawl说mod_ssl有比较好的脚本，但是笔者一时找不到，就自己用openssl的ca命令来完成了，也不是很麻烦。 
+
+说说本人的操作环境：无盘工作站（有权限问题使用起来不太方便），操作目录是openssl/bin（没办法改不了环境变量，如果你可以改的话，就不用在这个目录下工作了），为了方便本人把apps下的openssl.cnf也复制到了这个目录下来。文件名都是以本人使用的来说了：
+
+1.首先要生成服务器端的私钥(key文件):
+openssl genrsa -des3 -out server.key 1024
+运行时会提示输入密码,此密码用于加密key文件(参数des3便是指加密算法,当然也可以选用其他你认为安全的算法.),以后每当需读取此文件(通过openssl提供的命令或API)都需输入口令.如果觉得不方便,也可以去除这个口令,但一定要采取其他的保护措施!
+去除key文件口令的命令:
+openssl rsa -in server.key -out server.key
+
+2.openssl req -new -key server.key -out server.csr -config openssl.cnf
+生成Certificate Signing Request（CSR）,生成的csr文件交给CA签名后形成服务端自己的证书.屏幕上将有提示,依照其指示一步一步输入要求的个人信息即可.
+
+3.对客户端也作同样的命令生成key及csr文件:
+openssl genrsa -des3 -out client.key 1024
+openssl req -new -key client.key -out client.csr -config openssl.cnf
+
+4.CSR文件必须有CA的签名才可形成证书.可将此文件发送到verisign等地方由它验证,要交一大笔钱,何不自己做CA呢.
+openssl req -new -x509 -keyout ca.key -out ca.crt -config openssl.cnf
+
+5.用生成的CA的证书为刚才生成的server.csr,client.csr文件签名:
+Openssl ca -in server.csr -out server.crt -cert ca.crt -keyfile ca.key -config openssl.cnf
+Openssl ca -in client.csr -out client.crt -cert ca.crt -keyfile ca.key -config openssl.cnf
+
+现在我们所需的全部文件便生成了.
+
+另：
+client使用的文件有：ca.crt,client.crt,client.key
+server使用的文件有：ca.crt,server.crt,server.key
+.crt文件和.key可以合到一个文件里面，本人把2个文件合成了一个.pem文件（直接拷贝过去就行了）
+ 将私钥秘cer证书合并成p12格式  
+1）生成pkcs12文件，但不包含CA证书：  
+openssl pkcs12 -export -inkey ocspserverkey.pem -in ocspservercert.pem  -out ocspserverpkcs12.pfx
+2）  生成pcs12文件，包含CA证书： 
+openssl pkcs12 -export -inkey server.key -in server.crt -CAfile ca.crt -chain -out server.pfx
+3）  将pcks12中的信息分离出来，写入文件：
+openssl pkcs12 –in ocsp1.pfx -out certandkey.pem
+4）  显示pkcs12信息：
+openssl pkcs12 –in ocsp1.pfx -info  
+------------------------------------ 
+ 附： 1、把cert1.pem转换成.p12格式  
+openssl pkcs12 -export -in cert1.pem -inkey　cert1.key -certfile ca.pem -out cert1.p12  
+2、把cert1.pem转换成.cer格式:只需把扩展名改为.cer即可.
+
+首先需要搞清楚几个概念：
+
+AES加密分几种方法：ECB和其他几种；
+
+    ECB的方式不需要IV（初始向量：就是再秘钥基础上再偏移一下更难破解），只需要有秘钥就可以了；
+
+    其他方式都需要有秘钥和IV。
+
+其次，AES加密需要整组整组的加密，也就是说少于16个字符需要补足16个字符，正好等于16个字符需要再额外加上16个字符，这个东西叫padding，有None, pkcs5padding, pkcs7padding等等种类，具体可以看看这哥们的文章，C#和Java支持的方式不一样，这也会导致不同语言加的密解不开。。。。
+
+读取证书：
+直接从文件中读取：
+cert = PEM_read_X509(fp, NULL, NULL, NULL);
+从BIO中读取：
+    /* Read in signer certificate and private key */
+    tbio = BIO_new_file("signer.pem", "r");
+
+    if (!tbio)
+        goto err;
+
+    scert = PEM_read_bio_X509(tbio, NULL, 0, NULL);
+
+读取私钥：
+从BIO中读取：
+    BIO_reset(tbio);
+
+    skey = PEM_read_bio_PrivateKey(tbio, NULL, 0, NULL);
+从文件中读取：
+    rewind(fp);
+    pkey = PEM_read_PrivateKey(fp, NULL, NULL, NULL);	
+	
+kara: 	13611442559
+mueller: 13570805308
+leon: 13632534552
+ron:15827329740
+globe: 18520868915
+		
+file:///C:/Users/Admin/Documents/Fiddler2/Scripts/BrowserPAC.js
+fidder4 : 
+设置可解密https包。
+取消system proxy
+set lan proxy : 127.0.0.1, 8888
+
+
+有时我们需要RPM包中的某个文件，如何解压RPM包呢？
+RPM包括是使用cpio格式打包的，因此可以先转成cpio然后解压，如下所示：
+rpm2cpio xxx.rpm | cpio -div
+		
+[root@p2p-dev ~]# ps -ef |grep zookeeper
+root      6273  6247  0 09:22 pts/0    00:00:00 grep zookeeper
+root      9123     1  0 Mar09 ?        00:19:10 /home/boll/java/jdk1.8.0_45/bin/java -Dzookeeper.log.dir=. -Dzookeeper.root.logger=INFO,CONSOLE -cp /usr/local/zookeeper_1/bin/../build/classes:/usr/local/zookeeper_1/bin/../build/lib/*.jar:/usr/local/zookeeper_1/bin/../lib/slf4j-log4j12-1.6.1.jar:/usr/local/zookeeper_1/bin/../lib/slf4j-api-1.6.1.jar:/usr/local/zookeeper_1/bin/../lib/netty-3.7.0.Final.jar:/usr/local/zookeeper_1/bin/../lib/log4j-1.2.16.jar:/usr/local/zookeeper_1/bin/../lib/jline-0.9.94.jar:/usr/local/zookeeper_1/bin/../zookeeper-3.4.6.jar:/usr/local/zookeeper_1/bin/../src/java/lib/*.jar:/usr/local/zookeeper_1/bin/../conf:/usr/local/zookeeper_1/bin/../build/classes:/usr/local/zookeeper_1/bin/../build/lib/*.jar:/usr/local/zookeeper_1/bin/../lib/slf4j-log4j12-1.6.1.jar:/usr/local/zookeeper_1/bin/../lib/slf4j-api-1.6.1.jar:/usr/local/zookeeper_1/bin/../lib/netty-3.7.0.Final.jar:/usr/local/zookeeper_1/bin/../lib/log4j-1.2.16.jar:/usr/local/zookeeper_1/bin/../lib/jline-0.9.94.jar:/usr/local/zookeeper_1/bin/../zookeeper-3.4.6.jar:/usr/local/zookeeper_1/bin/../src/java/lib/*.jar:/usr/local/zookeeper_1/bin/../conf:.:/home/boll/java/jdk1.8.0_45/lib/tools.jar -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=7999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false org.apache.zookeeper.server.quorum.QuorumPeerMain /usr/local/zookeeper_1/bin/../conf/zoo.cfg
+root     38643     1  0  2015 ?        16:45:38 /home/boll/java/jdk1.8.0_45/bin/java -Dzookeeper.log.dir=. -Dzookeeper.root.logger=INFO,CONSOLE -cp /usr/local/zookeeper/bin/../build/classes:/usr/local/zookeeper/bin/../build/lib/*.jar:/usr/local/zookeeper/bin/../lib/slf4j-log4j12-1.6.1.jar:/usr/local/zookeeper/bin/../lib/slf4j-api-1.6.1.jar:/usr/local/zookeeper/bin/../lib/netty-3.7.0.Final.jar:/usr/local/zookeeper/bin/../lib/log4j-1.2.16.jar:/usr/local/zookeeper/bin/../lib/jline-0.9.94.jar:/usr/local/zookeeper/bin/../zookeeper-3.4.6.jar:/usr/local/zookeeper/bin/../src/java/lib/*.jar:/usr/local/zookeeper/bin/../conf:/usr/local/zookeeper/bin/../build/classes:/usr/local/zookeeper/bin/../build/lib/*.jar:/usr/local/zookeeper/bin/../lib/slf4j-log4j12-1.6.1.jar:/usr/local/zookeeper/bin/../lib/slf4j-api-1.6.1.jar:/usr/local/zookeeper/bin/../lib/netty-3.7.0.Final.jar:/usr/local/zookeeper/bin/../lib/log4j-1.2.16.jar:/usr/local/zookeeper/bin/../lib/jline-0.9.94.jar:/usr/local/zookeeper/bin/../zookeeper-3.4.6.jar:/usr/local/zookeeper/bin/../src/java/lib/*.jar:/usr/local/zookeeper/bin/../conf:.:/home/boll/java/jdk1.8.0_45/lib/tools.jar -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /usr/local/zookeeper/bin/../conf/zoo.cfg
+root     39180     1  0  2015 ?        03:07:16 /home/boll/java/jdk1.8.0_45/bin/java -Dzookeeper.log.dir=. -Dzookeeper.root.logger=INFO,CONSOLE -cp /usr/local/zookeeper_2/bin/../build/classes:/usr/local/zookeeper_2/bin/../build/lib/*.jar:/usr/local/zookeeper_2/bin/../lib/slf4j-log4j12-1.6.1.jar:/usr/local/zookeeper_2/bin/../lib/slf4j-api-1.6.1.jar:/usr/local/zookeeper_2/bin/../lib/netty-3.7.0.Final.jar:/usr/local/zookeeper_2/bin/../lib/log4j-1.2.16.jar:/usr/local/zookeeper_2/bin/../lib/jline-0.9.94.jar:/usr/local/zookeeper_2/bin/../zookeeper-3.4.6.jar:/usr/local/zookeeper_2/bin/../src/java/lib/*.jar:/usr/local/zookeeper_2/bin/../conf:/usr/local/zookeeper_2/bin/../build/classes:/usr/local/zookeeper_2/bin/../build/lib/*.jar:/usr/local/zookeeper_2/bin/../lib/slf4j-log4j12-1.6.1.jar:/usr/local/zookeeper_2/bin/../lib/slf4j-api-1.6.1.jar:/usr/local/zookeeper_2/bin/../lib/netty-3.7.0.Final.jar:/usr/local/zookeeper_2/bin/../lib/log4j-1.2.16.jar:/usr/local/zookeeper_2/bin/../lib/jline-0.9.94.jar:/usr/local/zookeeper_2/bin/../zookeeper-3.4.6.jar:/usr/local/zookeeper_2/bin/../src/java/lib/*.jar:/usr/local/zookeeper_2/bin/../conf:.:/home/boll/java/jdk1.8.0_45/lib/tools.jar -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /usr/local/zookeeper_2/bin/../conf/zoo.cfg
+root     39301     1  0  2015 ?        02:30:31 /home/boll/java/jdk1.8.0_45/bin/java -Dzookeeper.log.dir=. -Dzookeeper.root.logger=INFO,CONSOLE -cp /usr/local/zookeeper_3/bin/../build/classes:/usr/local/zookeeper_3/bin/../build/lib/*.jar:/usr/local/zookeeper_3/bin/../lib/slf4j-log4j12-1.6.1.jar:/usr/local/zookeeper_3/bin/../lib/slf4j-api-1.6.1.jar:/usr/local/zookeeper_3/bin/../lib/netty-3.7.0.Final.jar:/usr/local/zookeeper_3/bin/../lib/log4j-1.2.16.jar:/usr/local/zookeeper_3/bin/../lib/jline-0.9.94.jar:/usr/local/zookeeper_3/bin/../zookeeper-3.4.6.jar:/usr/local/zookeeper_3/bin/../src/java/lib/*.jar:/usr/local/zookeeper_3/bin/../conf:/usr/local/zookeeper_3/bin/../build/classes:/usr/local/zookeeper_3/bin/../build/lib/*.jar:/usr/local/zookeeper_3/bin/../lib/slf4j-log4j12-1.6.1.jar:/usr/local/zookeeper_3/bin/../lib/slf4j-api-1.6.1.jar:/usr/local/zookeeper_3/bin/../lib/netty-3.7.0.Final.jar:/usr/local/zookeeper_3/bin/../lib/log4j-1.2.16.jar:/usr/local/zookeeper_3/bin/../lib/jline-0.9.94.jar:/usr/local/zookeeper_3/bin/../zookeeper-3.4.6.jar:/usr/local/zookeeper_3/bin/../src/java/lib/*.jar:/usr/local/zookeeper_3/bin/../conf:.:/home/boll/java/jdk1.8.0_45/lib/tools.jar -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /usr/local/zookeeper_3/bin/../conf/zoo.cfg
+
+./zkCli.sh -server 127.0.0.1:2182
+		
+[zk: 127.0.0.1:2181(CONNECTED) 13] get /p2p/DepositService                    
+
+cZxid = 0x13e55
+ctime = Thu Aug 06 22:04:29 CST 2015
+mZxid = 0x13e55
+mtime = Thu Aug 06 22:04:29 CST 2015
+pZxid = 0x70001671b
+cversion = 407
+dataVersion = 0
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 0
+numChildren = 1
+[zk: 127.0.0.1:2181(CONNECTED) 14] ls /p2p/DepositService 
+[192.168.21.50:12005]
+[zk: 127.0.0.1:2181(CONNECTED) 15] get /p2p/DepositService/192.168.21.50:12005
+
+cZxid = 0x70001671b
+ctime = Thu Mar 17 14:22:29 CST 2016
+mZxid = 0x70001671b
+mtime = Thu Mar 17 14:22:29 CST 2016
+pZxid = 0x70001671b
+cversion = 0
+dataVersion = 0
+aclVersion = 0
+ephemeralOwner = 0x1528f4f21b6094a
+dataLength = 0
+numChildren = 0
+	
+[zk: 127.0.0.1:2181(CONNECTED) 2] ls /dubbo/com.yeahka.fundmanager.service.PayOffInfoService/
+
+consumers       routers         configurators   providers
+	
+https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2.0.0.zip
+https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2.4.14.zip
+mongodb-win32-x86_64-2.0.0.zip
+
+C:\mongo\bin\mongod --dbpath=c:\ db --logpath=c:\mongo\logs\mongodb.log --install
+
+面向文档的 NoSQL 数据库主要解决的问题不是高性能的并发读写，而是保证海量数据存储
+的同时，具有良好的查询性能。
+
+use p2p;
+CREATE TABLE `t_auth_rec` (
+  `F_sysseqnb` varchar(27) NOT NULL DEFAULT '000000000000000000000000' COMMENT '流水号',
+  `F_insert_module` varchar(64) NOT NULL COMMENT '插入记录的模块名,如：hdcompare, idverify, ocr',
+  `F_status` varchar(4) NOT NULL COMMENT '业务处理状态:01：正在处理中；00：成功；表示此次身份真伪或身份认证通过；03：失败；表示身份真伪或身份认证失败，具体原因参见respCd,respInfo',
+  `F_errinfo` varchar(100) DEFAULT NULL COMMENT '错误信息',
+  `F_certseq` varchar(20) DEFAULT NULL COMMENT '身份证号',
+  `F_mpssim` varchar(8) DEFAULT NULL COMMENT '公安比对分值',
+  `F_insert_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '插入时间',
+  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8  
+	
+set tx_isolation='read-uncommitted';
+tx isolation : 会话级别修改，要重新开启事务才有效。
+	
+You can think of MVCC as a twist on row-level locking; it avoids the need for locking
+at all in many cases and can have much lower overhead. Depending on how it is im-
+plemented, it can allow nonlocking reads, while locking only the necessary rows during
+write operations.	
+InnoDB uses MVCC to achieve high concurrency, and it implements all four SQL stan-
+dard isolation levels. It defaults to the REPEATABLE READ  isolation  level, and  it has a 
+next-key  locking strategy that prevents phantom reads in this isolation level: rather than
+locking only the rows you’ve touched in a query, InnoDB locks gaps in the index struc-
+ture as well, preventing phantoms from being inserted.
+
+
+debian硬盘安装：
+ 除此之外还需要下载vmlinuz和initrd.gz，这两个文件不能从镜像中提取，而是需要到官网上选取相应的版本
+ 
+
+32位：http://ftp.cn.debian.org/debian/dists/Debian7.1/main/installer-i386/current/images/hd-media/
+ 
+64位：http://ftp.cn.debian.org/debian/dists/Debian7.1/main/installer-amd64/c/current/images/hd-media/
+# NeoSmart NeoGrub Bootloader Configuration File
+#
+# This is the NeoGrub configuration file, and should be located at C:\NST\menu.lst
+# Please see the EasyBCD Documentation for information on how to create/modify entries:
+# http://neosmart.net/wiki/display/EBCD/
+title install debian7--wheezy!
+root (hd0,2)
+kernel /vmlinuz  root=casper iso-scan/filename=/debian-7.0.0-amd64-DVD-1.iso
+initrd /initrd.gz
+boot
+
+HTTP权威指南：
+对非安全字符进行编码 。客户端应用程序在向其它应用程序发送任意URL之前，最好把所有不安全或者爱限字符都进行转换。
+无论对象搬移到什么地方，URN都能为对象提供一个稳定的名称 。
+HTTP报文的三个部分：1 报文起始行 2 各种首部 3 正文
+起始行和首部 每行都 以\r\n结束 。同时应该兼容\n字符结束 。
+Content-Type: text/html
+Content-Length: 14613
+说明了主体是什么 以及有多久。主体中既可以是文本， 也可以有二进制数据 。
+
+请求：
+
+method request-url version
+headers
+
+entity-body 
+
+start line: GET /index.html HTTP/1.0
+method: 客户端希望服务器对资源执行的动作。是一个单独的词， 比如GET， POST,HEAD
+response :
+start line: 
+version status reason-phrase
+headers
+
+entity-body
+status-code : 三位数字， 描述了请求过程中所发生的情况。
+
+
+Pac文件地址
+先介绍一下设置各个系统代理的方法。首先给出两个Pac文件地址，Pac文件有itzmx.com提供，希望大家合理使用：
+主：https://pac.itzmx.com/abc.pac
+备：https://pac.itzmx.com/adc.pac
+
+http://127.0.0.1:16823/proxy_on.pac
+
+ls -l |grep ^d|awk '{print $9}'|xargs du -sm 
+
+select pool_id, hit_rate, pages_made_young, pages_not_made_young from information_schema.innodb_buffer_pool_stats\G;
+
+select table_name, space, page_number, page_type from information_schema.innodb_buffer_page_lru where space = 1;
+
+
+mysql -ujun -p`cat pwfile` < show.sql
+
+gdb -p 6312 -ex "set max_connections=200" -batch
+
+set print pretty on
+
+[root@localhost bin]# ps -ef |grep zoo
+root     18401     1  0 23:51 pts/1    00:00:01 java -Dzookeeper.log.dir=. -Dzookeeper.root.logger=INFO,CONSOLE -cp /root/zookeeper1/bin/../build/classes:/root/zookeeper1/bin/../build/lib/*.jar:/root/zookeeper1/bin/../lib/slf4j-log4j12-1.6.1.jar:/root/zookeeper1/bin/../lib/slf4j-api-1.6.1.jar:/root/zookeeper1/bin/../lib/netty-3.2.2.Final.jar:/root/zookeeper1/bin/../lib/log4j-1.2.15.jar:/root/zookeeper1/bin/../lib/jline-0.9.94.jar:/root/zookeeper1/bin/../zookeeper-3.4.5.jar:/root/zookeeper1/bin/../src/java/lib/*.jar:/root/zookeeper1/bin/../conf: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /root/zookeeper1/bin/../conf/zoo.cfg
+root     18455     1  0 23:53 pts/1    00:00:00 java -Dzookeeper.log.dir=. -Dzookeeper.root.logger=INFO,CONSOLE -cp /root/zookeeper2/bin/../build/classes:/root/zookeeper2/bin/../build/lib/*.jar:/root/zookeeper2/bin/../lib/slf4j-log4j12-1.6.1.jar:/root/zookeeper2/bin/../lib/slf4j-api-1.6.1.jar:/root/zookeeper2/bin/../lib/netty-3.2.2.Final.jar:/root/zookeeper2/bin/../lib/log4j-1.2.15.jar:/root/zookeeper2/bin/../lib/jline-0.9.94.jar:/root/zookeeper2/bin/../zookeeper-3.4.5.jar:/root/zookeeper2/bin/../src/java/lib/*.jar:/root/zookeeper2/bin/../conf: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /root/zookeeper2/bin/../conf/zoo.cfg
+root     18576     1  9 23:56 pts/1    00:00:00 java -Dzookeeper.log.dir=. -Dzookeeper.root.logger=INFO,CONSOLE -cp /root/zookeeper3/bin/../build/classes:/root/zookeeper3/bin/../build/lib/*.jar:/root/zookeeper3/bin/../lib/slf4j-log4j12-1.6.1.jar:/root/zookeeper3/bin/../lib/slf4j-api-1.6.1.jar:/root/zookeeper3/bin/../lib/netty-3.2.2.Final.jar:/root/zookeeper3/bin/../lib/log4j-1.2.15.jar:/root/zookeeper3/bin/../lib/jline-0.9.94.jar:/root/zookeeper3/bin/../zookeeper-3.4.5.jar:/root/zookeeper3/bin/../src/java/lib/*.jar:/root/zookeeper3/bin/../conf: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false org.apache.zookeeper.server.quorum.QuorumPeerMain /root/zookeeper3/bin/../conf/zoo.cfg
+root     18608 18286  0 23:56 pts/1    00:00:00 grep --color=auto zoo
+[root@localhost bin]# netstat -antup |grep 18576
+tcp6       0      0 :::3883                 :::*                    LISTEN      18576/java          
+tcp6       0      0 :::45982                :::*                    LISTEN      18576/java          
+tcp6       0      0 :::2183                 :::*                    LISTEN      18576/java          
+tcp6       0      0 127.0.0.1:39278         127.0.0.1:2882          ESTABLISHED 18576/java          
+tcp6       0      0 127.0.0.1:36825         127.0.0.1:3882          ESTABLISHED 18576/java          
+tcp6       0      0 127.0.0.1:43504         127.0.0.1:3881          ESTABLISHED 18576/java          
+[root@localhost bin]# netstat -antup |grep 18455
+tcp6       0      0 :::3882                 :::*                    LISTEN      18455/java          
+tcp6       0      0 :::59442                :::*                    LISTEN      18455/java          
+tcp6       0      0 :::2882                 :::*                    LISTEN      18455/java          
+tcp6       0      0 :::2182                 :::*                    LISTEN      18455/java          
+tcp6       0      0 127.0.0.1:43499         127.0.0.1:3881          ESTABLISHED 18455/java          
+tcp6       0      0 127.0.0.1:2882          127.0.0.1:39275         ESTABLISHED 18455/java          
+tcp6       0      0 127.0.0.1:3882          127.0.0.1:36825         ESTABLISHED 18455/java          
+tcp6       0      0 127.0.0.1:2882          127.0.0.1:39278         ESTABLISHED 18455/java          
+[root@localhost bin]# netstat -antup |grep 18401
+tcp6       0      0 :::3881                 :::*                    LISTEN      18401/java          
+tcp6       0      0 :::45441                :::*                    LISTEN      18401/java          
+tcp6       0      0 :::2181                 :::*                    LISTEN      18401/java          
+tcp6       0      0 127.0.0.1:3881          127.0.0.1:43499         ESTABLISHED 18401/java          
+tcp6       0      0 127.0.0.1:3881          127.0.0.1:43504         ESTABLISHED 18401/java          
+tcp6       0      0 127.0.0.1:39275         127.0.0.1:2882          ESTABLISHED 18401/java  
+
+windows netstata:
+netstat -anb 
+memcached :11211
+netstat -a :显示主机名而不是IP
+
+bin/zkCli.sh -server 127.0.0.1:2181
+
+序列化后：保存了类型和数据信息。用于存储和网络传输。serialize, unserialize.
+JSON：对数据类型并不关心， 便于存取处理，格式良好 key->value对。所有东西，键为字符串， 值大多也为字符串。freeze , unfreeze.
+session 存入 memcached : 以sessionid 为key 保存进memcached.
+$_SESSION['name'] = 'zhaojun';
+$_SESSION['city'] = 'beijing';
+将数组序列化后存储 进memcached.
+name|s:7:"zhaojun";city|s:7:"beijing"
+ stats cachedump 1 0
+ 
+crypt()用来加密用户密码。/etc/shadow.
+每一组进程有一个组长进程，组长进程的pid等于pgid.
+
+setsid()创建新会话。必须由不是进程组组长的进程调用。否则出错。
+即先fork(), 父进程退出， 子程pid与pgid不一致，不是进程组长。调用setsid()
+后进程成为1 会话首进程，2 调用进程成为新进程组的组长（组ID为新进程的ID）。3该进程没有控制终端。
+会话首进程的进程ID又叫会话ID.
+
+创建守护进程的步骤：双fork()
+1 /*
+	 * Clear file creation mask.
+	 */
+	umask(0);
+2 Get maximum number of file descriptors.
+	以便后面将所有fd关闭for() close()
+	getrlimit(RLIMIT_NOFILE,&rl)
+3 Become a session leader to lose controlling TTY.
+	fork() :父进程退出。
+	子进程继续调用setsid()创建会话：run a program in a new session
+4  Ensure future opens won't allocate controlling TTYs.
+	再次fork():父进程退出。
+	子进程chdir("/")切换到根目录 。避免 umount问题。
+5 关闭所有文件描述符。 Attach file descriptors 0, 1, and 2 to /dev/null.
+	fd0 = open("/dev/null", O_RDWR)
+	fd1 = dup(fd0);
+	fd2 = dup(fd0);
+6 Initialize the log file.程序中需要记录日志，直接用syslog函数通过域数据报socket文件（/dev/log)发送给syslogd进程。/var/log/messages文件中，但可于/etc/rsyslog.conf配置。
+	openlog(cmd, LOG_CONS, LOG_DAEMON);
+	syslogd提供的服务是将一条错误消息写入日志文件，可以是网络中。单向通信。
+	
+服务器：经常通过子进程提供服务 fork () + exec()。为避免子进程中获得父进程中打开的某个fd .
+int set_cloexec(int fd){
+	int val;
+	if (( val = fcntl(fd, F_GETFD, 0)) < 0)
+		return -1;
+	val |= FD_CLOEXEC;
+	return (fcntl(fd, F_SETFD, val));
+}
+	
+守护进程的信号处理：
+/*
+	调用进程block所有信号，再创建单独的线程专门处理指定信号.
+	另一种方法 ，单进程中直接绑定信号处理函数。
+*/
+	sigfillset(&mask);
+	if ((err = pthread_sigmask(SIG_BLOCK, &mask, NULL)) != 0)
+		err_exit(err, "SIG_BLOCK error");
+	
+err = pthread_create(&tid, NULL, thr_fn, 0);
+	if (err != 0)
+		err_exit(err, "can't create thread");
+		
+void *
+thr_fn(void *arg)
+{
+	int err, signo;
+
+	for (;;) {
+		/*线程阻塞直到有mask(通常为所有信号
+			sigset_t mask;
+			sigfillset(&mask);
+			
+		)中信号出现，并将收到的信号码存入signo*/
+		err = sigwait(&mask, &signo);
+		if (err != 0) {
+			syslog(LOG_ERR, "sigwait failed");
+			exit(1);
+		}
+
+		switch (signo) {
+		case SIGHUP:
+			syslog(LOG_INFO, "Re-reading configuration file");
+			reread();
+			break;
+
+		case SIGTERM:
+			syslog(LOG_INFO, "got SIGTERM; exiting");
+			exit(0);
+
+		default:
+			syslog(LOG_INFO, "unexpected signal %d\n", signo);
+		}
+	}
+	return(0);
+}
+
+/* IGNORE某个信号*/
+	sa.sa_handler = SIG_IGN;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	if (sigaction(SIGHUP, &sa, NULL) < 0)
+		err_quit("%s: can't ignore SIGHUP", cmd);
+/* RESTORE某个信号*/
+	sa.sa_handler = SIG_DFL;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	if (sigaction(SIGHUP, &sa, NULL) < 0)
+		err_quit("%s: can't ignore SIGHUP", cmd);
+
+使用文件锁，锁住标志文件，确保只有一个守护进程的实例运行。
+	fd = open(LOCKFILE, O_RDWR|O_CREAT, LOCKMODE);
+	if (fd < 0) {
+		syslog(LOG_ERR, "can't open %s: %s", LOCKFILE, strerror(errno));
+		exit(1);
+	}
+	if (lockfile(fd) < 0) {
+		if (errno == EACCES || errno == EAGAIN) {
+			close(fd);
+			return(1);
+		}
+		syslog(LOG_ERR, "can't lock %s: %s", LOCKFILE, strerror(errno));
+		exit(1);
+	}
+	ftruncate(fd, 0); /*截断文件,并写入进程号*/
+	sprintf(buf, "%ld", (long)getpid());
+	write(fd, buf, strlen(buf)+1);
+
+/*给文件加写锁*/	
+int lockfile(int fd){
+	struct flock f;
+	f.l_type = F_WRLCK;
+	f.l_start = 0;
+	f.l_whence = SEEK_SET;
+	f.l_len = 0;
+	return(fcntl(fd, F_SETLK, &fl));
+}	
+
+/*单独的线程专门处理指定信号*/
+	/*
+	 * Handle signals of interest.
+	 */
+	sa.sa_handler = sigterm;
+	sigemptyset(&sa.sa_mask);
+	sigaddset(&sa.sa_mask, SIGHUP);
+	sa.sa_flags = 0;
+	if (sigaction(SIGTERM, &sa, NULL) < 0) {
+		syslog(LOG_ERR, "can't catch SIGTERM: %s", strerror(errno));
+		exit(1);
+	}
+	sa.sa_handler = sighup;
+	sigemptyset(&sa.sa_mask);
+	sigaddset(&sa.sa_mask, SIGTERM);
+	sa.sa_flags = 0;
+	if (sigaction(SIGHUP, &sa, NULL) < 0) {
+		syslog(LOG_ERR, "can't catch SIGHUP: %s", strerror(errno));
+		exit(1);
+	}
+
+./mongod --dbpath=/home/m17 --logpath=/home/mlog/m17.log --fork --smallfiles
+3.141592653589793238462643383279502884197169399375105820974944592307816406
+3.1415926535897932384626433832795028841971693993751
+3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117068
+
+性能调优工具 ：
+systemtap
+oprofile
+blktrace
+tsung
+gdb
+lmbench
+erlang平台上的：
+lcnt
+dialyzer
+内置的自省机制
+cerl
+
+ed2k://|file|%E9%99%88%E6%85%A7%E5%A8%B4.-.[%E6%B4%BB%E5%87%BA%E7%94%9F%E5%91%BD.II.%E6%BC%94%E5%94%B1%E4%BC%9A.Disc1].%E6%BC%94%E5%94%B1%E4%BC%9A.(DVDRip)(ED2000.COM).avi|729647104|c19575e71fae83b03dee274dc7058a34|h=HPCD4UH3QLY6SJ444WHOKL2M7JCOVXAV|/
+
+windows动态库搜索路径 ：
+应用程序所在目录→当前目录→Windows SYSTEM目录→Windows目录→PATH环境变量指定的路径
+
+编译boost库：
+bootstrap.bat
+bjam toolset=msvc-12.0 variant=debug,release threading=multi link=static
+C:\Perl64\site\bin;C:\Perl64\bin;C:\ProgramData\Oracle\Java\javapath;D:\Go\bin;D:\app\developer\product\11.2.0\dbhome_1\bin;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files (x86)\Intel\OpenCL SDK\2.0\bin\x86;C:\Program Files (x86)\Intel\OpenCL SDK\2.0\bin\x64;C:\Program Files\TortoiseSVN\bin;C:\MinGW\bin;C:\MinGW\msys\1.0\bin;C:\cygwin64\bin;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;D:\2cpptools\mysql-connector-c++-noinstall-1.1.7-winx64\lib;D:\2cpptools\mysql-connector-c-6.1.6-winx64\lib;
+C:\Perl64\site\bin;C:\Perl64\bin;C:\ProgramData\Oracle\Java\javapath;D:\Go\bin;D:\app\developer\product\11.2.0\dbhome_1\bin;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files (x86)\Intel\OpenCL SDK\2.0\bin\x86;C:\Program Files (x86)\Intel\OpenCL SDK\2.0\bin\x64;C:\Program Files\TortoiseSVN\bin;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;
+
+[developer@localhost ~]$ openssl dgst -sign .ssh/id_rsa -out rsasign.bin openssl-1.0.2g.tar.gz     
+[developer@localhost ~]$ ls -l rsasign.bin
+-rw-rw-r--. 1 developer developer 128 Apr 16 10:23 rsasign.bin
+[developer@localhost ~]$ openssl dgst -prverify .ssh/id_rsa.pub -signature rsasign.bin openssl-1.0.2g.tar.gz 
+unable to load key file
+139784124049312:error:0906D06C:PEM routines:PEM_read_bio:no start line:pem_lib.c:703:Expecting: ANY PRIVATE KEY
+[developer@localhost ~]$ openssl dgst -prverify .ssh/id_rsa -signature rsasign.bin openssl-1.0.2g.tar.gz     
+Verified OK
+
+openssl rc5 -in plaintext.doc -out ciphertext.bin -S C62CB1D49F158ADC -iv E9EDACA1BD7090C6 -K 89D4B1678D604FAA3DBFFD030A314B29 
+
+echo -n "0123456789012345" | od -A n -t x1 | sed 's/ //g'
+
+私钥产生ssh公钥命令
+ssh-keygen -y -f private_key.pem > public_key.pub
+如果你觉得server.key的保护密码太麻烦想去掉的话： 
+
+openssl rsa -in server.key -out server.key.unsecure
+
+如何在實務上使用 TDD 來開發 - twMVC#12：
+https://www.youtube.com/watch?v=dZ_uZmoO2Aw
+oo 3大特性： 封闭，继承，多态。
+设计模式的3原则：针对接口编程，而不是针对实现编程；优先使用组合而不是继承；将变化部份与不变部分隔离开来。
+使用重构得到模式。
+
+軟體品質日
+自由軟體鑄造場
+https://www.youtube.com/watch?v=PScvkvY2KeQ&index=21&list=PLy-4BQDqpthAz17I1fRQQEidnDdF2nm1x
+bash: command line: 
+ctrl + w : delete a word
+ctrl + u  : delete whole line
+vim : ctrl + z , fg
+ctrl + r: reverse-i-search
+vi删除末尾空白符： :%s/\s\+//g
+
+Submodule 'bundle/Align' (git://github.com/vim-scripts/Align.git) registered for path 'bundle/Align'
+Submodule 'bundle/ack.vim' (git://github.com/mileszs/ack.vim.git) registered for path 'bundle/ack.vim'
+Submodule 'bundle/cocoa' (git://github.com/msanders/cocoa.vim.git) registered for path 'bundle/cocoa'
+Submodule 'bundle/ctrlp' (git://github.com/kien/ctrlp.vim.git) registered for path 'bundle/ctrlp'
+Submodule 'bundle/delimitMate' (git://github.com/Raimondi/delimitMate.git) registered for path 'bundle/delimitMate'
+Submodule 'bundle/matchit' (git://github.com/vim-scripts/matchit.zip.git) registered for path 'bundle/matchit'
+Submodule 'bundle/nerdtree' (git://github.com/scrooloose/nerdtree.git) registered for path 'bundle/nerdtree'
+Submodule 'bundle/nerdtreecommenter' (git://github.com/scrooloose/nerdcommenter.git) registered for path 'bundle/nerdtreecommenter'
+Submodule 'bundle/nginx' (git://github.com/vim-scripts/nginx.vim.git) registered for path 'bundle/nginx'
+Submodule 'bundle/scss-syntax' (git://github.com/cakebaker/scss-syntax.vim.git) registered for path 'bundle/scss-syntax'
+Submodule 'bundle/supertab' (git://github.com/ervandew/supertab.git) registered for path 'bundle/supertab'
+Submodule 'bundle/taglist' (git://github.com/vim-scripts/taglist.vim.git) registered for path 'bundle/taglist'
+Submodule 'bundle/vim-addon-mw-utils' (https://github.com/MarcWeber/vim-addon-mw-utils.git) registered for path 'bundle/vim-addon-mw-utils'
+Submodule 'bundle/vim-airline' (git@github.com:bling/vim-airline.git) registered for path 'bundle/vim-airline'
+Submodule 'bundle/vim-coffee-script' (git://github.com/kchmck/vim-coffee-script.git) registered for path 'bundle/vim-coffee-script'
+Submodule 'bundle/vim-css-color' (git://github.com/ap/vim-css-color.git) registered for path 'bundle/vim-css-color'
+Submodule 'bundle/vim-fugitive' (git://github.com/tpope/vim-fugitive.git) registered for path 'bundle/vim-fugitive'
+Submodule 'bundle/vim-haml' (git://github.com/tpope/vim-haml.git) registered for path 'bundle/vim-haml'
+Submodule 'bundle/vim-indent-object' (git://github.com/michaeljsmith/vim-indent-object.git) registered for path 'bundle/vim-indent-object'
+Submodule 'bundle/vim-javascript' (git://github.com/pangloss/vim-javascript.git) registered for path 'bundle/vim-javascript'
+Submodule 'bundle/vim-markdown' (git://github.com/plasticboy/vim-markdown.git) registered for path 'bundle/vim-markdown'
+Submodule 'bundle/vim-multiple-cursors' (git://github.com/terryma/vim-multiple-cursors.git) registered for path 'bundle/vim-multiple-cursors'
+Submodule 'bundle/vim-nerdtree-tabs' (git://github.com/jistr/vim-nerdtree-tabs.git) registered for path 'bundle/vim-nerdtree-tabs'
+Submodule 'bundle/vim-octopress' (git://github.com/tangledhelix/vim-octopress.git) registered for path 'bundle/vim-octopress'
+Submodule 'bundle/vim-pathogen' (git://github.com/tpope/vim-pathogen.git) registered for path 'bundle/vim-pathogen'
+Submodule 'bundle/vim-ragtag' (git://github.com/tpope/vim-ragtag.git) registered for path 'bundle/vim-ragtag'
+Submodule 'bundle/vim-rails' (git://github.com/tpope/vim-rails.git) registered for path 'bundle/vim-rails'
+Submodule 'bundle/vim-repeat' (git://github.com/tpope/vim-repeat.git) registered for path 'bundle/vim-repeat'
+Submodule 'bundle/vim-ruby' (git://github.com/vim-ruby/vim-ruby.git) registered for path 'bundle/vim-ruby'
+Submodule 'bundle/vim-snipmate' (git@github.com:garbas/vim-snipmate.git) registered for path 'bundle/vim-snipmate'
+Submodule 'bundle/vim-surround' (git://github.com/tpope/vim-surround.git) registered for path 'bundle/vim-surround'
+Submodule 'bundle/vim-swift' (git@github.com:toyamarinyon/vim-swift.git) registered for path 'bundle/vim-swift'
+Submodule 'bundle/vimwiki' (git://github.com/vim-scripts/vimwiki.git) registered for path 'bundle/vimwiki'
+
+iPhone Safari:
+
+Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1A543 Safari/419.3
+iPad Safari:
+
+Here's an example of a Chrome for iPhone User-Agent string:
+
+Mozilla/5.0 (iPhone; U; CPU iPhone OS 5_1_1 like Mac OS X; en) AppleWebKit/534.46.0 (KHTML, like Gecko) CriOS/19.0.1084.60 Mobile/9B206 Safari/7534.48.3
+For
+
+
+hd3000亮度
+cd /S*/L*/Ext*/AppleIntelSNBGraphicsFB.kext/C*/M*
+sudo cp AppleIntelSNBGraphicsFB AppleIntelSNBGraphicsFB.backup
+sudo perl -pi -e 's|\x10\x07\x00\x00\x10\x07|\x12\x13\x00\x00\x12\x13|g' AppleIntelSNBGraphicsFB
