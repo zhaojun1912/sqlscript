@@ -3,11 +3,7 @@ SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode,cs.spcode,
 dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
-<<<<<<< HEAD
-dn.dn_num = '51300017'
-=======
-dn.dn_num = '56407060'
->>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9
+dn.dn_num = '51096556'
 --ca.custcode = '407060'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
@@ -16,7 +12,6 @@ AND cs.co_id = coa.co_id
 AND coa.customer_id = ca.customer_id     --ORDER BY csactivated
 AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
 
-<<<<<<< HEAD
 SELECT * FROM ptcapp_usage_hist WHERE co_id =5805013  AND customer_id =  5638718 AND date_billed = To_Date('20161201', 'yyyymmdd');
 SELECT * FROM ptcbill_co_usage_summary WHERE co_id = 5805013;
 
@@ -39,7 +34,7 @@ SELECT plcode, Sum(rounded_volume/60) FROM rtx_040401 WHERE r_p_customer_id = 63
 SELECT 11224882 - 1024*1024*6 FROM dual;
 SELECT * FROM rtx_070101 WHERE r_p_customer_id = 6238481 AND r_p_contract_id  =6432204  AND sncode = ;
 SELECT Sum(rated_flat_amount)  FROM rtx_050401 WHERE r_p_customer_id = 4510973 AND r_p_contract_id  =4630949  AND sncode = 119 ;
-=======
+
 SELECT * FROM customer_all ca WHERE custcode  = '1.5607861';
 SELECT * FROM ptcbill_main_sub_lnk WHERE sub_customer_id  =   6350025;
 
@@ -48,7 +43,6 @@ SELECT * FROM rtx_050301 WHERE r_p_customer_id = 5803836 AND r_p_contract_id  =5
 SELECT plcode, Sum(rounded_volume/60) FROM rtx_040401 WHERE r_p_customer_id = 6350025 AND r_p_contract_id  =6548123  AND rated_flat_amount <>0 GROUP BY plcode ;
 SELECT 11224882 - 1024*1024*6 FROM dual;
 SELECT * FROM rtx_070101 WHERE r_p_customer_id = 6238481 AND r_p_contract_id  =6432204  AND sncode = ;
->>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9
 
 
 --查找所有子账号的imei
@@ -92,13 +86,8 @@ lnk.TM_GROUP_ID,
 Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id, a.msisdn, a.invoice_date, a.inter_voice_usage +a.intra_voice_usage, a.china_usage, Ceil(a.GPRS_USAGE/1024),Ceil(a.CHINA_GPRS_USAGE/1024)
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-<<<<<<< HEAD
-WHERE a.custcode IN ('1.5705209')
-AND a.invoice_date = To_Date('20170201','yyyymmdd')
-=======
 WHERE a.custcode IN ('1.6375924')
 AND a.invoice_date = To_Date('20170101','yyyymmdd')
->>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
@@ -130,13 +119,17 @@ AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
 and cs.dn_id = dn.dn_id
 ORDER BY dn_num;
 
-<<<<<<< HEAD
+
 SELECT * FROM contr_volume_history WHERE co_id IN (6488826
 ) ;
 
-=======
->>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9
 SELECT *FROM rtx_040101 WHERE r_p_customer_id =  6293607 AND r_p_contract_id =  6488825 AND sncode = 119 AND ;
+SELECT plcode FROM mpdpltab WHERE country = 'Russia';
+
+SELECT *  FROM rtx_040401
+ WHERE r_p_customer_id =  5860160 AND r_p_contract_id =  6038992 AND sncode = 119 
+ AND  plcode IN (SELECT plcode FROM mpdpltab WHERE country = 'Russia') AND original_start_d_t >= To_Date('20170103', 'yyyymmdd')
+ ORDER BY original_start_d_t ;
 
 SELECT  rtx.r_p_customer_id, Sum(rounded_volume)/60/1024/1024 FROM  rtx_010401 rtx, ptcbill_main_sub_lnk l
 WHERE rtx.r_p_customer_id = l.sub_customer_id
@@ -226,13 +219,8 @@ lnk.TM_GROUP_ID,
 Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id, a.msisdn, a.invoice_date, a.FREE_GPRS, a.GPRS_USAGE,  a.EXTRA_GPRS_VOL,  a.FREE_CHINA_GPRS,  a.CHINA_GPRS_USAGE,  a.EXTRA_CHINA_GPRS_VOL, a.CHINA_LOCAL_GPRS_USAGE, a.EXTRA_CHINA_LOCAL_GPRS_VOL
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-<<<<<<< HEAD
 WHERE a.custcode IN ('1.3928440')
 AND a.invoice_date = To_Date('20170101','yyyymmdd')
-=======
-WHERE a.custcode IN ('1.5607861')
-AND a.invoice_date = To_Date('20170106','yyyymmdd')
->>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
@@ -240,7 +228,7 @@ AND ca.tmcode = tm.tmcode
 AND tm.tmcode = lnk.tmcode
 ORDER BY 4,3
 ;
-<<<<<<< HEAD
+
 SELECT * FROM ptcapp_usage_hist WHERE co_id IN (6488826,
 6488827,
 6488829,
@@ -249,9 +237,7 @@ SELECT * FROM ptcapp_usage_hist WHERE co_id IN (6488826,
 6526465,
 6488828
 ) AND date_billed = To_Date('20170101', 'yyyymmdd');
-=======
 
->>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9
 
 SELECT * FROM customer_all WHERE custcode LIKE '2.11%';
 SELECT * FROM customer_all WHERE custcode = '1.4815717';
@@ -626,11 +612,8 @@ SELECT * FROM ptcbill_co_usage_summary WHERE invoice_date = To_Date('20160120', 
 
 SELECT * FROM mpusntab WHERE des LIKE '%Bar%' ORDER BY sncode;
 SELECT * FROM  mpusntab WHERE sncode = 17;
-<<<<<<< HEAD
-SELECT * FROM customer_all WHERE custcode = '1.6335476';
-=======
+
 SELECT * FROM customer_all WHERE custcode = '1.5988245';
->>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9
 SELECT * FROM  ptcbill_main_sub_lnk WHERE main_customer_id = 5923768;
 SELECT dn.dn_num, sn.des, cs.cs_stat_chng  FROM ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, contract_all co,directory_number dn, mpusntab sn
  WHERE main_customer_id = ca.customer_id
