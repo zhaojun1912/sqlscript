@@ -126,10 +126,18 @@ SELECT * FROM contr_volume_history WHERE co_id IN (6488826
 SELECT *FROM rtx_040101 WHERE r_p_customer_id =  6293607 AND r_p_contract_id =  6488825 AND sncode = 119 AND ;
 SELECT plcode FROM mpdpltab WHERE country = 'Russia';
 
+SELECT distinct trunc(original_start_d_t)   FROM rtx_040401
+ WHERE r_p_customer_id =  5860160 AND r_p_contract_id =  6038992 AND sncode = 119
+ AND  plcode IN (SELECT plcode FROM mpdpltab WHERE country = 'Russia') ;
 SELECT *  FROM rtx_040401
- WHERE r_p_customer_id =  5860160 AND r_p_contract_id =  6038992 AND sncode = 119 
- AND  plcode IN (SELECT plcode FROM mpdpltab WHERE country = 'Russia') AND original_start_d_t >= To_Date('20170103', 'yyyymmdd')
- ORDER BY original_start_d_t ;
+ WHERE r_p_customer_id =  5860160 AND r_p_contract_id =  6038992 AND sncode = 119
+ AND  plcode = 157 AND original_start_d_t >= To_Date('20170104', 'yyyymmdd');
+
+ SELECT * FROM mpusntab WHERE des LIKE '%Corp%';
+SELECT *  FROM rtx_040401
+ WHERE r_p_customer_id =  5860160 AND r_p_contract_id =  6038992 AND sncode = 525 ORDER BY start_d_t;
+
+
 
 SELECT  rtx.r_p_customer_id, Sum(rounded_volume)/60/1024/1024 FROM  rtx_010401 rtx, ptcbill_main_sub_lnk l
 WHERE rtx.r_p_customer_id = l.sub_customer_id

@@ -611,8 +611,6 @@ jundev@debian:~/sqlscripts$ cat ~/pythonstartup.py
 import readline
 readline.parse_and_bind('tab: complete')
 readline.parse_and_bind('set editing-mode vi')
-<<<<<<< HEAD
-=======
 
 sb1: 10.1.12.131 boss/boss78
 svn: 10.1.12.50 boss/boss78
@@ -640,4 +638,9 @@ jundev@debian:~/programming/goprogramming/go/bin$ cat ~/.gitconfig
     unstage=reset HEAD
     last=log -1
     lg=log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
->>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9
+
+Lantern 的配置参数
+
+　　主界面的右下角有一个“配置按钮”，点击之后会弹出“Lantern 的配置界面”——这个界面同样很简单，目前只有3个复选框（选项）。
+　　其中一个选项是“Proxy all traffic”，俺稍微说一下：
+　　如果你勾选了这个选项，那么所有的 HTTP 请求都会走 Lantern 的翻墙通道；反之（没有勾选），那么只有那些“被墙的网站”才会走 Lantern 的线路。Lantern 内置了一个“被屏蔽的网站列表”，以此来判断那些是“被墙的”。
