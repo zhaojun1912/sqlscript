@@ -3,8 +3,8 @@ SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode,cs.spcode,
 dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
-dn.dn_num = '51096556'
---ca.custcode = '407060'
+--dn.dn_num = '51096556'
+ca.custcode = '1.6051560'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
 AND dn.dn_id = cs.dn_id
@@ -17,7 +17,7 @@ SELECT * FROM ptcbill_co_usage_summary WHERE co_id = 5805013;
 
 SELECT * FROM contr_volume_history WHERE customer_id = 6248151 ORDER BY ent_date;
 
-SELECT * FROM customer_all ca WHERE custcode  = '1.3928440';
+SELECT * FROM customer_all ca WHERE custcode  = '1.6051560';
 SELECT * FROM ptcbill_main_sub_lnk WHERE sub_customer_id  =   5638718;
 SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 3843789 AND sub_co_id IN (6488826,
 6488827,
@@ -118,6 +118,20 @@ AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
 --AND cs.dn_id IS NOT NULL
 and cs.dn_id = dn.dn_id
 ORDER BY dn_num;
+
+--查询主账号下所有子账号的流量限制
+SELECT dn.dn_num, volume/1024 "volume(GB)", l.sub_customer_id,  cvh.co_id /*,  seq_no, cvh.ent_date, cs.tmcode, cs.spcode, cs.sncode */ FROM contr_volume_history cvh,
+ptcbill_main_sub_lnk l ,contr_services cs, directory_number dn , customer_all ca
+WHERE l.sub_co_id = cvh.co_id
+AND l.main_customer_id = ca.customer_id
+AND ca.custcode = '1.6051560'
+AND seq_no = (SELECT Max(seq_no) FROM contr_volume_history hh WHERE hh.co_id = cvh.co_id)
+AND  cs.co_id = l.sub_co_id
+AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
+--AND cs.dn_id IS NOT NULL
+and cs.dn_id = dn.dn_id
+ORDER BY dn_num;
+
 
 
 SELECT * FROM contr_volume_history WHERE co_id IN (6488826
@@ -227,8 +241,8 @@ lnk.TM_GROUP_ID,
 Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id, a.msisdn, a.invoice_date, a.FREE_GPRS, a.GPRS_USAGE,  a.EXTRA_GPRS_VOL,  a.FREE_CHINA_GPRS,  a.CHINA_GPRS_USAGE,  a.EXTRA_CHINA_GPRS_VOL, a.CHINA_LOCAL_GPRS_USAGE, a.EXTRA_CHINA_LOCAL_GPRS_VOL
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-WHERE a.custcode IN ('1.3928440')
-AND a.invoice_date = To_Date('20170101','yyyymmdd')
+WHERE a.custcode IN ('1.6051560')
+AND a.invoice_date = To_Date('20170216','yyyymmdd')
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
@@ -659,3 +673,6 @@ WITH t AS
 
 SELECT * FROM contr_services WHERE co_id = 6432204 AND sncode IN ( 24,31,175,423);
 SELECT *FROM mpusntab;
+
+--sim (serial no.)
+select * from CONTR_DEVICES;
