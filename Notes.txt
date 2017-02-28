@@ -653,3 +653,5 @@ https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
 启动Chrome用这个命令行： chrome.exe --proxy-pac-url="file://E:/foo/bar.pac"
 
 地址栏打开 chrome://net-internals/#events
+
+oa: ps0010/zhaojun_*2
