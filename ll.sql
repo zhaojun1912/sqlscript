@@ -4,7 +4,7 @@ dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_status,cs.cs_stat_chng
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
 --dn.dn_num = '51096556'
-ca.custcode = '1.6051560'
+ca.custcode = '1.6338176'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
 AND dn.dn_id = cs.dn_id
@@ -17,7 +17,7 @@ SELECT * FROM ptcbill_co_usage_summary WHERE co_id = 5805013;
 
 SELECT * FROM contr_volume_history WHERE customer_id = 6248151 ORDER BY ent_date;
 
-SELECT * FROM customer_all ca WHERE custcode  = '1.6051560';
+SELECT * FROM customer_all ca WHERE custcode  = '1.6235072';
 SELECT * FROM ptcbill_main_sub_lnk WHERE sub_customer_id  =   5638718;
 SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 3843789 AND sub_co_id IN (6488826,
 6488827,
@@ -372,8 +372,8 @@ SELECT * FROM customer_all WHERE tmcode = 727;
 SELECT pcd.cdesc, ids.*FROM ptcbill_invoice_detail_cosum ids,
 ptcbpp_cfg_description pcd
 WHERE
-ids.des = pcd.source and custcode = '1.6204460'
-AND msisdn = 56467561 ORDER BY seq;
+ids.des = pcd.source and custcode = '1.5991896'
+AND msisdn = 98261820 ORDER BY seq;
 SELECT * FROM ptcbill_text_config ;
 SELECT * FROM ptcbpp_cfg_description WHERE ROWNUM <= 1;
 select * from v$parameter WHERE name LIKE 'nls%';
@@ -393,7 +393,7 @@ SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' and tag IN
 SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' AND msisdn = 51084508;
 
 SELECT * FROM ptcbill_invoice_header WHERE custcode =    '1.6204460';
-SELECT *FROM ptcbill_invoice_detail_sum WHERE custcode = '1.6204460' ORDER BY seq;
+SELECT *FROM ptcbill_invoice_detail_sum WHERE custcode = '1.5991896' ORDER BY seq;
 SELECT *FROM ptcbill_text_config ;
 SELECT * FROM 	ptcbpp_cfg_rateplan WHERE tmcode = 653;
 SELECT * FROM ptcapp_bill_country pbc, MPDPLTAB dpl
@@ -676,3 +676,94 @@ SELECT *FROM mpusntab;
 
 --sim (serial no.)
 select * from CONTR_DEVICES;
+
+SELECT oh.customer_id, oh.ohrefdate, ot.otname, ot.otmerch, CASE when ot.otname LIKE '%.R.R.%' THEN otmerch
+                                                                 when ot.otname LIKE '%.r.r.%' THEN otmerch
+                                                                 ELSE 0
+                                                            END roam_charge,
+                                                            CASE when ot.otname LIKE '%.U.I.%' THEN otmerch
+                                                                 ELSE 0
+                                                            END idd_charge
+FROM orderhdr_all oh, ordertrailer ot
+WHERE oh.customer_id = 6042274
+AND   oh.ohxact = ot.otxact
+and   (ot.otname LIKE '%.R.%' OR ot.otname LIKE '%.r.%' OR ot.otname LIKE '%U.I.F%')
+AND   oh.ohrefdate = To_Date('20161226','YYYYMMDD')  ;
+
+SELECT oh.customer_id, oh.ohrefdate, Sum(CASE when ot.otname LIKE '%.R.R.%' THEN otmerch
+                                              when ot.otname LIKE '%.r.r.%' THEN otmerch
+                                              ELSE 0
+                                              END )roam_charge,
+                                     Sum(CASE when ot.otname LIKE '%.U.I.%' THEN otmerch
+                                         ELSE 0
+                                         END) idd_charge
+FROM orderhdr_all oh, ordertrailer ot
+WHERE oh.customer_id = 6042274
+AND   oh.ohxact = ot.otxact
+and   (ot.otname LIKE '%.R.%' OR ot.otname LIKE '%.r.%' OR ot.otname LIKE '%U.I.F%')
+AND   oh.ohinvtype = 5
+GROUP BY oh.customer_id, oh.ohrefdate
+ORDER BY oh.ohrefdate
+;
+SELECT * FROM orderhdr_all oh, ordertrailer ot
+WHERE oh.customer_id =  5870290
+AND oh.ohxact = ot.otxact
+AND oh.ohinvtype = 5
+AND oh.ohentdate = To_Date('20160726', 'yyyymmdd')
+--AND  (ot.otname LIKE '%.R.%' OR ot.otname LIKE '%.r.%' OR ot.otname LIKE '%U.I.F%')
+
+;
+
+  select a.*
+  from ptcbpp_inv_vipp_detail a, ptcbpp_inv_vipp_header b
+  where b.customer_code = 1.5935054
+  and b.invoice_date =  To_Date('20161226', 'yyyymmdd')
+  and a.custcode = b.customer_code
+  and a.invoice_date = b.invoice_date
+  order by seq_no;
+
+SELECT * FROM orderhdr_all oh, ordertrailer ot
+WHERE oh.customer_id =  6003053
+AND oh.ohxact = ot.otxact
+AND oh.ohinvtype = 5
+AND oh.ohentdate = To_Date('20170101', 'yyyymmdd')
+--AND  (ot.otname LIKE '%.R.%' OR ot.otname LIKE '%.r.%' OR ot.otname LIKE '%U.I.F%')
+
+;
+
+  select a.*
+  from ptcbpp_inv_vipp_detail a, ptcbpp_inv_vipp_header b
+  where b.customer_code = 1.6066926
+  and b.invoice_date =  To_Date('20170101', 'yyyymmdd')
+  and a.custcode = b.customer_code
+  and a.invoice_date = b.invoice_date
+  order by seq_no;
+
+SELECT ca.custcode, oh.ohrefdate, Sum(ot.otmerch) monthly_charge,
+                                     Sum(CASE when ot.otname LIKE '%.U.I.%' THEN otmerch
+                                         ELSE 0
+                                         END) idd_charge ,
+
+                                     Sum(CASE when ot.otname LIKE '%.R.R.%' THEN otmerch
+                                              when ot.otname LIKE '%.r.r.%' THEN otmerch
+                                              ELSE 0
+                                              END )roam_charge,
+                                     Sum(CASE when ot.otname LIKE '%.%.%.119%' THEN otmerch
+                                              ELSE 0
+                                              END )data_charge,
+                                     Sum(CASE when ot.otname LIKE '%119.U.R.R.%' THEN otmerch
+                                              when ot.otname LIKE '%119.U.r.r.%' THEN otmerch
+                                              ELSE 0
+                                              END )roam_data_charge
+FROM orderhdr_all oh, ordertrailer ot, customer_all ca
+WHERE oh.customer_id = ca.customer_id
+AND    ca.custcode = '1.6235072'
+AND   oh.ohxact = ot.otxact
+--and   (ot.otname LIKE '%.R.%' OR ot.otname LIKE '%.r.%' OR ot.otname LIKE '%U.I.F%')
+AND   oh.ohinvtype = 5
+AND oh.ohrefdate >= To_Date('20160101', 'yyyymmdd')
+AND oh.ohrefdate  <= To_Date('20161231', 'yyyymmdd')
+
+GROUP BY oh.customer_id, oh.ohrefdate, ca.custcode
+ORDER BY oh.ohrefdate
+;
