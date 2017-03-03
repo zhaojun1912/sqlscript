@@ -655,3 +655,4 @@ https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
 地址栏打开 chrome://net-internals/#events
 
 oa: ps0010/zhaojun_*2
+export PS1="\u@\h \w> "
