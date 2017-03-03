@@ -45,7 +45,7 @@ SELECT 11224882 - 1024*1024*6 FROM dual;
 SELECT * FROM rtx_070101 WHERE r_p_customer_id = 6238481 AND r_p_contract_id  =6432204  AND sncode = ;
 
 
---²éÕÒËùÓĞ×ÓÕËºÅµÄimei
+--æŸ¥æ‰¾æ‰€æœ‰å­è´¦å·çš„imei
 SELECT l.sub_co_id ,dn.dn_num HKG_MSISDN, mv.imei, cs.cs_sparam1 CHN_MSISDN, l.sub_customer_id
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  directory_number dn, DW_CONTRACT_IMEI_MVIEW mv, DW_HANDSET_MODEL
 hd
@@ -64,7 +64,7 @@ ORDER BY hkg_msisdn
 
 SELECT * FROM contr_services WHERE co_id = 5979591;
 
---²éÕÒ´óÂ½¸±ºÅ
+--æŸ¥æ‰¾å¤§é™†å‰¯å·
 SELECT l.sub_co_id ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN, l.sub_customer_id
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs, contr_services cs1, directory_number dn
 WHERE custcode = '1.5483165'
@@ -78,7 +78,7 @@ AND cs.cs_Seqno=cs1.cs_seqno
 AND cs1.dn_id = dn.dn_id     ;
 
 
---²éÑ¯·ÖÖÓÁ¿¼°Á÷Á¿Ê¹ÓÃÃ÷Ï¸£¨Ã¿ºÅÂëÃ¿ÔÂÒ»ÌõÊı¾İ£© £¬ Ã¿ÔÂ»ã×Ü¡£
+--æŸ¥è¯¢åˆ†é’Ÿé‡åŠæµé‡ä½¿ç”¨æ˜ç»†ï¼ˆæ¯å·ç æ¯æœˆä¸€æ¡æ•°æ®ï¼‰ ï¼Œ æ¯æœˆæ±‡æ€»ã€‚
 SELECT
 tm.tmcode,
 tm.des,
@@ -107,7 +107,7 @@ SELECT *FROM ptcbill_sub_psh_fu_cat  WHERE  main_customer_id =4308519 ;
 SELECT *FROM customer_all WHERE custcode = '1.4392172';  --6333805
 SELECT * FROM mputmtab WHERE tmcode = 739;
 SELECT * FROM customer_all WHERE custcode = '1.6051560';
---²éÑ¯Ö÷ÕËºÅÏÂËùÓĞ×ÓÕËºÅµÄÁ÷Á¿ÏŞÖÆ
+--æŸ¥è¯¢ä¸»è´¦å·ä¸‹æ‰€æœ‰å­è´¦å·çš„æµé‡é™åˆ¶
 SELECT dn.dn_num, volume/1024 "volume(GB)", l.sub_customer_id,  cvh.co_id, seq_no, cvh.ent_date, cs.tmcode, cs.spcode, cs.sncode FROM contr_volume_history cvh,
 ptcbill_main_sub_lnk l ,contr_services cs, directory_number dn
 WHERE l.sub_co_id = cvh.co_id
@@ -119,7 +119,7 @@ AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
 and cs.dn_id = dn.dn_id
 ORDER BY dn_num;
 
---²éÑ¯Ö÷ÕËºÅÏÂËùÓĞ×ÓÕËºÅµÄÁ÷Á¿ÏŞÖÆ
+--æŸ¥è¯¢ä¸»è´¦å·ä¸‹æ‰€æœ‰å­è´¦å·çš„æµé‡é™åˆ¶
 SELECT dn.dn_num, volume/1024 "volume(GB)", l.sub_customer_id,  cvh.co_id /*,  seq_no, cvh.ent_date, cs.tmcode, cs.spcode, cs.sncode */ FROM contr_volume_history cvh,
 ptcbill_main_sub_lnk l ,contr_services cs, directory_number dn , customer_all ca
 WHERE l.sub_co_id = cvh.co_id
@@ -459,7 +459,7 @@ AND cs.co_id = l.sub_co_id
 AND cs.dn_id = dn.dn_Id
 GROUP BY trunc(original_start_d_t) ,rtx.r_p_customer_Id, rtx.r_p_contract_id,  dn.dn_num;
 
---Ïã¸Û
+--é¦™æ¸¯
 SELECT l.sub_customer_id,
 l.sub_co_id, dn.dn_num,
 Sum(CASE  rtx_type  when 'A' THEN  rounded_volume/60 ELSE 0 END)
@@ -477,7 +477,7 @@ AND cs.co_id = l.sub_co_id
 AND cs.dn_id = dn.dn_Id
 AND Trunc(rtx.original_start_d_t) = To_Date('20161026', 'yyyymmdd')
 GROUP BY l.sub_customer_id, l.sub_co_id,  dn.dn_num;
---´óÂ½
+--å¤§é™†
 SELECT dn.dn_num, Sum(CASE  rtx_type  when 'A' THEN  Nvl(rounded_volume,0)/60 ELSE 0 END)
 as HK_DATA, Sum(CASE   rtx_type when 'R' THEN  Nvl(rounded_volume,0)/60 ELSE 0 END) as CHINA_DATA, Sum(Nvl(rounded_volume,0)/60)
 FROM rtx_060201 rtx ,
@@ -643,7 +643,7 @@ AND l.sub_co_id = cs.co_id
 AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
 AND cs.sncode = 1;
 
-/*²éÑ¯¹«Ë¾ÕËºÅÏÂ¸÷ÏÖÉúĞ§ÓÃ»§ÊÇ·ñ¿ªÍ¨Ä³·şÎñ*/
+/*æŸ¥è¯¢å…¬å¸è´¦å·ä¸‹å„ç°ç”Ÿæ•ˆç”¨æˆ·æ˜¯å¦å¼€é€šæŸæœåŠ¡*/
 WITH t AS
 ( SELECT dn.dn_num, co.co_id FROM ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, contract_all co,directory_number dn, mpusntab sn
  WHERE main_customer_id = ca.customer_id
