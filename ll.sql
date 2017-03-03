@@ -632,26 +632,22 @@ SELECT * FROM ptcbill_co_usage_summary WHERE invoice_date = To_Date('20170116', 
 SELECT * FROM ptcbill_co_usage_summary WHERE invoice_date = To_Date('20160120', 'yyyymmdd') AND custcode = '2.11.52.64.100109';
 
 
-SELECT * FROM mpusntab WHERE des LIKE '%Bar%' ORDER BY sncode;
+SELECT * FROM mpusntab WHERE des LIKE '%Data Roaming Zone%' ORDER BY sncode;
 SELECT * FROM  mpusntab WHERE sncode = 17;
 
-SELECT * FROM customer_all WHERE custcode = '1.5988245';
-SELECT * FROM  ptcbill_main_sub_lnk WHERE main_customer_id = 5923768;
-SELECT dn.dn_num, sn.des, cs.cs_stat_chng  FROM ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, contract_all co,directory_number dn, mpusntab sn
- WHERE main_customer_id = ca.customer_id
- AND ca.custcode = '1.5988245'
- AND cs.co_id = co.co_id
- AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
- AND cs.sncode IN ( 423,85, 68,69,284,71)
- --AND cs.dn_id = dn.dn_id
- AND l.sub_co_id = cs.co_id
- AND cs.sncode = sn.sncode
-;
+
+SELECT * FROM customer_all WHERE custcode = '1.6231089';
+SELECT * FROM  ptcbill_main_sub_lnk l, contr_services cs
+WHERE main_customer_id = 6168377
+AND l.sub_co_id = cs.co_id
+AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
+AND cs.sncode = 1;
+
 
 WITH t AS
 ( SELECT dn.dn_num, co.co_id  FROM ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, contract_all co,directory_number dn, mpusntab sn
  WHERE main_customer_id = ca.customer_id
- AND ca.custcode = '1.5988245'
+ AND ca.custcode = '1.6231089'
  AND cs.co_id = co.co_id
  AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
  --AND cs.sncode = 1
@@ -660,15 +656,15 @@ WITH t AS
  AND l.sub_co_id = cs.co_id
  AND cs.sncode = sn.sncode
  )
-
- SELECT t.dn_num, t.co_id, sn.des, cs.cs_Stat_chng FROM t,  contr_services cs, mpusntab sn
+ SELECT t.dn_num, t.co_id,/* sn.des,*/ ' Data Roaming Zone (Corporate)' des, cs.cs_Stat_chng FROM t,  contr_services cs --, mpusntab sn
  WHERE
  --cs.sncode IN ( 24,31,175,423,85, 68,69,284,71)
  --cs.sncode IN ( 85, 68,69,284,71)
- cs.sncode IN ( 24,31,175,423)
- AND t.co_id = cs.co_id
- AND cs.sncode = sn.sncode
- AND  SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
+ cs.sncode(+) = 525
+ AND t.co_id = cs.co_id   (+)
+-- AND cs.sncode = sn.sncode
+ --AND  SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
+ ORDER BY  SubStr(cs.cs_Stat_chng,-1)
 ;
 
 SELECT * FROM contr_services WHERE co_id = 6432204 AND sncode IN ( 24,31,175,423);
