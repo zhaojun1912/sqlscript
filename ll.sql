@@ -643,9 +643,9 @@ AND l.sub_co_id = cs.co_id
 AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
 AND cs.sncode = 1;
 
-
+/*查询公司账号下各现生效用户是否开通某服务*/
 WITH t AS
-( SELECT dn.dn_num, co.co_id  FROM ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, contract_all co,directory_number dn, mpusntab sn
+( SELECT dn.dn_num, co.co_id FROM ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, contract_all co,directory_number dn, mpusntab sn
  WHERE main_customer_id = ca.customer_id
  AND ca.custcode = '1.6231089'
  AND cs.co_id = co.co_id
@@ -656,6 +656,7 @@ WITH t AS
  AND l.sub_co_id = cs.co_id
  AND cs.sncode = sn.sncode
  )
+
  SELECT t.dn_num, t.co_id,/* sn.des,*/ ' Data Roaming Zone (Corporate)' des, cs.cs_Stat_chng FROM t,  contr_services cs --, mpusntab sn
  WHERE
  --cs.sncode IN ( 24,31,175,423,85, 68,69,284,71)
