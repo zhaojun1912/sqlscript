@@ -1,4 +1,4 @@
-md5: Êä³ö¹Ì¶¨128-bits³¤¡£
+md5: è¾“å‡ºå›ºå®š128-bitsé•¿ã€‚
 0eb3be2db3a534c192be5570c6c42f59->3df324afc6fbf9b7ce6bf722f73b9240
 
 shared_ptr<ResultSet> res(conn->query(oss.str()));
@@ -7,12 +7,12 @@ res->next();
 if (!res->getInt32(0)) bret = true;
 
 	shared_ptr<ResultSet> res(conn->query(oss.str()));
-	// res Îªnull, ²éÑ¯Ê§°Ü
+	// res ä¸ºnull, æŸ¥è¯¢å¤±è´¥
 	if (!res) {
 		yk_api::log_error("select account fail, %s", oss.str().c_str());
 		return   error_code::e_mysql_error;
 	}
-	//¿Õ½á¹û¼¯
+	//ç©ºç»“æœé›†
 	if (!res->next()) {
 		yk_api::log_error("account not found, %s", oss.str().c_str());
 		return  error_code::e_account_nofound;
@@ -30,7 +30,7 @@ error_code::type accountHandler::get_account_info(int64_t uid, account_type::typ
 	//if lock
 	if (block) oss<<" for update";
 
-×Ö·û´®×ªÒå£º
+å­—ç¬¦ä¸²è½¬ä¹‰ï¼š
 conn->escapeString(info.user_name)
 
 	//query
@@ -56,7 +56,7 @@ conn->escapeString(info.user_name)
 		return	error_code::e_account_already_exsit;
 	}
 	//check if exsit
-	// true±íÊ¾Ã»ÓĞÖØ¸´deposit
+	// trueè¡¨ç¤ºæ²¡æœ‰é‡å¤deposit
 	bool bret = check_again(req.trans_id, req.account_id, 
 							req.amount, req.product_id, 
 							req.btype, operate_type::o_deposit,
@@ -69,7 +69,7 @@ conn->escapeString(info.user_name)
 	}
 	P2P_TIMEMARK("check_again");	
 	
-//¼ì²éÊÇ·ñÔÚ½øĞĞÖØ¸´³äÖµ £¬²éÓÃ»§ÕË»§Á÷Ë®±í£¬¸ÃÊÂÎñid.
+//æ£€æŸ¥æ˜¯å¦åœ¨è¿›è¡Œé‡å¤å……å€¼ ï¼ŒæŸ¥ç”¨æˆ·è´¦æˆ·æµæ°´è¡¨ï¼Œè¯¥äº‹åŠ¡id.
 /*check if happened*/
 bool accountHandler::check_again(int64_t transid, int64_t aid, int64_t amount, 
 									 int64_t product_id, bus_type::type btype, 
@@ -91,7 +91,7 @@ bool accountHandler::check_again(int64_t transid, int64_t aid, int64_t amount,
 	if (!res->getInt32(0)) bret = true;
 	return bret;
 }	
-//ÆÕÍ¨µÄÕı³£×´Ì¬µÄÕË»§²ÅÄÜ³äÖµ
+//æ™®é€šçš„æ­£å¸¸çŠ¶æ€çš„è´¦æˆ·æ‰èƒ½å……å€¼
 	if (info.user_id != req.user_id  ||
 		info.type != account_type::t_account_common ||
 		info.state != account_state::s_account_normal)
@@ -99,44 +99,44 @@ bool accountHandler::check_again(int64_t transid, int64_t aid, int64_t amount,
 	string desc;
 	if (req.__isset.desc) desc = conn->escapeString(req.desc);		
 	
-//¸¸ÕË»§¼´ÎªÖĞ¼äÕË»§
+//çˆ¶è´¦æˆ·å³ä¸ºä¸­é—´è´¦æˆ·
 
-ÕË»§³äÖµÁ÷³Ì£ºaccountHandler::account_deposit£º Ó¦¸ÃÊÇ³äÖµÏµÍ³»Øµ÷µÄ¡£¸Ä±äÆÕÍ¨ÕË»§ºÍÖĞ¼äÕË»§Óà¶î£¬
-²¢¼ÇÂ¼ÏàÓ¦µÄÁ÷Ë®±í¡£
+è´¦æˆ·å……å€¼æµç¨‹ï¼šaccountHandler::account_depositï¼š åº”è¯¥æ˜¯å……å€¼ç³»ç»Ÿå›è°ƒçš„ã€‚æ”¹å˜æ™®é€šè´¦æˆ·å’Œä¸­é—´è´¦æˆ·ä½™é¢ï¼Œ
+å¹¶è®°å½•ç›¸åº”çš„æµæ°´è¡¨ã€‚
 
-Ğ£ÑéÇëÇóĞÅÏ¢£¬¼ì²éÖØ×ö£¬-> 
+æ ¡éªŒè¯·æ±‚ä¿¡æ¯ï¼Œæ£€æŸ¥é‡åšï¼Œ-> 
 fetch flowid & parent_flowid; ->
-¿ªÊÂÎñ->
-»ñÈ¡ÓÃ»§ÕË»§->checkÕË»§×´Ì¬¼°ÀàĞÍ-> update account -> 
+å¼€äº‹åŠ¡->
+è·å–ç”¨æˆ·è´¦æˆ·->checkè´¦æˆ·çŠ¶æ€åŠç±»å‹-> update account -> 
 insert flow for the account ->
 get parent account of this common accout -> update parent account ->
 insert flow for the parent account ->
 close transaction
 
 | t_freeze_order_00 | CREATE TABLE `t_freeze_order_00` (
-  `F_order_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '¶³½áµ¥ºÅ£¬µ÷ÓÃÕß´«Èë',
-  `F_acc_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '¶³½áÕËºÅid',
-  `F_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT '¶³½áÓÃ»§id',
-  `F_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '¶³½á×Ü½ğ¶î',
-  `F_bus_type` int(11) NOT NULL DEFAULT '0' COMMENT 'ÒµÎñÀàĞÍ',
-  `F_unfrozen_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÒÑ½â¶³½ğ¶î',
-  `F_loan_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '±êµÄID',
-  `F_state` int(11) NOT NULL DEFAULT '0' COMMENT '×´Ì¬£º1-¶³½á£¬2-²¿·Ö½â¶³£¬3-ÒÑÈ«²¿½â¶³',
-  `F_trans_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'µ¼ÖÂ¸ÃÁ÷Ë®µÄÒµÎñ½»Ò×ID£¨ºÍF_idÒ»Ñù£©',
-  `F_remark` varchar(64) NOT NULL DEFAULT '' COMMENT 'ÃèÊö',
-  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '¸üĞÂÊ±¼ä',
-  `F_create_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '´´½¨Ê±¼ä',
+  `F_order_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å†»ç»“å•å·ï¼Œè°ƒç”¨è€…ä¼ å…¥',
+  `F_acc_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å†»ç»“è´¦å·id',
+  `F_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å†»ç»“ç”¨æˆ·id',
+  `F_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å†»ç»“æ€»é‡‘é¢',
+  `F_bus_type` int(11) NOT NULL DEFAULT '0' COMMENT 'ä¸šåŠ¡ç±»å‹',
+  `F_unfrozen_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å·²è§£å†»é‡‘é¢',
+  `F_loan_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'æ ‡çš„ID',
+  `F_state` int(11) NOT NULL DEFAULT '0' COMMENT 'çŠ¶æ€ï¼š1-å†»ç»“ï¼Œ2-éƒ¨åˆ†è§£å†»ï¼Œ3-å·²å…¨éƒ¨è§£å†»',
+  `F_trans_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å¯¼è‡´è¯¥æµæ°´çš„ä¸šåŠ¡äº¤æ˜“IDï¼ˆå’ŒF_idä¸€æ ·ï¼‰',
+  `F_remark` varchar(64) NOT NULL DEFAULT '' COMMENT 'æè¿°',
+  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'æ›´æ–°æ—¶é—´',
+  `F_create_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'åˆ›å»ºæ—¶é—´',
   PRIMARY KEY (`F_order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8  
 
-??? ÌáÏÖÎªºÎÒªÓĞ¶³½áµ¥ºÅ£¬ ²¢ÇÒÊ£Óà¶³½á½ğ¶î±ØĞë´óÓÚµÈÓÚÌáÏÖ½ğ¶î¡£
+??? æç°ä¸ºä½•è¦æœ‰å†»ç»“å•å·ï¼Œ å¹¶ä¸”å‰©ä½™å†»ç»“é‡‘é¢å¿…é¡»å¤§äºç­‰äºæç°é‡‘é¢ã€‚
 //check
 	int64_t amount = res->getInt64(0);
 	int64_t unfreeze_amount = res->getInt64(1);
 	if (amount - unfreeze_amount < req.amount) 
 
-ÕË»§ÌáÏÖ £ºÎªºÎaccount Ö»±ä¶¯ freezon amount ¶ø²»±ä¶¯ balance.
-???¶øparent account Ö»±ä¶¯Óà¶î¶ø²»±ä¶¯ freezon amount ?
+è´¦æˆ·æç° ï¼šä¸ºä½•account åªå˜åŠ¨ freezon amount è€Œä¸å˜åŠ¨ balance.
+???è€Œparent account åªå˜åŠ¨ä½™é¢è€Œä¸å˜åŠ¨ freezon amount ?
 check amount -> check transation redo -> get flowid & parent flowid
 -> begin transation -> 
 query t_free_order_ (get frozen amount  & unfreeze_amount by freezon state  = 0)->
@@ -153,13 +153,13 @@ update parent account set F_balance = F_balance-"<<req.amount ->
 insert parent flow ->
 close transaction
  
-ÕË»§×ªÕËÁ÷³Ì£º²»Í¬ÕË»§²ÅÄÜ×ªÕË£¬Í¬Ò»ÕË»§½ûÖ¹×ªÕË£¬ 
+è´¦æˆ·è½¬è´¦æµç¨‹ï¼šä¸åŒè´¦æˆ·æ‰èƒ½è½¬è´¦ï¼ŒåŒä¸€è´¦æˆ·ç¦æ­¢è½¬è´¦ï¼Œ 
 common account but no userid , ->
 check amount > 0 ->
 check account & update account balance ->
 check middle account & update balance 
 
-ÕË»§¶³½áÁ÷³Ì£º
+è´¦æˆ·å†»ç»“æµç¨‹ï¼š
 if (!ifmiddle)
 		oss<<"update acc.t_user_account_"<<id_to_string_3(req.account_id);
 	else
@@ -181,7 +181,7 @@ if (!ifmiddle)
 	oss<<0<<", "<<req.product_id<<", "<<req.trans_id<<", ";
 	oss<<"'freeze oder', '"<<current<<"', '"<<current<<"')";	
 
-	freezeid×÷Îªtrans_id
+	freezeidä½œä¸ºtrans_id
 	//insert flow
 	oss.str("");
 	if (!ifmiddle)
@@ -201,7 +201,7 @@ if (!ifmiddle)
 	oss<<req.trans_id<<", "<<req.product_id<<", '"<<desc<<"', "<<freezeid;
 	oss<<", '"<<current<<"')";
 
-½â¶³Á÷³Ì£º
+è§£å†»æµç¨‹ï¼š
 check amount - unfreeze_amount >= req.amount ->
 	//update freeze order
 	oss.str("");
@@ -218,51 +218,51 @@ update account balance+= req.amount, frozen -= req.amount
 update account flow : info.balance + req.amount<<", "<<info.frozen - req.amount<<", ";
 
 user service:
-×Ö·û´®±È½Ï £ºand F_user_name='"<<conn->escapeString(name)<<"'";
+å­—ç¬¦ä¸²æ¯”è¾ƒ ï¼šand F_user_name='"<<conn->escapeString(name)<<"'";
 name -> id: (((uint16_t)(uint8_t)name[0] << 8) | (uint8_t)name[1]);
 id -> table: id % 1000
-user_parnter_type::t_user_guarantorÓÃ»§´´½¨¶ş¸öÕË»§£º
-1 Îªt_account_common , 2 Îªt_account_deposit
+user_parnter_type::t_user_guarantorç”¨æˆ·åˆ›å»ºäºŒä¸ªè´¦æˆ·ï¼š
+1 ä¸ºt_account_common , 2 ä¸ºt_account_deposit
 
 internal transfer:
 source.info.balance < req.amount
 
 
-±êµØÏµÍ³ £º
+æ ‡åœ°ç³»ç»Ÿ ï¼š
 | t_loan_000 | CREATE TABLE `t_loan_000` (
-  `F_loan_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '±êµÄID',
-  `F_lender_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT '½è¿îÈËuid',
-  `F_guarantor_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'µ£±£ÈËUID',
-  `F_guarantee_rate` int(11) NOT NULL DEFAULT '0' COMMENT 'µ£±£±ÈÀı,µ¥Î»Íò·ÖÖ®Ò»£¬µ±Ç°ºÏÀíÖµ:1000£¨10%£©£¬2000£¨20%£©£¬3000£¨30%£©',
-  `F_title` varchar(32) NOT NULL DEFAULT '' COMMENT '²úÆ·±êÌâ',
-  `F_credit` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'ĞÅÓÃÆÀ¼¶',
-  `F_annual_rate` int(11) NOT NULL DEFAULT '0' COMMENT 'Äê»¯ÀûÂÊ(Íò·ÖÖ®£©',
-  `F_monthly_rate` int(11) NOT NULL DEFAULT '0' COMMENT 'ÔÂ»¯ÀûÂÊ(Íò·ÖÖ®£©',
-  `F_state` int(11) NOT NULL DEFAULT '0' COMMENT '×´Ì¬£º1-Éú³É±êµÄ£¬2-Ä¼¼¯ÖĞ£¬3-Ä¼¼¯Íê±Ï£¬4-ÒÑ·Å¿î£¬5-»¹¿îÖĞ£¬6-»¹¿îÍê±Ï',
-  `F_total_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT 'Ä¼×Ê×Ü¶î£¨·Ö£©',
-  `F_raised_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÒÑÄ¼¼¯½ğ¶î£¨·Ö)',
-  `F_repaid_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÒÑ·µ»¹½ğ¶î£¨·Ö£©',
-  `F_loan_tenure` int(11) NOT NULL DEFAULT '0' COMMENT '´û¿îÆÚÏŞ£¨µ¥Î»£ºÔÂ£©',
-  `F_bid_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Í¶±êÊ±¼ä',
-  `F_expected_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Ó¦»¹¿îÈÕÆÚ',
-  `F_actual_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Êµ¼ÊÇå³¥ÈÕÆÚ',
-  `F_repaid_principal` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÒÑ»¹±¾½ğ',
-  `F_repaid_interest` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÒÑ»¹ÀûÏ¢',
-  `F_receivable_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT 'Ó¦ÊÕÓâÆÚ·£½ğ',
-  `F_paid_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÒÑÊÕ·£½ğ',
-  `F_phase_total` int(11) NOT NULL DEFAULT '0' COMMENT '»¹¿î×ÜÆÚÊı',
-  `F_repaid_phase` int(11) NOT NULL DEFAULT '0' COMMENT 'ÒÑ»¹¿îÆÚÊı',
-  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '¸üĞÂÊ±¼ä',
-  `F_create_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '´´½¨Ê±¼ä',
+  `F_loan_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'æ ‡çš„ID',
+  `F_lender_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å€Ÿæ¬¾äººuid',
+  `F_guarantor_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'æ‹…ä¿äººUID',
+  `F_guarantee_rate` int(11) NOT NULL DEFAULT '0' COMMENT 'æ‹…ä¿æ¯”ä¾‹,å•ä½ä¸‡åˆ†ä¹‹ä¸€ï¼Œå½“å‰åˆç†å€¼:1000ï¼ˆ10%ï¼‰ï¼Œ2000ï¼ˆ20%ï¼‰ï¼Œ3000ï¼ˆ30%ï¼‰',
+  `F_title` varchar(32) NOT NULL DEFAULT '' COMMENT 'äº§å“æ ‡é¢˜',
+  `F_credit` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'ä¿¡ç”¨è¯„çº§',
+  `F_annual_rate` int(11) NOT NULL DEFAULT '0' COMMENT 'å¹´åŒ–åˆ©ç‡(ä¸‡åˆ†ä¹‹ï¼‰',
+  `F_monthly_rate` int(11) NOT NULL DEFAULT '0' COMMENT 'æœˆåŒ–åˆ©ç‡(ä¸‡åˆ†ä¹‹ï¼‰',
+  `F_state` int(11) NOT NULL DEFAULT '0' COMMENT 'çŠ¶æ€ï¼š1-ç”Ÿæˆæ ‡çš„ï¼Œ2-å‹Ÿé›†ä¸­ï¼Œ3-å‹Ÿé›†å®Œæ¯•ï¼Œ4-å·²æ”¾æ¬¾ï¼Œ5-è¿˜æ¬¾ä¸­ï¼Œ6-è¿˜æ¬¾å®Œæ¯•',
+  `F_total_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å‹Ÿèµ„æ€»é¢ï¼ˆåˆ†ï¼‰',
+  `F_raised_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å·²å‹Ÿé›†é‡‘é¢ï¼ˆåˆ†)',
+  `F_repaid_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å·²è¿”è¿˜é‡‘é¢ï¼ˆåˆ†ï¼‰',
+  `F_loan_tenure` int(11) NOT NULL DEFAULT '0' COMMENT 'è´·æ¬¾æœŸé™ï¼ˆå•ä½ï¼šæœˆï¼‰',
+  `F_bid_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'æŠ•æ ‡æ—¶é—´',
+  `F_expected_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'åº”è¿˜æ¬¾æ—¥æœŸ',
+  `F_actual_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'å®é™…æ¸…å¿æ—¥æœŸ',
+  `F_repaid_principal` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å·²è¿˜æœ¬é‡‘',
+  `F_repaid_interest` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å·²è¿˜åˆ©æ¯',
+  `F_receivable_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT 'åº”æ”¶é€¾æœŸç½šé‡‘',
+  `F_paid_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å·²æ”¶ç½šé‡‘',
+  `F_phase_total` int(11) NOT NULL DEFAULT '0' COMMENT 'è¿˜æ¬¾æ€»æœŸæ•°',
+  `F_repaid_phase` int(11) NOT NULL DEFAULT '0' COMMENT 'å·²è¿˜æ¬¾æœŸæ•°',
+  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'æ›´æ–°æ—¶é—´',
+  `F_create_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'åˆ›å»ºæ—¶é—´',
   PRIMARY KEY (`F_loan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
-//ÊÖĞø·Ñ½ğ¶î
+//æ‰‹ç»­è´¹é‡‘é¢
 		int64_t service_money = (loan.total_amount * loan.monthly_rate*loan.months_per_phase) / 10000;
-ÊÖĞø·Ñ½»µ½BIZ_ACC_ID_INCOME  //ÊÕÒæ´ı·Ö³ÉÖĞ¼äÕË»§
+æ‰‹ç»­è´¹äº¤åˆ°BIZ_ACC_ID_INCOME  //æ”¶ç›Šå¾…åˆ†æˆä¸­é—´è´¦æˆ·
 
-´úÀíÉÌ£ºt_account_deposit
+ä»£ç†å•†ï¼št_account_deposit
 		/**
-		 * ¶Ô´úÀíÉÌ½øĞĞ¼ì²é
+		 * å¯¹ä»£ç†å•†è¿›è¡Œæ£€æŸ¥
 		 */
 		yeahka::account::account_get_rt guarantor_account;
 		if (GetAccountByUserID(info.guarantor_uid, guarantor_account,account_type::t_account_deposit) != 0) {
@@ -270,8 +270,8 @@ source.info.balance < req.amount
 			_return.__set_err(error_code::e_account_call_fail);
 			break;
 		}
-Ïòmq·¢ËÍ£º
-//·¢ËÍmq³É¹¦
+å‘mqå‘é€ï¼š
+//å‘é€mqæˆåŠŸ
 p2p_api::Producer<yeahka::loan::loan_info> mq_loan_info; 	
 
 		int32_t res=g_ApplicationGlobalData.mq_loan_info.send(info);
@@ -280,28 +280,28 @@ p2p_api::Producer<yeahka::loan::loan_info> mq_loan_info;
 			return res;
 		}
 | t_repayment_00 | CREATE TABLE `t_repayment_00` (
-  `F_repayment_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'µ¥ºÅ',
-  `F_lender_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT '´û¿îÈËUID',
-  `F_lender_name` varchar(64) NOT NULL DEFAULT '' COMMENT '´û¿îÈËÓÃ»§Ãû',
-  `F_lender_acc_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '´û¿îÈËÕË»§ID',
-  `F_loan_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '±êµÄID',
-  `F_loan_title` varchar(32) NOT NULL DEFAULT '' COMMENT '²úÆ·±êÌâ',
-  `F_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '»¹¿î½ğ¶î',
-  `F_phase` int(11) NOT NULL DEFAULT '0' COMMENT 'ÆÚÊı',
-  `F_principal` bigint(20) NOT NULL DEFAULT '0' COMMENT '±¾½ğ£¨µ¥Î»£º·Ö£©',
-  `F_interest` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÀûÏ¢£¨µ¥Î»£º·Ö£©',
-  `F_receivable_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT 'Ó¦ÊÕÓâÆÚ·£½ğ£¨µ¥Î»£º·Ö£©',
-  `F_expected_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Ó¦»¹¿îÈÕÆÚ',
-  `F_actual_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Êµ¼ÊÇå³¥ÈÕÆÚ',
-  `F_repaid_principal` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÒÑ»¹±¾½ğ',
-  `F_repaid_interest` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÒÑ»¹ÀûÏ¢',
-  `F_paid_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÒÑÊÕ·£½ğ',
-  `F_guarantee_disburse` bigint(20) NOT NULL DEFAULT '0' COMMENT '´úÀíÉÌµæ¸¶»¹¿î½ğ¶î',
-  `F_reserve_disburse` bigint(20) NOT NULL DEFAULT '0' COMMENT '×¼±¸½ğµæ¸¶»¹¿î½ğ¶î',
-  `F_state` int(11) NOT NULL DEFAULT '0' COMMENT '×´Ì¬£º1-´ı»¹£¬2-ÒÑ»¹£¬3-»µÕË',
-  `F_properties` int(11) NOT NULL DEFAULT '0' COMMENT 'ÊôĞÔÎ»£º1-ÓâÆÚ£¬2-ÌáÇ°»¹¿î',
-  `F_create_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '´´½¨Ê±¼ä',
-  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '¸üĞÂÊ±¼ä',
+  `F_repayment_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å•å·',
+  `F_lender_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'è´·æ¬¾äººUID',
+  `F_lender_name` varchar(64) NOT NULL DEFAULT '' COMMENT 'è´·æ¬¾äººç”¨æˆ·å',
+  `F_lender_acc_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'è´·æ¬¾äººè´¦æˆ·ID',
+  `F_loan_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'æ ‡çš„ID',
+  `F_loan_title` varchar(32) NOT NULL DEFAULT '' COMMENT 'äº§å“æ ‡é¢˜',
+  `F_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT 'è¿˜æ¬¾é‡‘é¢',
+  `F_phase` int(11) NOT NULL DEFAULT '0' COMMENT 'æœŸæ•°',
+  `F_principal` bigint(20) NOT NULL DEFAULT '0' COMMENT 'æœ¬é‡‘ï¼ˆå•ä½ï¼šåˆ†ï¼‰',
+  `F_interest` bigint(20) NOT NULL DEFAULT '0' COMMENT 'åˆ©æ¯ï¼ˆå•ä½ï¼šåˆ†ï¼‰',
+  `F_receivable_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT 'åº”æ”¶é€¾æœŸç½šé‡‘ï¼ˆå•ä½ï¼šåˆ†ï¼‰',
+  `F_expected_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'åº”è¿˜æ¬¾æ—¥æœŸ',
+  `F_actual_repay_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'å®é™…æ¸…å¿æ—¥æœŸ',
+  `F_repaid_principal` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å·²è¿˜æœ¬é‡‘',
+  `F_repaid_interest` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å·²è¿˜åˆ©æ¯',
+  `F_paid_penalty` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å·²æ”¶ç½šé‡‘',
+  `F_guarantee_disburse` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ä»£ç†å•†å«ä»˜è¿˜æ¬¾é‡‘é¢',
+  `F_reserve_disburse` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å‡†å¤‡é‡‘å«ä»˜è¿˜æ¬¾é‡‘é¢',
+  `F_state` int(11) NOT NULL DEFAULT '0' COMMENT 'çŠ¶æ€ï¼š1-å¾…è¿˜ï¼Œ2-å·²è¿˜ï¼Œ3-åè´¦',
+  `F_properties` int(11) NOT NULL DEFAULT '0' COMMENT 'å±æ€§ä½ï¼š1-é€¾æœŸï¼Œ2-æå‰è¿˜æ¬¾',
+  `F_create_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'åˆ›å»ºæ—¶é—´',
+  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'æ›´æ–°æ—¶é—´',
   PRIMARY KEY (`F_repayment_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
 		
@@ -309,20 +309,20 @@ p2p_api::Producer<yeahka::loan::loan_info> mq_loan_info;
 service type: 
 loan , invest, s_common
 business type: 
-factorage ÊÖĞø·Ñ
-investment: Í¶×Ê
-pay_loan: »¹¿î
-refund: ÍË¿î,»¹¿î×ªÕË
-earnings: ×¬µ½µÄÇ®£¬ÊÕÒæ 
-deposit: ´æ¿î£¬³äÖµ
-settle: ½áËã
+factorage æ‰‹ç»­è´¹
+investment: æŠ•èµ„
+pay_loan: è¿˜æ¬¾
+refund: é€€æ¬¾,è¿˜æ¬¾è½¬è´¦
+earnings: èµšåˆ°çš„é’±ï¼Œæ”¶ç›Š 
+deposit: å­˜æ¬¾ï¼Œå……å€¼
+settle: ç»“ç®—
 common: 
 create: 
 
 deposit_type: 
-cash : ²é±ít_deposit_order_£¬ check pay order 
-withhold : ´ú¿Û´ú½É   ,call httpÖ§¸¶ÏµÍ³ 
-offline: Ò»°ãÖ»ĞèÌá¹©¿¨ºÅ¡¢ÓĞĞ§ÆÚ¡¢CVVÂë¡¢Ç©ÃûµÈ  
+cash : æŸ¥è¡¨t_deposit_order_ï¼Œ check pay order 
+withhold : ä»£æ‰£ä»£ç¼´   ,call httpæ”¯ä»˜ç³»ç»Ÿ 
+offline: ä¸€èˆ¬åªéœ€æä¾›å¡å·ã€æœ‰æ•ˆæœŸã€CVVç ã€ç­¾åç­‰  
 pos
 
 withdraw_type:
@@ -335,35 +335,35 @@ account_state:
 normal, abnormal, frozen
 
 account type:
-common,  ÆÕÍ¨ÕË»§
-deposit, ´úÀíÉÌÕË»§
-middle, ÀÖË¢ÖĞ¼ä»§
+common,  æ™®é€šè´¦æˆ·
+deposit, ä»£ç†å•†è´¦æˆ·
+middle, ä¹åˆ·ä¸­é—´æˆ·
 
 operate_type:
 deposit,
 withdraw,
-transfer_in, ×ªÕËÈë
-transfer_out, ×ªÕË³ö
-freeze, ¶³½á
-unfreeze, ½â¶³
-unfreeze_transfer, ½â¶³×ªÕË
+transfer_in, è½¬è´¦å…¥
+transfer_out, è½¬è´¦å‡º
+freeze, å†»ç»“
+unfreeze, è§£å†»
+unfreeze_transfer, è§£å†»è½¬è´¦
 create
 
 loan state:
-initial , ·¢Æğ£¨Î´Ö§¸¶ÀûÏ¢ )
-publish, ×¼±¸·¢²¼£¨ÒÑÖ§¸¶ÀûÏ¢ )
-financing, ³ï±êÖĞ(±êµØÒÑ·¢²¼)
-full, Âú±ê
-lending, ·Å¿îÖĞ£¬ ÌáÏÖ´¦ÀíÖĞ
-repay, ´ı»¹¿î
-disbursement, µæ¸¶ £¬ ¼´ÓâÆÚ»¹¿î
-finish, Íê±ê£¨ÒÑ½áÇå£©
-bad_debt, »µÕË
-invalid, Á÷±ê
+initial , å‘èµ·ï¼ˆæœªæ”¯ä»˜åˆ©æ¯ )
+publish, å‡†å¤‡å‘å¸ƒï¼ˆå·²æ”¯ä»˜åˆ©æ¯ )
+financing, ç­¹æ ‡ä¸­(æ ‡åœ°å·²å‘å¸ƒ)
+full, æ»¡æ ‡
+lending, æ”¾æ¬¾ä¸­ï¼Œ æç°å¤„ç†ä¸­
+repay, å¾…è¿˜æ¬¾
+disbursement, å«ä»˜ ï¼Œ å³é€¾æœŸè¿˜æ¬¾
+finish, å®Œæ ‡ï¼ˆå·²ç»“æ¸…ï¼‰
+bad_debt, åè´¦
+invalid, æµæ ‡
 
 loan type:
-p2p Ô­ÏµÍ³±êµØ
-newer  ĞÂÊÖÀí²Æ±êµØ
+p2p åŸç³»ç»Ÿæ ‡åœ°
+newer  æ–°æ‰‹ç†è´¢æ ‡åœ°
 
 flow operate type:
 create loan
@@ -443,40 +443,40 @@ pos repay deposit request
 pos repay deposit and transfer success
 
 repayment state:
-wait to repay ´ı»¹¿î 
-finish repay ÒÑ»¹¿î
-disburse µæ¸¶ 
+wait to repay å¾…è¿˜æ¬¾ 
+finish repay å·²è¿˜æ¬¾
+disburse å«ä»˜ 
 
 repayment property :
-repay Õı³£
-overdue ÓâÆÚÎ´ÉóºË 
-verify ÓâÆÚÒäÉóºË 
-ahead ÌáÇ° »¹¿î
+repay æ­£å¸¸
+overdue é€¾æœŸæœªå®¡æ ¸ 
+verify é€¾æœŸå¿†å®¡æ ¸ 
+ahead æå‰ è¿˜æ¬¾
 
 investment state:
-initial  ³õÊ¼»¯
-order ÏÂµ¥³É¹¦
-invalid Í¶×ÊÊ§°Ü
-success Í¶×Ê³É¹¦
+initial  åˆå§‹åŒ–
+order ä¸‹å•æˆåŠŸ
+invalid æŠ•èµ„å¤±è´¥
+success æŠ•èµ„æˆåŠŸ
 
-payoff state: ÊÕÒæ×´Ì¬ 
+payoff state: æ”¶ç›ŠçŠ¶æ€ 
 wait to repay 
 finish
 
 pos service type :
-pos service charge ´ÓposÖĞ½ÉÊÖĞø·Ñ
-pos repay : ´Ópos ÖĞ»¹¿î 
+pos service charge ä»posä¸­ç¼´æ‰‹ç»­è´¹
+pos repay : ä»pos ä¸­è¿˜æ¬¾ 
 
-biz_acc_id_LESHUA ×ÜÕË»§
-biz_acc_id_REPAID  »¹¿îÕË»§
-biz_acc_id_INVESTED ÒÑÄ¼¼¯×Ê½ğÕË»§
-biz_acc_id_INCOME ÊÕÒæ´ı·Ö³ÉÕË»§
-biz_acc_id_REVENUE ÊÕÒæÕË»§
-biz_acc_id_RESERVE ×¼±¸½ğÕË»§
-biz_acc_id_DISTRIBUE ´ı·ÖÅä ÕË»§
-biz_acc_id_correction ²î´í´¦ÀíÕË»§
+biz_acc_id_LESHUA æ€»è´¦æˆ·
+biz_acc_id_REPAID  è¿˜æ¬¾è´¦æˆ·
+biz_acc_id_INVESTED å·²å‹Ÿé›†èµ„é‡‘è´¦æˆ·
+biz_acc_id_INCOME æ”¶ç›Šå¾…åˆ†æˆè´¦æˆ·
+biz_acc_id_REVENUE æ”¶ç›Šè´¦æˆ·
+biz_acc_id_RESERVE å‡†å¤‡é‡‘è´¦æˆ·
+biz_acc_id_DISTRIBUE å¾…åˆ†é… è´¦æˆ·
+biz_acc_id_correction å·®é”™å¤„ç†è´¦æˆ·
 
-´íÎóÂë£º
+é”™è¯¯ç ï¼š
 e_no_error 
 e_unknown_error
 e_already_happen
@@ -534,22 +534,22 @@ e_insert_flow_fail
 e_delete_flow_fail
 e_select_repayment_fail
 e_select_investment_fail
-e_penalty_fail   //»¹¿ÉÉèÖÃ·£½ğ
+e_penalty_fail   //è¿˜å¯è®¾ç½®ç½šé‡‘
 e_create_loan_fail
-e_money_not_equal  //ÊıÄ¿ ¶Ô²»ÉÏ£¬ ½ğÇ®²»ÏàµÈ
-e_withdraw_call_fail   //µ÷ÓÃÌáÏÖÊ§°Ü
-e_call_guarantor_disburse_fail  //´úÀíÉÌµæ¸¶Ê§°Ü 
-e_call_reserve_disburse_fail, ÀÖË¢ µæ¸¶Ê§°Ü
-e_call_transfer_service_repayment_fail //×ªÕËµ½´ı·ÖÅäÕË»§Ê§°Ü
-e_invalid_state   ´íÎóµÄ×´Ì¬ 
-e_service_transfer_to_distribute_fail //×ªÕËÊÖĞø·ÑÊ§°Ü
-e_repayment_transfer_to_distribute_fail //×ªÕË»¹¿îÊ§°Ü
-e_repay_to_reserve_fail //»¹¿î¸øÀÖË¢Ê§°Ü
-e_repay_to_guarantor_fail //»¹¿î¸ø´úÀíÉÌÊ§°Ü
+e_money_not_equal  //æ•°ç›® å¯¹ä¸ä¸Šï¼Œ é‡‘é’±ä¸ç›¸ç­‰
+e_withdraw_call_fail   //è°ƒç”¨æç°å¤±è´¥
+e_call_guarantor_disburse_fail  //ä»£ç†å•†å«ä»˜å¤±è´¥ 
+e_call_reserve_disburse_fail, ä¹åˆ· å«ä»˜å¤±è´¥
+e_call_transfer_service_repayment_fail //è½¬è´¦åˆ°å¾…åˆ†é…è´¦æˆ·å¤±è´¥
+e_invalid_state   é”™è¯¯çš„çŠ¶æ€ 
+e_service_transfer_to_distribute_fail //è½¬è´¦æ‰‹ç»­è´¹å¤±è´¥
+e_repayment_transfer_to_distribute_fail //è½¬è´¦è¿˜æ¬¾å¤±è´¥
+e_repay_to_reserve_fail //è¿˜æ¬¾ç»™ä¹åˆ·å¤±è´¥
+e_repay_to_guarantor_fail //è¿˜æ¬¾ç»™ä»£ç†å•†å¤±è´¥
 
 e_select_payoff_fail,
 e_insert_payoff_fail,
-e_service_deposit //½ğ¶î²»¹»£¬½É·ÑÊ§°Ü£¬·¢Æğ³äÖµ 
+e_service_deposit //é‡‘é¢ä¸å¤Ÿï¼Œç¼´è´¹å¤±è´¥ï¼Œå‘èµ·å……å€¼ 
 e_invest_deposit  
 e_repay_deposit,
 e_deposit_call_fail,
@@ -563,17 +563,17 @@ e_not_financing_loan,
 e_not_invalid_loan,
 e_not_initial_loan,
 e_error_service_amount,
-e_beyond_total_amount,  //³¬±ê
-e_invest_amount_not_equal_amount, //Í¶×Ê½ğ¶î²»µÈÓÚ±êµØ
-e_error_request_arg,     //ÇëÇó²ÎÊıĞ£ÑéÊ§°Ü¡£
-e_get_investors_fail, //»ñÈ¡±êµØÍ¶×ÊÕßÊ§°Ü
+e_beyond_total_amount,  //è¶…æ ‡
+e_invest_amount_not_equal_amount, //æŠ•èµ„é‡‘é¢ä¸ç­‰äºæ ‡åœ°
+e_error_request_arg,     //è¯·æ±‚å‚æ•°æ ¡éªŒå¤±è´¥ã€‚
+e_get_investors_fail, //è·å–æ ‡åœ°æŠ•èµ„è€…å¤±è´¥
 
-e_call_pos_service_fail //posÁ÷Ë®cgi·şÎñÊ§°Ü
-e_auth_fail //ÈÏÖ¤Ê§°Ü
-e_auth_queryfail  //²éÑ¯½Ó¿Úµ÷ÓÃÊ§°Ü
-e_auth_reqfail  //ÈÏÖ¤½Ó¿ÚÌá½»ÇëÇóÊ§°Ü
-e_auth_timeout //³¬¹ı×î´ó²éÑ¯´ÎÊı 
-e_jsonparse_fail //json¸ñÊ½²»¶Ô
+e_call_pos_service_fail //posæµæ°´cgiæœåŠ¡å¤±è´¥
+e_auth_fail //è®¤è¯å¤±è´¥
+e_auth_queryfail  //æŸ¥è¯¢æ¥å£è°ƒç”¨å¤±è´¥
+e_auth_reqfail  //è®¤è¯æ¥å£æäº¤è¯·æ±‚å¤±è´¥
+e_auth_timeout //è¶…è¿‡æœ€å¤§æŸ¥è¯¢æ¬¡æ•° 
+e_jsonparse_fail //jsonæ ¼å¼ä¸å¯¹
 e_zookeeper_error, 
 e_httppost_error
 
@@ -583,9 +583,9 @@ enum user_parnter_type{
     t_user_guarantor,
 }
 
-partner_type  ÓÃ»§ÀàĞÍ
+partner_type  ç”¨æˆ·ç±»å‹
 
-´ÓÊı¾İ¿âÖĞ¶ÁÈ¡Ã¶¾ÙÖµÊ±£¬ Òª¼ì²éÊÇ·ñºÏ·¨¡£
+ä»æ•°æ®åº“ä¸­è¯»å–æšä¸¾å€¼æ—¶ï¼Œ è¦æ£€æŸ¥æ˜¯å¦åˆæ³•ã€‚
 	if (res->getInt32(3) == 0)
 		info.__set_state(user_state::s_user_normal);
 	else if (res->getInt32(3) == 1)
@@ -599,7 +599,7 @@ partner_type  ÓÃ»§ÀàĞÍ
 		return;
 	}
 
-__set_errÖ®¼äÒªĞ´´íÎóÈÕÖ¾¡£
+__set_errä¹‹é—´è¦å†™é”™è¯¯æ—¥å¿—ã€‚
 oss<<" and F_user_name='"<<conn->escapeString(name)<<"'";
 
 	int64_t id = -1;
@@ -610,18 +610,18 @@ oss<<" and F_user_name='"<<conn->escapeString(name)<<"'";
 			yk_api::log_error("get id from service, %lu\n", (uint64_t)id);
 		}
 	}
-»ñÈ¡ĞÅÏ¢¼ÇÂ¼ÈÕÖ¾
-¶³½á -> ÌáÏÖ ->½â¶³
-ÌáÏÖ £º´Ó¶³½á½ğ¶îÖĞ¼õÈ¥ÌáÏÖ½ğ¶î¡£ ´Ó¸¸ÕË»§ÖĞ¼õÈ¥Óà¶î
+è·å–ä¿¡æ¯è®°å½•æ—¥å¿—
+å†»ç»“ -> æç° ->è§£å†»
+æç° ï¼šä»å†»ç»“é‡‘é¢ä¸­å‡å»æç°é‡‘é¢ã€‚ ä»çˆ¶è´¦æˆ·ä¸­å‡å»ä½™é¢
 
-ÕËÎñ¿â£º
+è´¦åŠ¡åº“ï¼š
 t_user_account_000;
 t_user_acc_flow_00;
 t_biz_account;
 t_biz_acc_flow_00;
 t_freeze_order_00;
 
-p2p¿â£º
+p2påº“ï¼š
 t_bank_card_000;
 t_deposit_flow_00;
 t_deposit_order_00;
@@ -639,7 +639,7 @@ t_user_flow_000;
 t_withdraw_flow_00;
 t_withdraw_order_43;
 
-bill¿â£º
+billåº“ï¼š
 t_repayment_penalty_statement_99
 t_leshua_bill
 t_investor_bill
@@ -656,134 +656,134 @@ t_guarantor_investor_payoff_statement
 
 t_investor_report
 
-±êµÄÏµÍ³£º
-ÉèÖÃ·£½ğ£º
-²é³ö±êµÄ£¬ ²é³ö»¹¿î¼Æ»®-> check -> Èç¹û»¹¿î¼Æ»®±íÒÑ¾­»¹±¾½ğºÍÀûÏ¢£¬ÄÇÃ´¾Í²»ÔÊĞíÉèÖÃ·£½ğ
--> Ö»ÓĞ»¹¿îºÍµæ¸¶×´Ì¬ÏÂ£¬²Å¿ÉÒÔ½øĞĞ·£½ğÉèÖÃ -> ±¾½ğÒÑ¾­¹é»¹£¬ÄÇÃ´²»ÔÊĞíÉèÖÃ·£½ğ 
--> ²éÑ¯½ñÌìÊÇ·ñÒÑ¾­ÉèÖÃÁËÕâ¸ö·£½ğ -> ÉèÖÃ·£½ğ t_repayment -> ÉèÖÃĞÂµÄ·£½ğ t_loan 
--> ¼ÇÂ¼·£½ğÁ÷Ë®t_loan_flow
+æ ‡çš„ç³»ç»Ÿï¼š
+è®¾ç½®ç½šé‡‘ï¼š
+æŸ¥å‡ºæ ‡çš„ï¼Œ æŸ¥å‡ºè¿˜æ¬¾è®¡åˆ’-> check -> å¦‚æœè¿˜æ¬¾è®¡åˆ’è¡¨å·²ç»è¿˜æœ¬é‡‘å’Œåˆ©æ¯ï¼Œé‚£ä¹ˆå°±ä¸å…è®¸è®¾ç½®ç½šé‡‘
+-> åªæœ‰è¿˜æ¬¾å’Œå«ä»˜çŠ¶æ€ä¸‹ï¼Œæ‰å¯ä»¥è¿›è¡Œç½šé‡‘è®¾ç½® -> æœ¬é‡‘å·²ç»å½’è¿˜ï¼Œé‚£ä¹ˆä¸å…è®¸è®¾ç½®ç½šé‡‘ 
+-> æŸ¥è¯¢ä»Šå¤©æ˜¯å¦å·²ç»è®¾ç½®äº†è¿™ä¸ªç½šé‡‘ -> è®¾ç½®ç½šé‡‘ t_repayment -> è®¾ç½®æ–°çš„ç½šé‡‘ t_loan 
+-> è®°å½•ç½šé‡‘æµæ°´t_loan_flow
 
-½áËã£º·£½ğ¡¡£¬¡¡¼ÆËãÀÖË¢£¬¡¡´úÀíÉÌ£¬¡¡Í¶×ÊÈËÊÕÒæ¡¡£¬¡¡×ªÕË
-³äÖµ£º²åÈëÖ§¸¶µ¥£¬ ²åÈëÖ§¸¶Á÷Ë®£¬ ÏÂÖ§¸¶µ¥£¬ 
+ç»“ç®—ï¼šç½šé‡‘ã€€ï¼Œã€€è®¡ç®—ä¹åˆ·ï¼Œã€€ä»£ç†å•†ï¼Œã€€æŠ•èµ„äººæ”¶ç›Šã€€ï¼Œã€€è½¬è´¦
+å……å€¼ï¼šæ’å…¥æ”¯ä»˜å•ï¼Œ æ’å…¥æ”¯ä»˜æµæ°´ï¼Œ ä¸‹æ”¯ä»˜å•ï¼Œ 
 
 salary DECIMAL(5,2)
 In this example, 5 is the precision and 2 is the scale. The precision represents the number of significant digits that are stored for values, and the scale represents the number of digits that can be stored following the decimal point.
 Standard SQL requires that DECIMAL(5,2) be able to store any value with five digits and two decimals, so values that can be stored in the salary column range from -999.99 to 999.99.
 If the scale is 0, DECIMAL values contain no decimal point or fractional part.
 
-¡¡¡¡mysql> SELECT * FROM table LIMIT 5,10; // ¼ìË÷¼ÇÂ¼ĞĞ 6-15
+ã€€ã€€mysql> SELECT * FROM table LIMIT 5,10; // æ£€ç´¢è®°å½•è¡Œ 6-15
 
-¡¡¡¡//ÎªÁË¼ìË÷´ÓÄ³Ò»¸öÆ«ÒÆÁ¿µ½¼ÇÂ¼¼¯µÄ½áÊøËùÓĞµÄ¼ÇÂ¼ĞĞ£¬¿ÉÒÔÖ¸¶¨µÚ¶ş¸ö²ÎÊıÎª -1£º
+ã€€ã€€//ä¸ºäº†æ£€ç´¢ä»æŸä¸€ä¸ªåç§»é‡åˆ°è®°å½•é›†çš„ç»“æŸæ‰€æœ‰çš„è®°å½•è¡Œï¼Œå¯ä»¥æŒ‡å®šç¬¬äºŒä¸ªå‚æ•°ä¸º -1ï¼š
 
-¡¡¡¡mysql> SELECT * FROM table LIMIT 95,-1; // ¼ìË÷¼ÇÂ¼ĞĞ 96-last.
+ã€€ã€€mysql> SELECT * FROM table LIMIT 95,-1; // æ£€ç´¢è®°å½•è¡Œ 96-last.
 
-¡¡¡¡//Èç¹ûÖ»¸ø¶¨Ò»¸ö²ÎÊı£¬Ëü±íÊ¾·µ»Ø×î´óµÄ¼ÇÂ¼ĞĞÊıÄ¿£º
+ã€€ã€€//å¦‚æœåªç»™å®šä¸€ä¸ªå‚æ•°ï¼Œå®ƒè¡¨ç¤ºè¿”å›æœ€å¤§çš„è®°å½•è¡Œæ•°ç›®ï¼š
 
-¡¡¡¡mysql> SELECT * FROM table LIMIT 5; //¼ìË÷Ç° 5 ¸ö¼ÇÂ¼ĞĞ
+ã€€ã€€mysql> SELECT * FROM table LIMIT 5; //æ£€ç´¢å‰ 5 ä¸ªè®°å½•è¡Œ
 
-¡¡¡¡//»»¾ä»°Ëµ£¬LIMIT n µÈ¼ÛÓÚ LIMIT 0,n¡£
+ã€€ã€€//æ¢å¥è¯è¯´ï¼ŒLIMIT n ç­‰ä»·äº LIMIT 0,nã€‚
 
-¡¡¡¡×¢Òâlimit 10ºÍlimit 9£¬1µÄ²»Í¬£º
+ã€€ã€€æ³¨æ„limit 10å’Œlimit 9ï¼Œ1çš„ä¸åŒï¼š
 	
-±êµÄÏµÍ³ £º»¹¿î¡¡£¬¡¡½ÉÊÖĞø·Ñ£¬¡¡Á÷±ê£¬ Í¶±ê£¬¡¡´´½¨±êµÄ£¬¡¡Âú±ê£¬ ·Å¿î, »¹¿î, »ñÈ¡±êµÄĞÅÏ¢ £¬ »ñÈ¡ËùÓĞ Í¶×ÊÕß£¬¡¡²éÑ¯±êµÄÁĞ±í£¬¡¡µæ¸¶,¸üĞÂÖÍÄÉ½ğ¡£ĞŞ¸Ä±êµÄ¡£
-Í¶×ÊÏµÍ³ £ºÍ¶±ê£¬¡¡Éú³ÉÊÕÒæ¼Æ»®±í£¬¡¡Ìá¹©Ô¤¼Æ¼ÆÏ¢ÈÕÆÚºÍÔ¤¼ÆÊÕÒæÈÕÆÚ£¬ ²éÑ¯Í¶×Ê¼ÇÂ¼
-ÌáÏÖÏµÍ³¡¡£ºÌáÏÖ £¬¡¡ÌáÏÖ»Øµ÷
-³äÖµÏµÍ³¡¡£º·¢Æğ³äÖµ £¬³äÖµ»Øµ÷
-ÕË»§ÏµÍ³ £º×ªÕË£¬²éÑ¯ÕË»§Óà¶î£¬¡¡³äÖµºóÕË»§Óà¶î±ä¸ü¡¡£¬²éÑ¯Í¶×ÊÕßÕË»§ĞÅÏ¢£¬¡¡¶³½áÕË»§Óà¶î£¬¡¡½â¶³ÕË»§Óà¶î£¬¡¡½â¶³×ªÕË¡¡
-ÓÃ»§ÏµÍ³£º»ñÈ¡ÓÃ»§ĞÅÏ¢
-½áËãÏµÍ³£ºÉèÖÃ·£½ğ£¬ ¼ÆËãÍ¶×ÊÈËÊÕÒæ£¬¼ÆËãÀÖË¢ºÍ´úÀíÉÌÊÕÒæ£¬ ·¢Æğ×ªÕË£¨×ªÕËÍ¶×ÊÈË±¾½ğºÍÊÕÒæ£¬×ªÕËÀÖË¢ºÍ´úÀíÉÌÊÕÒæ£©¡£
+æ ‡çš„ç³»ç»Ÿ ï¼šè¿˜æ¬¾ã€€ï¼Œã€€ç¼´æ‰‹ç»­è´¹ï¼Œã€€æµæ ‡ï¼Œ æŠ•æ ‡ï¼Œã€€åˆ›å»ºæ ‡çš„ï¼Œã€€æ»¡æ ‡ï¼Œ æ”¾æ¬¾, è¿˜æ¬¾, è·å–æ ‡çš„ä¿¡æ¯ ï¼Œ è·å–æ‰€æœ‰ æŠ•èµ„è€…ï¼Œã€€æŸ¥è¯¢æ ‡çš„åˆ—è¡¨ï¼Œã€€å«ä»˜,æ›´æ–°æ»çº³é‡‘ã€‚ä¿®æ”¹æ ‡çš„ã€‚
+æŠ•èµ„ç³»ç»Ÿ ï¼šæŠ•æ ‡ï¼Œã€€ç”Ÿæˆæ”¶ç›Šè®¡åˆ’è¡¨ï¼Œã€€æä¾›é¢„è®¡è®¡æ¯æ—¥æœŸå’Œé¢„è®¡æ”¶ç›Šæ—¥æœŸï¼Œ æŸ¥è¯¢æŠ•èµ„è®°å½•
+æç°ç³»ç»Ÿã€€ï¼šæç° ï¼Œã€€æç°å›è°ƒ
+å……å€¼ç³»ç»Ÿã€€ï¼šå‘èµ·å……å€¼ ï¼Œå……å€¼å›è°ƒ
+è´¦æˆ·ç³»ç»Ÿ ï¼šè½¬è´¦ï¼ŒæŸ¥è¯¢è´¦æˆ·ä½™é¢ï¼Œã€€å……å€¼åè´¦æˆ·ä½™é¢å˜æ›´ã€€ï¼ŒæŸ¥è¯¢æŠ•èµ„è€…è´¦æˆ·ä¿¡æ¯ï¼Œã€€å†»ç»“è´¦æˆ·ä½™é¢ï¼Œã€€è§£å†»è´¦æˆ·ä½™é¢ï¼Œã€€è§£å†»è½¬è´¦ã€€
+ç”¨æˆ·ç³»ç»Ÿï¼šè·å–ç”¨æˆ·ä¿¡æ¯
+ç»“ç®—ç³»ç»Ÿï¼šè®¾ç½®ç½šé‡‘ï¼Œ è®¡ç®—æŠ•èµ„äººæ”¶ç›Šï¼Œè®¡ç®—ä¹åˆ·å’Œä»£ç†å•†æ”¶ç›Šï¼Œ å‘èµ·è½¬è´¦ï¼ˆè½¬è´¦æŠ•èµ„äººæœ¬é‡‘å’Œæ”¶ç›Šï¼Œè½¬è´¦ä¹åˆ·å’Œä»£ç†å•†æ”¶ç›Šï¼‰ã€‚
 
-ÉêÇë´û¿î£ºÓÃ»§ÏµÍ³¡¡£¬¡¡ÕË»§ÏµÍ³
-ÉóºË´û¿î£º¡¡±êµÄÏµÍ³¡¡
+ç”³è¯·è´·æ¬¾ï¼šç”¨æˆ·ç³»ç»Ÿã€€ï¼Œã€€è´¦æˆ·ç³»ç»Ÿ
+å®¡æ ¸è´·æ¬¾ï¼šã€€æ ‡çš„ç³»ç»Ÿã€€
 
-MQ: ±êµÄ±ä¸ü£¬ ÌáÏÖ½á¹û£¬ ³äÖµ½á¹û£¬ Í¶×Ê¼ÇÂ¼±ä¸ü£¬Í¶×Ê³É¹¦£¬ Âú±ê
+MQ: æ ‡çš„å˜æ›´ï¼Œ æç°ç»“æœï¼Œ å……å€¼ç»“æœï¼Œ æŠ•èµ„è®°å½•å˜æ›´ï¼ŒæŠ•èµ„æˆåŠŸï¼Œ æ»¡æ ‡
 
 http://192.168.11.130/cgi-bin/bankaccountquery.cgi?cmd=query_balance&channel=CEB2&account_no=78180188000090175&sign=XXXXXXX
 $2 = "{\"balance\":\"50803205\",\"channel\":\"CEB2\",\"result\":\"0\"}\n"
 
-Ö¤ÊéÌáÈ¡¹«Ô¿£º
+è¯ä¹¦æå–å…¬é’¥ï¼š
 openssl x509 -outform PEM -in base64cer -pubkey -out srca.pubkey
-base64cerÎªbase64¸ñÊ½µÄx509±ê×¼Ö¤ÊéÎÄ¼ş
+base64cerä¸ºbase64æ ¼å¼çš„x509æ ‡å‡†è¯ä¹¦æ–‡ä»¶
 
-Êı×ÖÖ¤Êé°üº¬ÓÃ»§µÄÉí·İĞÅÏ¢¼°Æä¹«Ô¿£¬ CAÓÃ×Ô¼ºµÄË½Ô¿ÎªÊı×ÖÖ¤Êé¼ÓÉÏÁËÇ©Ãû¡£
-CAÏàµ±ÓÚ¹«°²¾Ö£¬ Êı×ÖÖ¤ÊéÏàµ±ÓÚÉí·İÖ¤¡£Ç©ÃûÏàµ±ÓÚ¹«°²Ó¡ÕÂ¡£
-ºËĞÄ¼¼Êõ £º¼ÓÃÜºÍÇ©Ãû¼¼Êõ¡¡¡£
+æ•°å­—è¯ä¹¦åŒ…å«ç”¨æˆ·çš„èº«ä»½ä¿¡æ¯åŠå…¶å…¬é’¥ï¼Œ CAç”¨è‡ªå·±çš„ç§é’¥ä¸ºæ•°å­—è¯ä¹¦åŠ ä¸Šäº†ç­¾åã€‚
+CAç›¸å½“äºå…¬å®‰å±€ï¼Œ æ•°å­—è¯ä¹¦ç›¸å½“äºèº«ä»½è¯ã€‚ç­¾åç›¸å½“äºå…¬å®‰å°ç« ã€‚
+æ ¸å¿ƒæŠ€æœ¯ ï¼šåŠ å¯†å’Œç­¾åæŠ€æœ¯ã€€ã€‚
 
 79 5e b6 77 b7 e2 52 83 43 ed c7 51 88 4c 63 85 2c 00 43 58
 79 5e b6 77 b7 e2 52 83 43 ed c7 51 88 4c 63 85 2c 00 43 58
 
-Ë½Ô¿ÓÃÓÚ½øĞĞ½âÃÜºÍÇ©Ãû
-¹«Ô¿ÓÃÓÚ¼ÓÃÜºÍÑéÖ¤Ç©Ãû¡£
-·¢ËÍ·½ÓÃ¶Ô·½µÄ¹«Ô¿¶ÔÊı¾İ¼ÓÃÜ£¬¡¡¶ø½ÓÊÕ·½ÔòÓÃ×Ô¼ºµÄË½Ô¿½âÃÜ¡££¨±£Ö¤ĞÅÏ¢µÄ°²È«ĞÔ£©
+ç§é’¥ç”¨äºè¿›è¡Œè§£å¯†å’Œç­¾å
+å…¬é’¥ç”¨äºåŠ å¯†å’ŒéªŒè¯ç­¾åã€‚
+å‘é€æ–¹ç”¨å¯¹æ–¹çš„å…¬é’¥å¯¹æ•°æ®åŠ å¯†ï¼Œã€€è€Œæ¥æ”¶æ–¹åˆ™ç”¨è‡ªå·±çš„ç§é’¥è§£å¯†ã€‚ï¼ˆä¿è¯ä¿¡æ¯çš„å®‰å…¨æ€§ï¼‰
 
-¹ºÎïÕß¿ÉÓÃÉÌ¼Ò¸øµÄ¹«¿ªÃÜÔ¿¶Ô·¢ËÍµÄĞÅÏ¢½øĞĞ¼ÓÃÜ£¬¡¡°²È«µØËÍ¸øÉÌ¼Ò¡£
-ÓÃ»§¿ÉÒÔÍ¨¹ıÊı×ÖÇ©ÃûÊµÏÖÊı¾İµÄÍêÕûĞÔºÍÓĞĞ§ĞÔ£¬Ö»Ğè²ÉÓÃË½Ô¿¶ÔÊı¾İ½øĞĞ¼ÓÃÜ´¦Àí¡£
-ÎÄ¼ş±¾ÉíµÄ¼ÓÃÜ£­>¶Ô³Æ¼ÓÃÜ
-»á»°ÃÜÔ¿µÄ¼ÓÃÜ->·Ç¶Ô³Æ¼ÓÃÜ£¬ ¼´ÎªÊı×ÖĞÅ·â¡£
+è´­ç‰©è€…å¯ç”¨å•†å®¶ç»™çš„å…¬å¼€å¯†é’¥å¯¹å‘é€çš„ä¿¡æ¯è¿›è¡ŒåŠ å¯†ï¼Œã€€å®‰å…¨åœ°é€ç»™å•†å®¶ã€‚
+ç”¨æˆ·å¯ä»¥é€šè¿‡æ•°å­—ç­¾åå®ç°æ•°æ®çš„å®Œæ•´æ€§å’Œæœ‰æ•ˆæ€§ï¼Œåªéœ€é‡‡ç”¨ç§é’¥å¯¹æ•°æ®è¿›è¡ŒåŠ å¯†å¤„ç†ã€‚
+æ–‡ä»¶æœ¬èº«çš„åŠ å¯†ï¼>å¯¹ç§°åŠ å¯†
+ä¼šè¯å¯†é’¥çš„åŠ å¯†->éå¯¹ç§°åŠ å¯†ï¼Œ å³ä¸ºæ•°å­—ä¿¡å°ã€‚
 
-¶ÔÎÄ¼ş¼ÓÃÜÖ»½â¾öÁË±£ÃÜĞÔÎÊÌâ¡£ Îª·ÀÖ¹ËûÈË¶Ô´«ÊäµÄÎÄ¼ş½øĞĞÆÆ»µÒÔ¼°È·¶¨·¢ĞÅÈËµÄÉí·İ»¹ĞèÒªÆäËü´ëÊ©¡£
-Êı×ÖÇ©Ãû£ºÓÃÓÚÔ´¼ø±ğ£¬ ÍêÕûĞÔ·şÎñºÍ²»¿É·ñÈÏ·şÎñ¡£
+å¯¹æ–‡ä»¶åŠ å¯†åªè§£å†³äº†ä¿å¯†æ€§é—®é¢˜ã€‚ ä¸ºé˜²æ­¢ä»–äººå¯¹ä¼ è¾“çš„æ–‡ä»¶è¿›è¡Œç ´åä»¥åŠç¡®å®šå‘ä¿¡äººçš„èº«ä»½è¿˜éœ€è¦å…¶å®ƒæªæ–½ã€‚
+æ•°å­—ç­¾åï¼šç”¨äºæºé‰´åˆ«ï¼Œ å®Œæ•´æ€§æœåŠ¡å’Œä¸å¯å¦è®¤æœåŠ¡ã€‚
 pkcs, digital signature, x.509, pgp
 
-·¢ËÍ·½£¬´Ó·¢ËÍÎÄ±¾ÖĞÌáÈ¡128bitµÄÕªÒª ¡£È»ºóÓÃ×Ô¼ºµÄprivate key ¶ÔÕªÒªÆä½øĞĞÇ©Ãû¡£²¢½«Ç©Ãû×÷Îª¸½¼şÍ¬ÎÄ±¾Ò»Í¬·¢³ö¡£
-½ÓÊÕ·½£¬´Ó½ÓÊÕµ½µÄÔ­Ê¼±¨ÎÄÖĞ¼ÆËã³ö128bitµÄÕªÒª £¬ ½Ó×ÅÓÃ·¢ËÍ·½µÄ¹«Ô¿À´¶Ô±¨ÎÄ¸½¼ÓµÄÊı×ÖÇ©Ãû½øĞĞ½âÃÜ¡£ÈôÁ½¸öÕªÒªÏàÍ¬£¬ ÄÇÃ´ ¾ÍÄÜÈ·ÈÏ¸ÃÊı×ÖÇ©ÃûÊÇ·¢ËÍ·½µÄ¡£
-so, Êı×ÖÇ©ÃûÄÜ¼ø±ğÔ­Ê¼±¨ÎÄ¡£
-ÈÎºÎÓµÓĞ·¢ËÍ·½¹«¿ªÃÜÔ¿µÄÈË¶¼¿ÉÒÔ ÑéÖ¤Êı×ÖÇ©ÃûµÄÕıÈ·ĞÔ¡£
-ÈÎºÎÖªµÀ½ÓÊÕ·½¹«¿ªÃÜÔ¿µÄÈË¶¼¿ÉÒÔÏò·¢ËÍ¼ÓÃÜĞÅÏ¢£¬Ö»ÓĞÎ¨Ò»ÓµÓĞ
-½ÓÊÕ·½Ë½ÓĞÃÜÔ¿µÄÈË²ÅÄÜ¶ÔĞÅÏ¢½âÃÜ¡£
-DTS£º digital timestamp service Êı×ÖÊ±¼ä´Á·şÎñ ¡£
-Èç¹ûÔÚÇ©ÃûÊ±¼ÓÉÏÒ»¸öÊ±¼ä±ê¼Ç£¬ ¼´ÊÇÓĞÊı×ÖÊ±¼ä´ÁµÄÊı×ÖÇ©Ãû¡£
+å‘é€æ–¹ï¼Œä»å‘é€æ–‡æœ¬ä¸­æå–128bitçš„æ‘˜è¦ ã€‚ç„¶åç”¨è‡ªå·±çš„private key å¯¹æ‘˜è¦å…¶è¿›è¡Œç­¾åã€‚å¹¶å°†ç­¾åä½œä¸ºé™„ä»¶åŒæ–‡æœ¬ä¸€åŒå‘å‡ºã€‚
+æ¥æ”¶æ–¹ï¼Œä»æ¥æ”¶åˆ°çš„åŸå§‹æŠ¥æ–‡ä¸­è®¡ç®—å‡º128bitçš„æ‘˜è¦ ï¼Œ æ¥ç€ç”¨å‘é€æ–¹çš„å…¬é’¥æ¥å¯¹æŠ¥æ–‡é™„åŠ çš„æ•°å­—ç­¾åè¿›è¡Œè§£å¯†ã€‚è‹¥ä¸¤ä¸ªæ‘˜è¦ç›¸åŒï¼Œ é‚£ä¹ˆ å°±èƒ½ç¡®è®¤è¯¥æ•°å­—ç­¾åæ˜¯å‘é€æ–¹çš„ã€‚
+so, æ•°å­—ç­¾åèƒ½é‰´åˆ«åŸå§‹æŠ¥æ–‡ã€‚
+ä»»ä½•æ‹¥æœ‰å‘é€æ–¹å…¬å¼€å¯†é’¥çš„äººéƒ½å¯ä»¥ éªŒè¯æ•°å­—ç­¾åçš„æ­£ç¡®æ€§ã€‚
+ä»»ä½•çŸ¥é“æ¥æ”¶æ–¹å…¬å¼€å¯†é’¥çš„äººéƒ½å¯ä»¥å‘å‘é€åŠ å¯†ä¿¡æ¯ï¼Œåªæœ‰å”¯ä¸€æ‹¥æœ‰
+æ¥æ”¶æ–¹ç§æœ‰å¯†é’¥çš„äººæ‰èƒ½å¯¹ä¿¡æ¯è§£å¯†ã€‚
+DTSï¼š digital timestamp service æ•°å­—æ—¶é—´æˆ³æœåŠ¡ ã€‚
+å¦‚æœåœ¨ç­¾åæ—¶åŠ ä¸Šä¸€ä¸ªæ—¶é—´æ ‡è®°ï¼Œ å³æ˜¯æœ‰æ•°å­—æ—¶é—´æˆ³çš„æ•°å­—ç­¾åã€‚
 
-1¡¢´´½¨Ë½Ô¿£º
-openssl genrsa -out private.pem 1024   //ÃÜÔ¿³¤¶È£¬1024¾õµÃ²»¹»°²È«µÄ»°¿ÉÒÔÓÃ2048£¬µ«ÊÇ´ú¼ÛÒ²ÏàÓ¦Ôö´ó
-2¡¢´´½¨¹«Ô¿£º
-//Îª·½±ã²âÊÔ£¬»¹ÊÇĞèÒª¹«Ô¿µÄ¡£Õı³£Çé¿öÏÂ£¬ÄÃµ½Ö¤Êé¾Í¿ÉÒÔÁË
+1ã€åˆ›å»ºç§é’¥ï¼š
+openssl genrsa -out private.pem 1024   //å¯†é’¥é•¿åº¦ï¼Œ1024è§‰å¾—ä¸å¤Ÿå®‰å…¨çš„è¯å¯ä»¥ç”¨2048ï¼Œä½†æ˜¯ä»£ä»·ä¹Ÿç›¸åº”å¢å¤§
+2ã€åˆ›å»ºå…¬é’¥ï¼š
+//ä¸ºæ–¹ä¾¿æµ‹è¯•ï¼Œè¿˜æ˜¯éœ€è¦å…¬é’¥çš„ã€‚æ­£å¸¸æƒ…å†µä¸‹ï¼Œæ‹¿åˆ°è¯ä¹¦å°±å¯ä»¥äº†
 openssl rsa -in private.pem -pubout -out public.pem
-3¡¢´´½¨Ö¤ÊéÇëÇó£º
-//Ê¹ÓÃË½Ô¿Éú³ÉÒ»¸öÖ¤ÊéÇëÇó£¬Ö¤ÊéÇëÇóÌá½»µ½CAÈÏÖ¤ÖĞĞÄºó»áµÃµ½Ò»·İÖ¤Êé£¬µ±È»£¬²âÊÔÓÃÊ±£¬¾Í²»±ØÌá½»CAÈÏÖ¤ÖĞĞÄ£¨ÊÕ·Ñ£©
+3ã€åˆ›å»ºè¯ä¹¦è¯·æ±‚ï¼š
+//ä½¿ç”¨ç§é’¥ç”Ÿæˆä¸€ä¸ªè¯ä¹¦è¯·æ±‚ï¼Œè¯ä¹¦è¯·æ±‚æäº¤åˆ°CAè®¤è¯ä¸­å¿ƒåä¼šå¾—åˆ°ä¸€ä»½è¯ä¹¦ï¼Œå½“ç„¶ï¼Œæµ‹è¯•ç”¨æ—¶ï¼Œå°±ä¸å¿…æäº¤CAè®¤è¯ä¸­å¿ƒï¼ˆæ”¶è´¹ï¼‰
 openssl req -new -out cert.csr -key private.pem
-4¡¢×ÔÇ©Êğ¸ùÖ¤Êé£º
-//×ÔÇ©Êğ£¬¾ÍÊÇ²»Í¨¹ıCAÈÏÖ¤ÖĞĞÄ×ÔĞĞ½øĞĞÖ¤ÊéÇ©Ãû£¬ÕâÀïÓÃÊÇx509
-openssl x509 -req -in cert.csr -out public.der -outform der -signkey private.pem -days 3650 //10ÄêÓĞĞ§ 
+4ã€è‡ªç­¾ç½²æ ¹è¯ä¹¦ï¼š
+//è‡ªç­¾ç½²ï¼Œå°±æ˜¯ä¸é€šè¿‡CAè®¤è¯ä¸­å¿ƒè‡ªè¡Œè¿›è¡Œè¯ä¹¦ç­¾åï¼Œè¿™é‡Œç”¨æ˜¯x509
+openssl x509 -req -in cert.csr -out public.der -outform der -signkey private.pem -days 3650 //10å¹´æœ‰æ•ˆ 
 
-½«DERÖ¤Êé×ª»»Îªpem¸ñÊ½ £º(CER¸ñÊ½¾ÍÊÇDER¸ñÊ½)
+å°†DERè¯ä¹¦è½¬æ¢ä¸ºpemæ ¼å¼ ï¼š(CERæ ¼å¼å°±æ˜¯DERæ ¼å¼)
 openssl x509 -in public.der -inform DER -out cert.pem -outform PEM
 
-SSL protocol £º ¿ÉÒÔ½¨Á¢Ò»¸öSSLÍ¨ĞÅµÄ·şÎñÆ÷ºÍ¿Í»§¶Ë ¡£
+SSL protocol ï¼š å¯ä»¥å»ºç«‹ä¸€ä¸ªSSLé€šä¿¡çš„æœåŠ¡å™¨å’Œå®¢æˆ·ç«¯ ã€‚
 SSL libssl.a
-ÃÜÂëËã·¨¿â£º libcrypto.a
-·Ö×é¶Ô³ÆËã·¨ ÊÇ¶ÔÊı¾İ¿é½øĞĞ²Ù×÷¡£des, 3des, aes,  rc2£¬ idea.
-rc4 -> ÎªÁ÷¼ÓÃÜËã·¨ 
+å¯†ç ç®—æ³•åº“ï¼š libcrypto.a
+åˆ†ç»„å¯¹ç§°ç®—æ³• æ˜¯å¯¹æ•°æ®å—è¿›è¡Œæ“ä½œã€‚des, 3des, aes,  rc2ï¼Œ idea.
+rc4 -> ä¸ºæµåŠ å¯†ç®—æ³• 
 
 //************
-OPENSSLº¯Êıµ÷ÓÃ³É¹¦·µ»Ø1£¬ ·ñÔò·µ»Ø0.
+OPENSSLå‡½æ•°è°ƒç”¨æˆåŠŸè¿”å›1ï¼Œ å¦åˆ™è¿”å›0.
 *************//
-EVP_CIPHER_CTX ctx; //ÃÜÂëËã·¨ÉÏÏÂÎÄ¹ØÏµ¾ä±ú ¡£
+EVP_CIPHER_CTX ctx; //å¯†ç ç®—æ³•ä¸Šä¸‹æ–‡å…³ç³»å¥æŸ„ ã€‚
 EVP_CIPHER_CTX_init(&ctx);
 
-EVP_EncryptInit_ex //ÉèÖÃÃÜÂëËã·¨£¬¼ÓÃÜÒıÇæ£¬ÃÜÔ¿£¬³õÊ¼»¯ÏòÁ¿
+EVP_EncryptInit_ex //è®¾ç½®å¯†ç ç®—æ³•ï¼ŒåŠ å¯†å¼•æ“ï¼Œå¯†é’¥ï¼Œåˆå§‹åŒ–å‘é‡
 EVP_EncryptUpdate
 EVP_EncryptFinal_ex
 
 
 unsigned char iv[8] = {0};
 EVP_EncryptInit_ex(&ctx, EVP_aes_128_ecb(), NULL, from_string(key), iv);
-EVP_aes_128_ecb(): 128Î»µÄECB·½Ê½µÄaesËã·¨ ¡£
-iv: ³õÊ¼»¯ÏòÁ¿£¬µ±cipherÎªCBC·½Ê½µÄ¶Ô³ÆËã·¨Ê±²ÅÓĞĞ§¡£
+EVP_aes_128_ecb(): 128ä½çš„ECBæ–¹å¼çš„aesç®—æ³• ã€‚
+iv: åˆå§‹åŒ–å‘é‡ï¼Œå½“cipherä¸ºCBCæ–¹å¼çš„å¯¹ç§°ç®—æ³•æ—¶æ‰æœ‰æ•ˆã€‚
 
 *len = 0;
 int outl = 0;
-// ¶ÔÓÚ²»¶¨³¤µÄÊı¾İ»òÕß´óÊı¾İ¿ÉÒÔ²»¶ÏÑ­»·µ÷ÓÃ¸Ãº¯Êı£¬ Ö±µ½°ÑÊı¾İ´¦ÀíÍêÎªÖ¹¡£
+// å¯¹äºä¸å®šé•¿çš„æ•°æ®æˆ–è€…å¤§æ•°æ®å¯ä»¥ä¸æ–­å¾ªç¯è°ƒç”¨è¯¥å‡½æ•°ï¼Œ ç›´åˆ°æŠŠæ•°æ®å¤„ç†å®Œä¸ºæ­¢ã€‚
 EVP_EncryptUpdate(&ctx, out+*len, &outl, in+*len, inl);
 
-//ÈôÓĞ·Ö×é²¹Æë£¬ÔòĞèÒªµ÷ÓÃ
+//è‹¥æœ‰åˆ†ç»„è¡¥é½ï¼Œåˆ™éœ€è¦è°ƒç”¨
 int test = inl >> 4;
 if ( inl != test << 4)
-//½áÊøÊı¾İ¼ÓÃÜ£¬·µ»Ø×îºó·Ö×éµÄ¼ÓÃÜÃÜÎÄ
+//ç»“æŸæ•°æ®åŠ å¯†ï¼Œè¿”å›æœ€ååˆ†ç»„çš„åŠ å¯†å¯†æ–‡
 EVP_EncryptFinal_ex(&ctx,out+*len,&outl);
 
-EVP_CIPHER_CTX_cleanup(&ctx); //ÇåÀí 
-ÔÚÏÖ´úÃÜÂëÑ§ÖĞÒ»°ãÊ¹ÓÃ·Ç¶Ô³ÆËã·¨ £¬ ÀûÓÃ¶Ô·½µÄ¹«Ô¿¼ÓÃÜ¸Ã¶Ô³ÆÃÜÔ¿£¬ ´ïµ½°²È«´«ÊäµÄÄ¿µÄ¡£
+EVP_CIPHER_CTX_cleanup(&ctx); //æ¸…ç† 
+åœ¨ç°ä»£å¯†ç å­¦ä¸­ä¸€èˆ¬ä½¿ç”¨éå¯¹ç§°ç®—æ³• ï¼Œ åˆ©ç”¨å¯¹æ–¹çš„å…¬é’¥åŠ å¯†è¯¥å¯¹ç§°å¯†é’¥ï¼Œ è¾¾åˆ°å®‰å…¨ä¼ è¾“çš„ç›®çš„ã€‚
 
 #include <stdio.h>
 #include <string.h>
@@ -853,21 +853,21 @@ int main()
 	return 0;
 }
 
-BCD±àÂëËµÃ÷£º
-±àÂë¹ı³Ì£¬½«Êı×Ö69½øĞĞBCD±àÂë£¨×¢£ºBCD±àÂëµÍÎ»ÔÚÇ°£¬ºóÃæ½«²»ÔÙ×¢ÊÍ£©¡£
+BCDç¼–ç è¯´æ˜ï¼š
+ç¼–ç è¿‡ç¨‹ï¼Œå°†æ•°å­—69è¿›è¡ŒBCDç¼–ç ï¼ˆæ³¨ï¼šBCDç¼–ç ä½ä½åœ¨å‰ï¼Œåé¢å°†ä¸å†æ³¨é‡Šï¼‰ã€‚
 
-1. ½«6£¬9·Ö±ğ×ª»»³É¶ş½øÖÆ±íÊ¾£º6£¨00000110£©9£¨00001001£©£¬´ó¼Ò¿ÉÒÔ¿´µ½£¬×î´óµÄÊı×Ö9Ò²Ö»Òª4¸öÎ»£¬ÔÚ´«Êä¹ı³ÌÖĞ°×°×ÀË·ÑÁË4¸öÎ»£»
+1. å°†6ï¼Œ9åˆ†åˆ«è½¬æ¢æˆäºŒè¿›åˆ¶è¡¨ç¤ºï¼š6ï¼ˆ00000110ï¼‰9ï¼ˆ00001001ï¼‰ï¼Œå¤§å®¶å¯ä»¥çœ‹åˆ°ï¼Œæœ€å¤§çš„æ•°å­—9ä¹Ÿåªè¦4ä¸ªä½ï¼Œåœ¨ä¼ è¾“è¿‡ç¨‹ä¸­ç™½ç™½æµªè´¹äº†4ä¸ªä½ï¼›
 
-2. ½«69ºÏ²¢ÎªÒ»¸ö×Ö½Ú£¬·Ö±ğÈ¡6£¬9¶ş½øÖÆ±àÂëµÄµÍ4Î»£¬°´ÕÕµÍÎ»ÔÚÇ°µÄÔ­Ôò£¬½«9µÄµÍËÄÎ»·ÅÇ°Ãæ6µÄµÍËÄÎ»·ÅºóÃæµÃ³öĞÂµÄ×Ö½Ú¶ş½øÖÆ±àÂëÊÇ10010110£»
+2. å°†69åˆå¹¶ä¸ºä¸€ä¸ªå­—èŠ‚ï¼Œåˆ†åˆ«å–6ï¼Œ9äºŒè¿›åˆ¶ç¼–ç çš„ä½4ä½ï¼ŒæŒ‰ç…§ä½ä½åœ¨å‰çš„åŸåˆ™ï¼Œå°†9çš„ä½å››ä½æ”¾å‰é¢6çš„ä½å››ä½æ”¾åé¢å¾—å‡ºæ–°çš„å­—èŠ‚äºŒè¿›åˆ¶ç¼–ç æ˜¯10010110ï¼›
 
-3. Íê³É±àÂë¹ı³Ì£¬69µÄBCD±àÂë½á¹ûÎª10010110¡£
+3. å®Œæˆç¼–ç è¿‡ç¨‹ï¼Œ69çš„BCDç¼–ç ç»“æœä¸º10010110ã€‚
 
-Base64±àÂëËµÃ÷
-¡¡¡¡Base64±àÂëÒªÇó°Ñ3¸ö8Î»×Ö½Ú£¨3*8=24£©×ª»¯Îª4¸ö6Î»µÄ×Ö½Ú£¨4*6=24£©£¬Ö®ºóÔÚ6Î»µÄÇ°Ãæ²¹Á½¸ö0£¬ĞÎ³É8Î»Ò»¸ö×Ö½ÚµÄĞÎÊ½¡£ Èç¹ûÊ£ÏÂµÄ×Ö·û²»×ã3¸ö×Ö½Ú£¬ÔòÓÃ0Ìî³ä£¬Êä³ö×Ö·ûÊ¹ÓÃ'='£¬Òò´Ë±àÂëºóÊä³öµÄÎÄ±¾Ä©Î²¿ÉÄÜ»á³öÏÖ1»ò2¸ö'='¡£
-¡¡¡¡ÎªÁË±£Ö¤ËùÊä³öµÄ±àÂëÎ»¿É¶Á×Ö·û£¬Base64ÖÆ¶¨ÁËÒ»¸ö±àÂë±í£¬ÒÔ±ã½øĞĞÍ³Ò»×ª»»¡£±àÂë±íµÄ´óĞ¡Îª2^6=64£¬ÕâÒ²ÊÇBase64Ãû³ÆµÄÓÉÀ´¡£
-Base64±àÂë±í
+Base64ç¼–ç è¯´æ˜
+ã€€ã€€Base64ç¼–ç è¦æ±‚æŠŠ3ä¸ª8ä½å­—èŠ‚ï¼ˆ3*8=24ï¼‰è½¬åŒ–ä¸º4ä¸ª6ä½çš„å­—èŠ‚ï¼ˆ4*6=24ï¼‰ï¼Œä¹‹ååœ¨6ä½çš„å‰é¢è¡¥ä¸¤ä¸ª0ï¼Œå½¢æˆ8ä½ä¸€ä¸ªå­—èŠ‚çš„å½¢å¼ã€‚ å¦‚æœå‰©ä¸‹çš„å­—ç¬¦ä¸è¶³3ä¸ªå­—èŠ‚ï¼Œåˆ™ç”¨0å¡«å……ï¼Œè¾“å‡ºå­—ç¬¦ä½¿ç”¨'='ï¼Œå› æ­¤ç¼–ç åè¾“å‡ºçš„æ–‡æœ¬æœ«å°¾å¯èƒ½ä¼šå‡ºç°1æˆ–2ä¸ª'='ã€‚
+ã€€ã€€ä¸ºäº†ä¿è¯æ‰€è¾“å‡ºçš„ç¼–ç ä½å¯è¯»å­—ç¬¦ï¼ŒBase64åˆ¶å®šäº†ä¸€ä¸ªç¼–ç è¡¨ï¼Œä»¥ä¾¿è¿›è¡Œç»Ÿä¸€è½¬æ¢ã€‚ç¼–ç è¡¨çš„å¤§å°ä¸º2^6=64ï¼Œè¿™ä¹Ÿæ˜¯Base64åç§°çš„ç”±æ¥ã€‚
+Base64ç¼–ç è¡¨
 
-ÂëÖµ	×Ö·û	 	ÂëÖµ	×Ö·û	 	ÂëÖµ	×Ö·û	 	ÂëÖµ	×Ö·û
+ç å€¼	å­—ç¬¦	 	ç å€¼	å­—ç¬¦	 	ç å€¼	å­—ç¬¦	 	ç å€¼	å­—ç¬¦
 0	A	16	Q	32	g	48	w
 1	B	17	R	33	h	49	x
 2	C	18	S	34	i	50	y
@@ -885,20 +885,20 @@ Base64±àÂë±í
 14	O	30	e	46	u	62	+
 15	P	31	f	47	v	63	/
 
-ÏûÏ¢ÕªÒª £º
-¾ÍÊÇ°Ñ²»¶¨³¤µÄÊı¾İÍ¨¹ıÊıÑ§±ä»»×ª»¯Îª¹Ì¶¨³¤¶ÈµÄ¶ÌÊı¾İ¡£¾ßÓĞ²»¿ÉÄæĞÔ¡£ÓÉÓÚË½Ô¿ÔËËãËÙ¶È ºÜÂı£¬¶ÔÏûÏ¢µÄÇ©ÃûÊµ¼ÊÉÏ¾ÍÊÇ¶ÔÏûÏ¢µÄÕªÒª ½øĞĞµÄË½Ô¿¼ÓÃÜ¡£ÏûÏ¢ÕªÒªÖ÷Òª ÓÃÀ´Êı¾İ·À´Û¸ÄºÍÊı¾İÇ©Ãû¡£
-openSSL Ìá¹© ÁËmd2, md4, md5, sha£¬ sha1, dss, mdc2, ripemd160µÈ¡£¶¨ÒåÓÚevp.hÖĞ¡£
+æ¶ˆæ¯æ‘˜è¦ ï¼š
+å°±æ˜¯æŠŠä¸å®šé•¿çš„æ•°æ®é€šè¿‡æ•°å­¦å˜æ¢è½¬åŒ–ä¸ºå›ºå®šé•¿åº¦çš„çŸ­æ•°æ®ã€‚å…·æœ‰ä¸å¯é€†æ€§ã€‚ç”±äºç§é’¥è¿ç®—é€Ÿåº¦ å¾ˆæ…¢ï¼Œå¯¹æ¶ˆæ¯çš„ç­¾åå®é™…ä¸Šå°±æ˜¯å¯¹æ¶ˆæ¯çš„æ‘˜è¦ è¿›è¡Œçš„ç§é’¥åŠ å¯†ã€‚æ¶ˆæ¯æ‘˜è¦ä¸»è¦ ç”¨æ¥æ•°æ®é˜²ç¯¡æ”¹å’Œæ•°æ®ç­¾åã€‚
+openSSL æä¾› äº†md2, md4, md5, shaï¼Œ sha1, dss, mdc2, ripemd160ç­‰ã€‚å®šä¹‰äºevp.hä¸­ã€‚
 EVP_MD_CTX_init
 EVP_DigestInit_ex
 EVP_DigestUpdate
 EVP_DigestFinal_ex
-ÒÔÉÏÈı¸öÓÃÓÚ¼ÆËã±È½Ï³¤µÄÏûÏ¢ÕªÒª 
+ä»¥ä¸Šä¸‰ä¸ªç”¨äºè®¡ç®—æ¯”è¾ƒé•¿çš„æ¶ˆæ¯æ‘˜è¦ 
 EVP_Digest
 EVP_MD_CTX_cleanup
 
-ÒÔÉÏÒ»¸öÓÃÓÚ¼ÆËã±È½Ï¶ÌµÄÏûÏ¢ÕªÒª ¡£
-ÏûÏ¢ÕªÒªµÄ³¤¶ÈÈ¡¾öÓÚÕªÒªËã·¨ £¬ ¶ÔÓÚÈ·¶¨ µÄÕªÒªËã·¨ £¬ÆäÊä³öÊÇÒ»¶¨µÄ¡£Èçmd2, md5Îª16×Ö½Ú¡£¶øsha1Îª20×Ö½Ú¡£
-½ÓÊÕ·½ÊÕµ½ÏûÏ¢£¬ ²¢ÖØĞÂ¼ÆËãÕªÒª¡£²¢Óë½ÓÊÕµ½µÄÕªÒª½øĞĞ¶Ô±È ¡£È·¶¨ÊÇ·ñÔÚ´«ÊäÖĞ±»´Û¸ÄÁË¡£µ±È»£¬ »¹Òª·ÀÖ¹ ¹¥»÷ÕßĞŞ¸ÄÁËÔ­ÎÄ²¢ÖØĞÂ¼ÆËãÁËÕªÒª ¡£ Ö»ÓĞÍ¨¹ı Êı×ÖÇ©Ãû²ÅÄÜ´ïµ½ ÕâÒ»Ä¿µÄ ¡£
+ä»¥ä¸Šä¸€ä¸ªç”¨äºè®¡ç®—æ¯”è¾ƒçŸ­çš„æ¶ˆæ¯æ‘˜è¦ ã€‚
+æ¶ˆæ¯æ‘˜è¦çš„é•¿åº¦å–å†³äºæ‘˜è¦ç®—æ³• ï¼Œ å¯¹äºç¡®å®š çš„æ‘˜è¦ç®—æ³• ï¼Œå…¶è¾“å‡ºæ˜¯ä¸€å®šçš„ã€‚å¦‚md2, md5ä¸º16å­—èŠ‚ã€‚è€Œsha1ä¸º20å­—èŠ‚ã€‚
+æ¥æ”¶æ–¹æ”¶åˆ°æ¶ˆæ¯ï¼Œ å¹¶é‡æ–°è®¡ç®—æ‘˜è¦ã€‚å¹¶ä¸æ¥æ”¶åˆ°çš„æ‘˜è¦è¿›è¡Œå¯¹æ¯” ã€‚ç¡®å®šæ˜¯å¦åœ¨ä¼ è¾“ä¸­è¢«ç¯¡æ”¹äº†ã€‚å½“ç„¶ï¼Œ è¿˜è¦é˜²æ­¢ æ”»å‡»è€…ä¿®æ”¹äº†åŸæ–‡å¹¶é‡æ–°è®¡ç®—äº†æ‘˜è¦ ã€‚ åªæœ‰é€šè¿‡ æ•°å­—ç­¾åæ‰èƒ½è¾¾åˆ° è¿™ä¸€ç›®çš„ ã€‚
 
 #include <stdio.h>
 #include <string.h.
@@ -934,27 +934,27 @@ int main()
 	return 0;
 }
 
-openssl Ç©ÃûºÍÑéÖ¤£º
-¶ÔÊı¾İ µÄÇ©Ãû¾ÍÊÇ¶ÔÊı¾İ µÄÕªÒª ½øĞĞË½Ô¿¼ÓÃÜ ¡£
-ÑéÖ¤Ç©Ãû¾ÍÊÇ½âÃÜÇ©ÃûÊı¾İ£¬ ºÍÔ­Ê¼µÄÕªÒªÊÇ·ñÒ»Ñù¡£Èô²»Ò»ÑùÔòËµ
-Ã÷Ô­Ãû»òÇ©Ãû±»´Û¸Ä¡£
-Êı×ÖÇ©Ãû½áºÏÊı×ÖÖ¤Êé¿ÉÒÔÊµÏÖ Éí·İÈÏÖ¤¡¢·À´Û¸Ä¡¢·ÀµÖÀµµÄ¹¦ÄÜ ¡£Ç©ÃûµÄÊı¾İ¸ñÊ½pkcs#1
-Ç©Ãû£º
-EVP_SignInit_ex¡¢
+openssl ç­¾åå’ŒéªŒè¯ï¼š
+å¯¹æ•°æ® çš„ç­¾åå°±æ˜¯å¯¹æ•°æ® çš„æ‘˜è¦ è¿›è¡Œç§é’¥åŠ å¯† ã€‚
+éªŒè¯ç­¾åå°±æ˜¯è§£å¯†ç­¾åæ•°æ®ï¼Œ å’ŒåŸå§‹çš„æ‘˜è¦æ˜¯å¦ä¸€æ ·ã€‚è‹¥ä¸ä¸€æ ·åˆ™è¯´
+æ˜åŸåæˆ–ç­¾åè¢«ç¯¡æ”¹ã€‚
+æ•°å­—ç­¾åç»“åˆæ•°å­—è¯ä¹¦å¯ä»¥å®ç° èº«ä»½è®¤è¯ã€é˜²ç¯¡æ”¹ã€é˜²æŠµèµ–çš„åŠŸèƒ½ ã€‚ç­¾åçš„æ•°æ®æ ¼å¼pkcs#1
+ç­¾åï¼š
+EVP_SignInit_exã€
 EVP_SignUpdate
-EVP_SignFinal :¼ÆËãÇ©Ãû½áÊø£¬Êä³öÇ©ÃûÖµ
+EVP_SignFinal :è®¡ç®—ç­¾åç»“æŸï¼Œè¾“å‡ºç­¾åå€¼
 
-ÑéÖ¤£º
+éªŒè¯ï¼š
 EVP_VerifyInit_ex
 EVP_VerifyUpdate
 EVP_VerifyFinal
 
-ÆäÖĞ£º EVP_SignInit_ex¡¢EVP_VerifyInit_exÎªEVP_DigestInit_exºê¶¨Òå
-EVP_SignUpdate\EVP_VerifyUpdateÎªEVP_DigestUpdateºê¶¨Òå
+å…¶ä¸­ï¼š EVP_SignInit_exã€EVP_VerifyInit_exä¸ºEVP_DigestInit_exå®å®šä¹‰
+EVP_SignUpdate\EVP_VerifyUpdateä¸ºEVP_DigestUpdateå®å®šä¹‰
 
-»ñµÃË½Ô¿£¬Ò»°ã´ÓÎÄ¼şÖĞ¶ÁÈ¡ÓĞ¿ÚÁî±£»¤ ¡£
-»ñµÃ¹«Ô¿ £¬ Êµ¼Ê¿ª·¢ÖĞÒ»°ã´ÓÖ¤ÊéÖĞ¶ÁÈ¡¡£
-ÑéÖ¤ÓÃ¹«Ô¿£ºEVP_PKEY *_key;
+è·å¾—ç§é’¥ï¼Œä¸€èˆ¬ä»æ–‡ä»¶ä¸­è¯»å–æœ‰å£ä»¤ä¿æŠ¤ ã€‚
+è·å¾—å…¬é’¥ ï¼Œ å®é™…å¼€å‘ä¸­ä¸€èˆ¬ä»è¯ä¹¦ä¸­è¯»å–ã€‚
+éªŒè¯ç”¨å…¬é’¥ï¼šEVP_PKEY *_key;
 SSL_library_init();
 
 	OpenSSL_add_all_algorithms();
@@ -985,13 +985,13 @@ SSL_library_init();
 		}
 	}
 
-Ç©ÃûÓÃË½Ô¿£º _key->pkey.rsa
+ç­¾åç”¨ç§é’¥ï¼š _key->pkey.rsa
 	BIO*  bp = BIO_new(BIO_s_file()) ;
 	BIO_read_filename(bp,  pszPEMKeyFileName);
 	_key = PEM_read_bio_PrivateKey(bp, NULL, NULL, (void*)pszPassword);
 	BIO_free(bp);
 
-ÊµÀı £º
+å®ä¾‹ ï¼š
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -1114,23 +1114,23 @@ int main()
 	return 0;
 }
 
-BASE64±à½âÂë£º
-¾ÍÊÇ°Ñ¶ş½øÖÆÊı¾İ×ª»»Îª¿É¼ûµÄASCII×Ö·û ¡£³£ÓÃÓÚwebÖĞ´«ÊäÒÔ¼°¿ÉÊÓ»¯µÄ¸´ÖÆ ºÍÕ³Ìù¡£µç×Ó ÓÊ¼şĞ­ÒéÒ²Í¨¹ı Æä±àÂë½øĞĞÊı¾İ´«Êä¡£
+BASE64ç¼–è§£ç ï¼š
+å°±æ˜¯æŠŠäºŒè¿›åˆ¶æ•°æ®è½¬æ¢ä¸ºå¯è§çš„ASCIIå­—ç¬¦ ã€‚å¸¸ç”¨äºwebä¸­ä¼ è¾“ä»¥åŠå¯è§†åŒ–çš„å¤åˆ¶ å’Œç²˜è´´ã€‚ç”µå­ é‚®ä»¶åè®®ä¹Ÿé€šè¿‡ å…¶ç¼–ç è¿›è¡Œæ•°æ®ä¼ è¾“ã€‚
 EVP_ENCODE_CTX ctx;
 EVP_EncodeInit(&ctx);
 
 EVP_EncodeInit
 EVP_EncodeUpdate
-EVP_EncodeFinal //±àÂë½áÊø£¬Êä³ö×îºóÊ£ÓàµÄ±àÂëÊı¾İ¡£
-ÒÔÉÏÈı¸öÊÊÓÃÓÚ´¦Àí²»¶¨³¤Êı¾İ
+EVP_EncodeFinal //ç¼–ç ç»“æŸï¼Œè¾“å‡ºæœ€åå‰©ä½™çš„ç¼–ç æ•°æ®ã€‚
+ä»¥ä¸Šä¸‰ä¸ªé€‚ç”¨äºå¤„ç†ä¸å®šé•¿æ•°æ®
 EVP_EncodeBlock
-ÊÊÓÃÓÚ´¦Àí¶ÌÊı¾İ 
+é€‚ç”¨äºå¤„ç†çŸ­æ•°æ® 
 EVP_DecodeInit
-EVP_DecodeUpdate //´óÊı¾İÎª²»¶¨³¤»òÕß Êı¾İÁ¿·Ç³£³¤£¬²»ÊÊºÏ·ÖÅä ¶¨³¤ÄÚ´æÀ´±£´æ£¬¹ÊĞèÒªÃ¿´Î´¦ÀíÒ»Ğ¡²¿·Ö£¬ÖØ¸´µ÷ÓÃ Ö±µ½´¦ÀíÍê±ÏÎªÖ¹¡£
+EVP_DecodeUpdate //å¤§æ•°æ®ä¸ºä¸å®šé•¿æˆ–è€… æ•°æ®é‡éå¸¸é•¿ï¼Œä¸é€‚åˆåˆ†é… å®šé•¿å†…å­˜æ¥ä¿å­˜ï¼Œæ•…éœ€è¦æ¯æ¬¡å¤„ç†ä¸€å°éƒ¨åˆ†ï¼Œé‡å¤è°ƒç”¨ ç›´åˆ°å¤„ç†å®Œæ¯•ä¸ºæ­¢ã€‚
 EVP_DecodeFinal // 
-ÒÔÉÏÈı¸öÊÊÓÃÓÚ´¦Àí²»¶¨³¤Êı¾İ
-EVP_DecodeBlock //·µ»Ø±àÂëÊı¾İµÄ³¤¶È
-ÊÊÓÃÓÚ´¦Àí¶ÌÊı¾İ 
+ä»¥ä¸Šä¸‰ä¸ªé€‚ç”¨äºå¤„ç†ä¸å®šé•¿æ•°æ®
+EVP_DecodeBlock //è¿”å›ç¼–ç æ•°æ®çš„é•¿åº¦
+é€‚ç”¨äºå¤„ç†çŸ­æ•°æ® 
 
 #include <stdio.h>
 #include <string.h>
@@ -1223,33 +1223,33 @@ int main()
   return 0;
 }
 
-x.509Ö¤Êé£ºÊı×ÖÖ¤ÊéÊÇÉí·İÖ¤Ã÷£¬ÍøÉÏÊÂÎñµÄ¸÷¸ö»·½Ú£¬ ²ÎÓë¸÷·½
-¶¼ ĞèÒªÑéÖ¤¶Ô·½Ö¤ÊéµÄÓĞĞ§ĞÔ£¬ ´Ó¶ø ½â¾öÏà»¥¼äµÄĞÅÈÎÎÊÌâ¡£
-°æ±¾ºÅ£¬ Ö¤ÊéĞòÁĞºÅ£¬ ÓĞĞ§ÆÚ£¬ ÓµÓĞÕß£¬ °ä·¢Õß£¬ÓµÓĞÕß¹«Ô¿£¬ CA¶ÔÒÔÉÏĞÅÏ¢µÄÇ©Ãû¡£
-Êµ¼Ê¿ª·¢ÖĞ£¬ Ö÷ÒªÓÃµ½Ö¤ÊéµÄÑéÖ¤£¬Ö¤ÊéµÄ½âÎö£¨Èç»ñµÃÖ¤ÊéµÄ°æ±¾£¬ ¹«Ô¿£¬ ÔÚĞ§ÆÚµÈ£©¡£¶¨ÒåÓÚx509.hÖĞ
-°Ñder±àÂëµÄÖ¤Êé×ª»»ÎªopenSSLÄÚ²¿ ½á¹¹Ìå¡£X509ÀàĞÍ¡£
+x.509è¯ä¹¦ï¼šæ•°å­—è¯ä¹¦æ˜¯èº«ä»½è¯æ˜ï¼Œç½‘ä¸Šäº‹åŠ¡çš„å„ä¸ªç¯èŠ‚ï¼Œ å‚ä¸å„æ–¹
+éƒ½ éœ€è¦éªŒè¯å¯¹æ–¹è¯ä¹¦çš„æœ‰æ•ˆæ€§ï¼Œ ä»è€Œ è§£å†³ç›¸äº’é—´çš„ä¿¡ä»»é—®é¢˜ã€‚
+ç‰ˆæœ¬å·ï¼Œ è¯ä¹¦åºåˆ—å·ï¼Œ æœ‰æ•ˆæœŸï¼Œ æ‹¥æœ‰è€…ï¼Œ é¢å‘è€…ï¼Œæ‹¥æœ‰è€…å…¬é’¥ï¼Œ CAå¯¹ä»¥ä¸Šä¿¡æ¯çš„ç­¾åã€‚
+å®é™…å¼€å‘ä¸­ï¼Œ ä¸»è¦ç”¨åˆ°è¯ä¹¦çš„éªŒè¯ï¼Œè¯ä¹¦çš„è§£æï¼ˆå¦‚è·å¾—è¯ä¹¦çš„ç‰ˆæœ¬ï¼Œ å…¬é’¥ï¼Œ åœ¨æ•ˆæœŸç­‰ï¼‰ã€‚å®šä¹‰äºx509.hä¸­
+æŠŠderç¼–ç çš„è¯ä¹¦è½¬æ¢ä¸ºopenSSLå†…éƒ¨ ç»“æ„ä½“ã€‚X509ç±»å‹ã€‚
 X509* d2i_X509(X509 **cert, unsigned char **d, int len);
-Ö¤Êé´æ´¢Çøº¯ÊıÖ÷ÒªÓÃÀ´ ÑéÖ¤Ö¤Êé£º
+è¯ä¹¦å­˜å‚¨åŒºå‡½æ•°ä¸»è¦ç”¨æ¥ éªŒè¯è¯ä¹¦ï¼š
 X509_STORE_new
 X509_STORE_free
 
-X509_STORE_CTX *ctx = NULL;			//Ö¤Êé´æ´¢Çø¾ä±ú
+X509_STORE_CTX *ctx = NULL;			//è¯ä¹¦å­˜å‚¨åŒºå¥æŸ„
 
-×´Ì¬»ú£º
-³õÊ¼×´Ì¬£º
+çŠ¶æ€æœºï¼š
+åˆå§‹çŠ¶æ€ï¼š
 struct Greeting;
 
-ÅÉÉúÀà±ØĞëÒª½«×Ô¼º×÷Îª»ùÀàÄ£°åµÄµÚÒ»¸ö²ÎÊı¡£
+æ´¾ç”Ÿç±»å¿…é¡»è¦å°†è‡ªå·±ä½œä¸ºåŸºç±»æ¨¡æ¿çš„ç¬¬ä¸€ä¸ªå‚æ•°ã€‚
 
-×´Ì¬»ú±ØĞëÒªÖªµÀµ±Æä³õÊ¼»¯ºó½øÈë µÄµÚÒ»¸ö×´Ì¬¡£
+çŠ¶æ€æœºå¿…é¡»è¦çŸ¥é“å½“å…¶åˆå§‹åŒ–åè¿›å…¥ çš„ç¬¬ä¸€ä¸ªçŠ¶æ€ã€‚
 struct Machine : sc::state_machine< Machine, Greeting> {};
 
-¶ÔÓÚÃ¿Ò»¸ö×´Ì¬ £¬ ÎÒÃÇĞèÒªÎªÆäÖ¸Ã÷£ºËüÊôÓÚÄÄÒ»¸ö×´Ì¬»ú£¬¡¡ËüÎ»ÓÚ×´Ì¬Í¼µÄÄÄ¸öÎ»ÖÃ¡£
+å¯¹äºæ¯ä¸€ä¸ªçŠ¶æ€ ï¼Œ æˆ‘ä»¬éœ€è¦ä¸ºå…¶æŒ‡æ˜ï¼šå®ƒå±äºå“ªä¸€ä¸ªçŠ¶æ€æœºï¼Œã€€å®ƒä½äºçŠ¶æ€å›¾çš„å“ªä¸ªä½ç½®ã€‚
 struct Greeting : sc::simple_state < Greeting, Machine>
 {
-	//Ò»µ©×´Ì¬»ú½øÈë Ò»¸ö×´Ì¬ µÄÊ±ºò£¬Ëü¾ÍÒª´´½¨Ò»¸öÏàÓ¦×´Ì¬ ÀàµÄ¶ÔÏó ¡£Ö»Òª×´Ì¬»ú±£³Ö ÔÚÕâ¸ö×´Ì¬£¬Õâ¸ö¶ÔÏó¾ÍÒ»Ö±´æÔÚ¡£×îºó£¬
-	//µ±×´Ì¬»úÀë¿ªÕâ¸ö×´Ì¬Ê±£¬ ¶ÔÏó±»Ïú»Ù¡£
-	//So£¬ Ò»¸ö×´Ì¬ µÄ½øÈë¶¯×÷¾ÍÊÇÕâ¸ö×´Ì¬ÀàµÄ¹¹ÔìÆ÷£¬ ¶øËüµÄÍË³ö¶¯×÷¾ÍÊÇÕâ¸ö×´Ì¬ÀàµÄÎö¹¹Æ÷¡£
+	//ä¸€æ—¦çŠ¶æ€æœºè¿›å…¥ ä¸€ä¸ªçŠ¶æ€ çš„æ—¶å€™ï¼Œå®ƒå°±è¦åˆ›å»ºä¸€ä¸ªç›¸åº”çŠ¶æ€ ç±»çš„å¯¹è±¡ ã€‚åªè¦çŠ¶æ€æœºä¿æŒ åœ¨è¿™ä¸ªçŠ¶æ€ï¼Œè¿™ä¸ªå¯¹è±¡å°±ä¸€ç›´å­˜åœ¨ã€‚æœ€åï¼Œ
+	//å½“çŠ¶æ€æœºç¦»å¼€è¿™ä¸ªçŠ¶æ€æ—¶ï¼Œ å¯¹è±¡è¢«é”€æ¯ã€‚
+	//Soï¼Œ ä¸€ä¸ªçŠ¶æ€ çš„è¿›å…¥åŠ¨ä½œå°±æ˜¯è¿™ä¸ªçŠ¶æ€ç±»çš„æ„é€ å™¨ï¼Œ è€Œå®ƒçš„é€€å‡ºåŠ¨ä½œå°±æ˜¯è¿™ä¸ªçŠ¶æ€ç±»çš„ææ„å™¨ã€‚
 	Greeting() {}
 	~Greeting(){}
 };
@@ -1258,11 +1258,11 @@ int main()
 {
 	Machine m;
 	
-	//Æô¶¯×´Ì¬»ú£¬×´Ì¬»ú½øĞĞÃ¿Ò»¸ö×´Ì¬Greeting,
-	//SO, Ö´ĞĞGreetingµÄ¹¹Ôìº¯Êı
+	//å¯åŠ¨çŠ¶æ€æœºï¼ŒçŠ¶æ€æœºè¿›è¡Œæ¯ä¸€ä¸ªçŠ¶æ€Greeting,
+	//SO, æ‰§è¡ŒGreetingçš„æ„é€ å‡½æ•°
 	m.initiate();
 	
-	//µ±ÎÒÃÇÀë¿ªmain()º¯ÊıÊ±£¬machine½«±»Ïú»Ù£¬µ¼ÖÂÖ´ĞĞÆäÎö¹¹º¯Êı¡£
+	//å½“æˆ‘ä»¬ç¦»å¼€main()å‡½æ•°æ—¶ï¼Œmachineå°†è¢«é”€æ¯ï¼Œå¯¼è‡´æ‰§è¡Œå…¶ææ„å‡½æ•°ã€‚
 	
 	return 0;
 }
@@ -1277,17 +1277,17 @@ base64
 configure items
 c++ public , private key algorithms
 
-    //ĞÂ½¨X509Ö¤Êé´æ´¢Çø
+    //æ–°å»ºX509è¯ä¹¦å­˜å‚¨åŒº
 	rootCertStore = X509_STORE_new();
-	//Ìí¼Ó¸ùÖ¤Êéµ½Ö¤Êé´æ´¢Çø
+	//æ·»åŠ æ ¹è¯ä¹¦åˆ°è¯ä¹¦å­˜å‚¨åŒº
 	X509_STORE_add_cert(rootCertStore,rootCert);
-	//ÉèÖÃ¼ì²éCRL±êÖ¾Î»£¬Èç¹ûÉèÖÃ´Ë±êÖ¾Î»£¬Ôò¼ì²éCRL£¬·ñÔò²»¼ì²éCRL¡£
+	//è®¾ç½®æ£€æŸ¥CRLæ ‡å¿—ä½ï¼Œå¦‚æœè®¾ç½®æ­¤æ ‡å¿—ä½ï¼Œåˆ™æ£€æŸ¥CRLï¼Œå¦åˆ™ä¸æ£€æŸ¥CRLã€‚
 	X509_STORE_set_flags(rootCertStore,X509_V_FLAG_CRL_CHECK);
-	//Ìí¼ÓCRLµ½Ö¤Êé´æ´¢Çø
+	//æ·»åŠ CRLåˆ°è¯ä¹¦å­˜å‚¨åŒº
 	X509_STORE_add_crl(rootCertStore,Crl);
-	//ĞÂ½¨Ö¤Êé´æ´¢Çø¾ä±ú
+	//æ–°å»ºè¯ä¹¦å­˜å‚¨åŒºå¥æŸ„
 	ctx = X509_STORE_CTX_new();
-	//³õÊ¼»¯¸ùÖ¤Êé´æ´¢Çø¡¢ÓÃ»§Ö¤Êé1
+	//åˆå§‹åŒ–æ ¹è¯ä¹¦å­˜å‚¨åŒºã€ç”¨æˆ·è¯ä¹¦1
 	rv = X509_STORE_CTX_init(ctx,rootCertStore,usrCert1,caCertStack);
 	if(rv != 1)
 	{
@@ -1301,38 +1301,38 @@ c++ public , private key algorithms
 		return;
 	}
 
-¶à×Ö½Ú£¬ ¿í×Ö·û £º
-Few programmers are aware that ANSI/ISO 9899-1990, the "American National Standard for Programming Languages¡ªC" (also known as "ANSI C") supports character sets that require more than one byte per character through a concept called "wide characters." 
+å¤šå­—èŠ‚ï¼Œ å®½å­—ç¬¦ ï¼š
+Few programmers are aware that ANSI/ISO 9899-1990, the "American National Standard for Programming Languagesâ€”C" (also known as "ANSI C") supports character sets that require more than one byte per character through a concept called "wide characters." 
 
 wcstombs - convert a wide-character string to a multibyte string
 mbstowcs - convert a multibyte string to a wide-character string
-ÓÃÓÚcharÓëwchar_tÖ®¼ä×ª»»¡£
+ç”¨äºcharä¸wchar_tä¹‹é—´è½¬æ¢ã€‚
 
-Ê×ÏÈ£¬%lsºÍ%sµÄÇø±ğºÜ¼òµ¥£¬%lsÒâÎ¶×Å½«¶ÔÓ¦µÄ²ÎÊı»á±»µ±×÷»ùÓÚ¿í×Ö·ûµÄ×Ö·û´®(wide chraracter string )¿´´ı£¬¶ø%sÔòÒâÎ¶×Å¶ÔÓ¦µÄ²ÎÊı»á±»µ±×÷ÆÕÍ¨×Ö·û´®(multi-byte string)¿´´ı¡£
-Êä³ö¿í×Ö·û£º
-    wchar_t wstr[] = L"ÖĞÎÄ";    
+é¦–å…ˆï¼Œ%lså’Œ%sçš„åŒºåˆ«å¾ˆç®€å•ï¼Œ%lsæ„å‘³ç€å°†å¯¹åº”çš„å‚æ•°ä¼šè¢«å½“ä½œåŸºäºå®½å­—ç¬¦çš„å­—ç¬¦ä¸²(wide chraracter string )çœ‹å¾…ï¼Œè€Œ%såˆ™æ„å‘³ç€å¯¹åº”çš„å‚æ•°ä¼šè¢«å½“ä½œæ™®é€šå­—ç¬¦ä¸²(multi-byte string)çœ‹å¾…ã€‚
+è¾“å‡ºå®½å­—ç¬¦ï¼š
+    wchar_t wstr[] = L"ä¸­æ–‡";    
     setlocale(LC_ALL, "zh_CN.UTF-8");       
     wprintf(L"%s ",wstr);
     wprintf(L"%ls ",wstr);
-µ«ÔÚLinuxÉÏ²¢²»Ò»¶¨³É¹¦¡£¿ÉÄÜ ÊÇÊä³öÁ÷¸ñÊ½»ìºÏÁËÆÕÍ¨printf¡£
+ä½†åœ¨Linuxä¸Šå¹¶ä¸ä¸€å®šæˆåŠŸã€‚å¯èƒ½ æ˜¯è¾“å‡ºæµæ ¼å¼æ··åˆäº†æ™®é€šprintfã€‚
     setlocale(LC_ALL, "zh_CN.UTF-8");
     printf("%ls ", wch);
-¿ÉÒÔÕıÈ·Êä³ö ¡£
+å¯ä»¥æ­£ç¡®è¾“å‡º ã€‚
 
-methodÊÇÓÃÀ´¸æËß·şÎñÆ÷×öÊ²Ã´ÊÂÇé ¡£
-×´Ì¬ÂëÔòÊÇÓÃÀ´¸æËß¿Í»§¶Ë·¢ÉúÁËÊ²Ã´ÊÂÇé ¡£
-100-199£ºĞÅÏ¢ÌáÊ¾¡£
-200-299 £º±íÊ¾³É¹¦¡£
-300-399£º±íÊ¾×ÊÔ´ÒÑ¾­¡¡±»ÒÆ×ßÁË¡£ÒªÃ´¸æÖª¿Í»§¶ËÊ¹ÓÃÌæ´úÎ»ÖÃÀ´·ÃÎÊËûÃÇËù¸ĞĞËÈ¤µÄ×ÊÔ´£¬ ÒªÃ´¾ÍÌá¹©Ò»¸öÌæ´úµÄÏìÓ¦¶ø²»ÊÇ×ÊÔ´µÄµÄÄÚÈİ¡£ Èç¹û ×ÊÔ´ÒÑ±»ÒÆ¶¯£¬¿É·¢ËÍÒ»¸öÖØ¶¨Ïò×´Ì¬ÂëºÍÒ»¸ö¿ÉÑ¡µÄLocationÊ×²¿À´¸æÖª¿Í»§¶Ë×ÊÔ´ÒÑ±»ÒÆ×ß£¬ÒÔ¼°ÏÖÔÚ¿ÉÒÔÔÚÄÄÀïÕÒµ½Ëü¡£ÕâÑùä¯ÀÀÆ÷¿ÉÒÔÔÚ²»´òÈÅÊ¹ÓÃÕßµÄÇé¿öÏÂ£¬Í¸Ã÷µØ×ªÈëĞÂµÄÎ»ÖÃÁË¡£
-400-499: ¿Í»§¶ËÇëÇó³ö´í¡£
-500-599£º·şÎñÆ÷¶Ë ³ö´íÁË¡£
-401£ºunauthorized ,ĞèÒªÊäÈëÓÃ»§ÃûºÍÃÜÂë¡£
-404£ºNot FOund£¬ ·şÎñÆ÷ÎŞ·¨ÕÒµ½ËùÇëÇóµÄURL¶ÔÓ¦µÄ×ÊÔ´ ¡£
-GET£ºÓÃÓÚÇëÇó·şÎñÆ÷·¢ËÍÄ³¸ö×ÊÔ´ ¡£
-HEAD£ºÓëGETÀàËÆ£¬µ«·şÎñÆ÷ÔÚÏìÓ¦ÖĞÖ»·µ»ØÊ×²¿£¬ ²»»á·µ»ØÊµÌåµÄÖ÷Ìå²¿·Ö¡£ÔÊĞí¿Í»§¶ËÔÚÎ´»ñÈ¡Êµ¼Ê×ÊÔ´µÄÇé¿öÏÂ£¬¶Ô×ÊÔ´µÄÊ×²¿½øĞĞ¼ì²é¡£
-PUT£ºÏò·şÎñÆ÷ÉÏ´«ÎÄµµ¡£
-POST£º Ïò·şÎñÆ÷·¢ËÍ±íµ¥Êı¾İ ¡£
-400 £º bad request
+methodæ˜¯ç”¨æ¥å‘Šè¯‰æœåŠ¡å™¨åšä»€ä¹ˆäº‹æƒ… ã€‚
+çŠ¶æ€ç åˆ™æ˜¯ç”¨æ¥å‘Šè¯‰å®¢æˆ·ç«¯å‘ç”Ÿäº†ä»€ä¹ˆäº‹æƒ… ã€‚
+100-199ï¼šä¿¡æ¯æç¤ºã€‚
+200-299 ï¼šè¡¨ç¤ºæˆåŠŸã€‚
+300-399ï¼šè¡¨ç¤ºèµ„æºå·²ç»ã€€è¢«ç§»èµ°äº†ã€‚è¦ä¹ˆå‘ŠçŸ¥å®¢æˆ·ç«¯ä½¿ç”¨æ›¿ä»£ä½ç½®æ¥è®¿é—®ä»–ä»¬æ‰€æ„Ÿå…´è¶£çš„èµ„æºï¼Œ è¦ä¹ˆå°±æä¾›ä¸€ä¸ªæ›¿ä»£çš„å“åº”è€Œä¸æ˜¯èµ„æºçš„çš„å†…å®¹ã€‚ å¦‚æœ èµ„æºå·²è¢«ç§»åŠ¨ï¼Œå¯å‘é€ä¸€ä¸ªé‡å®šå‘çŠ¶æ€ç å’Œä¸€ä¸ªå¯é€‰çš„Locationé¦–éƒ¨æ¥å‘ŠçŸ¥å®¢æˆ·ç«¯èµ„æºå·²è¢«ç§»èµ°ï¼Œä»¥åŠç°åœ¨å¯ä»¥åœ¨å“ªé‡Œæ‰¾åˆ°å®ƒã€‚è¿™æ ·æµè§ˆå™¨å¯ä»¥åœ¨ä¸æ‰“æ‰°ä½¿ç”¨è€…çš„æƒ…å†µä¸‹ï¼Œé€æ˜åœ°è½¬å…¥æ–°çš„ä½ç½®äº†ã€‚
+400-499: å®¢æˆ·ç«¯è¯·æ±‚å‡ºé”™ã€‚
+500-599ï¼šæœåŠ¡å™¨ç«¯ å‡ºé”™äº†ã€‚
+401ï¼šunauthorized ,éœ€è¦è¾“å…¥ç”¨æˆ·åå’Œå¯†ç ã€‚
+404ï¼šNot FOundï¼Œ æœåŠ¡å™¨æ— æ³•æ‰¾åˆ°æ‰€è¯·æ±‚çš„URLå¯¹åº”çš„èµ„æº ã€‚
+GETï¼šç”¨äºè¯·æ±‚æœåŠ¡å™¨å‘é€æŸä¸ªèµ„æº ã€‚
+HEADï¼šä¸GETç±»ä¼¼ï¼Œä½†æœåŠ¡å™¨åœ¨å“åº”ä¸­åªè¿”å›é¦–éƒ¨ï¼Œ ä¸ä¼šè¿”å›å®ä½“çš„ä¸»ä½“éƒ¨åˆ†ã€‚å…è®¸å®¢æˆ·ç«¯åœ¨æœªè·å–å®é™…èµ„æºçš„æƒ…å†µä¸‹ï¼Œå¯¹èµ„æºçš„é¦–éƒ¨è¿›è¡Œæ£€æŸ¥ã€‚
+PUTï¼šå‘æœåŠ¡å™¨ä¸Šä¼ æ–‡æ¡£ã€‚
+POSTï¼š å‘æœåŠ¡å™¨å‘é€è¡¨å•æ•°æ® ã€‚
+400 ï¼š bad request
 401 unauthorized
 402 payment required
 403 forbidden
@@ -1345,40 +1345,40 @@ POST£º Ïò·şÎñÆ÷·¢ËÍ±íµ¥Êı¾İ ¡£
 415 unsupported media type 
 
 500 internal server error
-501 not implemented ¿Í»§¶Ë·¢ÆğµÄÇëÇó³¬³ö·şÎñÆ÷µÄÄÜÁ¦·¶Î§¡£±ÈÈç²»Ö§³ÖµÄÇëÇó·½·¨¡£
+501 not implemented å®¢æˆ·ç«¯å‘èµ·çš„è¯·æ±‚è¶…å‡ºæœåŠ¡å™¨çš„èƒ½åŠ›èŒƒå›´ã€‚æ¯”å¦‚ä¸æ”¯æŒçš„è¯·æ±‚æ–¹æ³•ã€‚
 502 bad gateway
-503 service unavailable ·şÎñÆ÷ÏÖÔÚÎŞ·¨ÎªÇëÇóÌá¹©·şÎñ¡£
+503 service unavailable æœåŠ¡å™¨ç°åœ¨æ— æ³•ä¸ºè¯·æ±‚æä¾›æœåŠ¡ã€‚
 504 gateway timeout
 505 httpversion not supported 
 
-°²È«Ê×²¿£º
+å®‰å…¨é¦–éƒ¨ï¼š
 Authorization: 
-Cookie : ¿Í»§¶ËÓÃËüÏò ·şÎñÆ÷´«ËÍÒ»¸öÁîÅÆ£¬ Ëü²¢²»ÊÇÕæÕıµÄ°²È«ÉÌÎñ²¿£¬ µ«È·ÊµÒşº¬°²È«¹¦ÄÜ ¡£
+Cookie : å®¢æˆ·ç«¯ç”¨å®ƒå‘ æœåŠ¡å™¨ä¼ é€ä¸€ä¸ªä»¤ç‰Œï¼Œ å®ƒå¹¶ä¸æ˜¯çœŸæ­£çš„å®‰å…¨å•†åŠ¡éƒ¨ï¼Œ ä½†ç¡®å®éšå«å®‰å…¨åŠŸèƒ½ ã€‚
 
-·şÎñÆ÷¶ËÊ×²¿£º
-°²È«Ê×²¿£º
-Set-Cookie: ¿ÉÒÔÔÚ¿Í»§¶ËÉèÖÃÒ»¸öÁîÅÆ£¬ÒÔ±ã·şÎñÆ÷¶Ô¿Í»§¶Ë½øĞĞ±êÊ¶ ¡£
+æœåŠ¡å™¨ç«¯é¦–éƒ¨ï¼š
+å®‰å…¨é¦–éƒ¨ï¼š
+Set-Cookie: å¯ä»¥åœ¨å®¢æˆ·ç«¯è®¾ç½®ä¸€ä¸ªä»¤ç‰Œï¼Œä»¥ä¾¿æœåŠ¡å™¨å¯¹å®¢æˆ·ç«¯è¿›è¡Œæ ‡è¯† ã€‚
 
-Ê±ÑÓ£ºDNS²éÑ¯£¬ ½¨Á¢TCPÁ¬½Ó£¬ ·¢ËÍHTTPÇëÇó£¬´¦ÀíºÍ·şÎñÆ÷ÏìÓ¦¡£
+æ—¶å»¶ï¼šDNSæŸ¥è¯¢ï¼Œ å»ºç«‹TCPè¿æ¥ï¼Œ å‘é€HTTPè¯·æ±‚ï¼Œå¤„ç†å’ŒæœåŠ¡å™¨å“åº”ã€‚
 
-³Ö¾ÃÁ¬½Ó£ºÔÚÊÂÎñ´¦Àí½áÊøÖ®ºóÈÔÈ»±£³ÖÔÚ´ò¿ª×´Ì¬µÄ£Ô£Ã£ĞÁ¬½Ó±»³ÆÎª³Ö¾ÃÁ¬½Ó¡£ÖØÓÃÒÑ¶ÔÄ¿±ê·şÎñÆ÷´ò¿ªµÄ¿ÕÏĞ³Ö¾ÃÁ¬½Ó£¬¾Í¿ÉÒÔ¡¡±Ü¿ª»ºÂıµÄÁ¬½Ó½¨Á¢¡¡½×¶Î£¬¶øÇÒÒÑ¾­´ò¿ªµÄÁ¬½Ó»¹Ö»¿ÉÒÔ±ÜÃâÂıÆô¶¯µÄÓµÈûÊÊÓ¦½×¶Î¡¡¡£
-²¢ĞĞ³Ö¾ÃÁ¬½Ó£º¡¡ÏÖÔÚºÜ¶à£×£Å£ÂÓ¦ÓÃ³ÌĞò¡¡¶¼¡¡»á´ò¿ªÉÙÁ¿µÄ²¢ĞĞÁ¬½Ó£¬¡¡ÆäÖĞµÄÃ¿Ò»¸ö¶¼ÊÇ³Ö¾ÃÁ¬½Ó¡£Èç£º
+æŒä¹…è¿æ¥ï¼šåœ¨äº‹åŠ¡å¤„ç†ç»“æŸä¹‹åä»ç„¶ä¿æŒåœ¨æ‰“å¼€çŠ¶æ€çš„ï¼´ï¼£ï¼°è¿æ¥è¢«ç§°ä¸ºæŒä¹…è¿æ¥ã€‚é‡ç”¨å·²å¯¹ç›®æ ‡æœåŠ¡å™¨æ‰“å¼€çš„ç©ºé—²æŒä¹…è¿æ¥ï¼Œå°±å¯ä»¥ã€€é¿å¼€ç¼“æ…¢çš„è¿æ¥å»ºç«‹ã€€é˜¶æ®µï¼Œè€Œä¸”å·²ç»æ‰“å¼€çš„è¿æ¥è¿˜åªå¯ä»¥é¿å…æ…¢å¯åŠ¨çš„æ‹¥å¡é€‚åº”é˜¶æ®µã€€ã€‚
+å¹¶è¡ŒæŒä¹…è¿æ¥ï¼šã€€ç°åœ¨å¾ˆå¤šï¼·ï¼¥ï¼¢åº”ç”¨ç¨‹åºã€€éƒ½ã€€ä¼šæ‰“å¼€å°‘é‡çš„å¹¶è¡Œè¿æ¥ï¼Œã€€å…¶ä¸­çš„æ¯ä¸€ä¸ªéƒ½æ˜¯æŒä¹…è¿æ¥ã€‚å¦‚ï¼š
 http/1.0+ "keep-alive"
 Connection: Keep-Alive
 
-http/1.1  "persistent" Ä¬ÈÏÇé¿öÏÂÊÇ¼¤»îµÄ
-Connection: close ÏÔÊ¾¹Ø±Õ
+http/1.1  "persistent" é»˜è®¤æƒ…å†µä¸‹æ˜¯æ¿€æ´»çš„
+Connection: close æ˜¾ç¤ºå…³é—­
 
-HTTP»ù±¾ÈÏÖ¤£º ÒÔÃ÷ÎÄĞÎÊ½´«ËÍ£¬¼«²»°²È«¡£Î¨Ò»°²È«µÄÊ¹ÓÃ·½Ê½ ÊÇ½«ÆäÓëSSLÅäºÏ¡£
-ÕªÒªÈÏÖ¤£º²¢²»ÊÇ×î°²È«µÄĞ­Òé¡£²¢²»ÄÜÂú×ã°²È«HTTPÊÂÎñµÄºÜ¶àĞèÇó¡£¶ÔÕâĞ©ĞèÇóÀ´ËµÊ¹ÓÃtransport layer security and 
-secure http Ğ­Òé¸üÎªºÏÊÊÒ»Ğ© ¡£óğÑÔ£º ¾ø²»Í¨¹ıÍøÂç´«ËÍÃÜÂë¡£¶øÊÇ»á·¢ËÍÒ»¸öÖ¸ÎÆºÍÃÜÂëµÄÕªÒª £¬ÕâÊÇÃÜÂëµÄ²»¿ÉÄæÈÅÂë¡£
-¿Í»§¶ËºÍ·şÎñÆ÷¶¼ÖªµÀÕâ¸öÃÜÂë£¬ Òò´Ë·şÎñÆ÷¿ÉÒÔÑéÖ¤ËùÌá¹©µÄÕªÒªÊÇ»¹¿ÚÓëÃÜÂëÏàÆ¥Åä¡£
-ÃÜÂëÕªÒª 
-·şÎñÆ÷·¢¸ø¿Í»§¶ËÒ»¸öËæ»úÊı×÷ÎªÁîÅÆ¡£WWW-Authenticate´«È¥¡£
-¿Í»§¶ËÔÙÍ¨¹ıAuthorization±¨ÎÄ·¢»ØÕªÒª ¸ø·şÎñÆ÷¡£
-Í¬Ñù£¬ ¿Í»§¶ËÒ²¿ÉÒÔÈÏÖ¤·şÎñÆ÷¶Ë£¬¸ø·şÎñÆ÷´«ËÍ¿Í»§¶ËËæ»úÊı¡£
+HTTPåŸºæœ¬è®¤è¯ï¼š ä»¥æ˜æ–‡å½¢å¼ä¼ é€ï¼Œæä¸å®‰å…¨ã€‚å”¯ä¸€å®‰å…¨çš„ä½¿ç”¨æ–¹å¼ æ˜¯å°†å…¶ä¸SSLé…åˆã€‚
+æ‘˜è¦è®¤è¯ï¼šå¹¶ä¸æ˜¯æœ€å®‰å…¨çš„åè®®ã€‚å¹¶ä¸èƒ½æ»¡è¶³å®‰å…¨HTTPäº‹åŠ¡çš„å¾ˆå¤šéœ€æ±‚ã€‚å¯¹è¿™äº›éœ€æ±‚æ¥è¯´ä½¿ç”¨transport layer security and 
+secure http åè®®æ›´ä¸ºåˆé€‚ä¸€äº› ã€‚ç®´è¨€ï¼š ç»ä¸é€šè¿‡ç½‘ç»œä¼ é€å¯†ç ã€‚è€Œæ˜¯ä¼šå‘é€ä¸€ä¸ªæŒ‡çº¹å’Œå¯†ç çš„æ‘˜è¦ ï¼Œè¿™æ˜¯å¯†ç çš„ä¸å¯é€†æ‰°ç ã€‚
+å®¢æˆ·ç«¯å’ŒæœåŠ¡å™¨éƒ½çŸ¥é“è¿™ä¸ªå¯†ç ï¼Œ å› æ­¤æœåŠ¡å™¨å¯ä»¥éªŒè¯æ‰€æä¾›çš„æ‘˜è¦æ˜¯è¿˜å£ä¸å¯†ç ç›¸åŒ¹é…ã€‚
+å¯†ç æ‘˜è¦ 
+æœåŠ¡å™¨å‘ç»™å®¢æˆ·ç«¯ä¸€ä¸ªéšæœºæ•°ä½œä¸ºä»¤ç‰Œã€‚WWW-Authenticateä¼ å»ã€‚
+å®¢æˆ·ç«¯å†é€šè¿‡AuthorizationæŠ¥æ–‡å‘å›æ‘˜è¦ ç»™æœåŠ¡å™¨ã€‚
+åŒæ ·ï¼Œ å®¢æˆ·ç«¯ä¹Ÿå¯ä»¥è®¤è¯æœåŠ¡å™¨ç«¯ï¼Œç»™æœåŠ¡å™¨ä¼ é€å®¢æˆ·ç«¯éšæœºæ•°ã€‚
 
-usec : 10-6Ãë
+usec : 10-6ç§’
 time_t time(time_t *t);
 struct tm *localtime_r(const time_t *timep, struct tm *result);
 size_t strftime(char *s, size_t max, const char *format,
@@ -1392,7 +1392,7 @@ struct timeval {
     suseconds_t tv_usec;    /* microseconds */
 };
 
-¸ñÊ½´®£º"%Y-%m-%d %H:%M:%S"
+æ ¼å¼ä¸²ï¼š"%Y-%m-%d %H:%M:%S"
 
 CommonUtil::Time::operator timeval() const
 {
@@ -1458,7 +1458,7 @@ SELECT '%s',t1.F_trans_id,t1.F_amount,t1.F_order_id, t1.F_acc_id, t1.F_uid, t1.F
 scp -P 37600 outside_check p2p@192.168.11.171:/tmp/
 [127.0.0.1][20160104 10:52:59.545298][biz][depositservice.cpp:181][deposit_online][139830154479360]-- ###### deposit_online begin ##############, request=deposit_req(trans_id=2613, dtype=3, btype=1, account_id=201509220000000593, user_id=201509220000000593, amount=100, product_id=201511300000100013, card=card_info(card_no=, user_name=, identify_id=, card_type=0, bank_name=, bank_type=, card_cvv=, card_valid_date=, card_mobile=), desc=, stype=0, cb_ip=, cb_port=0, out_merchant_id=0000000018, pos_operator=p2p)
 [127.0.0.1][20160104 10:52:59.637242][trace][depositservice.cpp:262][deposit_online][139830154479360]-- deposit_online succ, amount=100, trans_id=2613, btype=1, account_id=201509220000000593
-[127.0.0.1][20160104 11:09:26.356432][biz][depositservice.cpp:181][deposit_online][139830152374016]-- ###### deposit_online begin ##############, request=deposit_req(trans_id=2614, dtype=0, btype=1, account_id=201509220000000593, user_id=201509220000000593, amount=400, product_id=201511300000100013, card=card_info(card_no=, user_name=, identify_id=, card_type=0, bank_name=, bank_type=, card_cvv=, card_valid_date=, card_mobile=), desc=Í¶×Ê 201511300000100013, stype=0, cb_ip=127.0.0.1, cb_port=12009, out_merchant_id=, pos_operator=)
+[127.0.0.1][20160104 11:09:26.356432][biz][depositservice.cpp:181][deposit_online][139830152374016]-- ###### deposit_online begin ##############, request=deposit_req(trans_id=2614, dtype=0, btype=1, account_id=201509220000000593, user_id=201509220000000593, amount=400, product_id=201511300000100013, card=card_info(card_no=, user_name=, identify_id=, card_type=0, bank_name=, bank_type=, card_cvv=, card_valid_date=, card_mobile=), desc=æŠ•èµ„ 201511300000100013, stype=0, cb_ip=127.0.0.1, cb_port=12009, out_merchant_id=, pos_operator=)
 [127.0.0.1][20160104 11:09:26.403687][trace][depositservice.cpp:262][deposit_online][139830152374016]-- deposit_online succ, amount=400, trans_id=2614, btype=1, account_id=201509220000000593
 				
 const uint8_t DESC[]={0xE6, 0x8A, 0x95, 0xE8, 0xB5, 0x84, 0x0};
@@ -1466,7 +1466,7 @@ const uint8_t DESC[]={0xE6, 0x8A, 0x95, 0xE8, 0xB5, 0x84, 0x0};
 0000000 8ae6 e895 84b5 000a
 0000007
 
-¼«¿ÍÑ§ÔºVIP£º £ÛÃâ·Ñ¸£Àû1Ã¶£İÁì¼«¿ÍÑ§Ôº30ÌìµÄVIP£¬Æ½Ê±30Ôª£¬ÏÖÔÚÃâ·Ñ¡£¿ÉÒÔ¿´È«Õ¾7500½ÚÊÓÆµ¿Î³Ì£¬ÏëÑ§±à³ÌµÄĞ¡»ï°éËÙÀ´¡£Ê±¼äÓĞÏŞ£ºhttp://e.jikexueyuan.com/invite/index.html?ZnJvbV9jb2RlPUVCUTNHMCZ1bmFtZT1qaWtlXzA4MjI3MDkmY2hhbm5lbD1pbnZpdGVfc2hhcmVidXR0b25fZGlyZWN0MDQ=			
+æå®¢å­¦é™¢VIPï¼š ï¼»å…è´¹ç¦åˆ©1æšï¼½é¢†æå®¢å­¦é™¢30å¤©çš„VIPï¼Œå¹³æ—¶30å…ƒï¼Œç°åœ¨å…è´¹ã€‚å¯ä»¥çœ‹å…¨ç«™7500èŠ‚è§†é¢‘è¯¾ç¨‹ï¼Œæƒ³å­¦ç¼–ç¨‹çš„å°ä¼™ä¼´é€Ÿæ¥ã€‚æ—¶é—´æœ‰é™ï¼šhttp://e.jikexueyuan.com/invite/index.html?ZnJvbV9jb2RlPUVCUTNHMCZ1bmFtZT1qaWtlXzA4MjI3MDkmY2hhbm5lbD1pbnZpdGVfc2hhcmVidXR0b25fZGlyZWN0MDQ=			
 
 /usr/local/activemq_2/data
 Program terminated with signal 6, Aborted.
@@ -1488,8 +1488,8 @@ Missing separate debuginfos, use: debuginfo-install p2p-cpp-0.0-1.x86_64 p2p-cpp
 #12 0x0000003245a07a51 in start_thread () from /lib64/libpthread.so.0
 #13 0x00000032452e893d in clone () from /lib64/libc.so.6
 
--rw------- 1 root root 394866688 1ÔÂ   6 23:28 core.loan_service.1452094118.9998
--rw------- 1 root root 394870784 1ÔÂ   7 13:15 core.loan_service.1452143750.61350
+-rw------- 1 root root 394866688 1æœˆ   6 23:28 core.loan_service.1452094118.9998
+-rw------- 1 root root 394870784 1æœˆ   7 13:15 core.loan_service.1452143750.61350
 	
 Program terminated with signal 6, Aborted.
 #0  0x0000003245232625 in raise () from /lib64/libc.so.6
@@ -1516,7 +1516,7 @@ IIRC, __cxa_pure_virtual() is a crash function, it is only meant to be called wh
 
 [127.0.0.1][20160107 15:48:19.408716][biz][withdrawservice.cpp:157][withdraw_online][140258511410944]-- ###### withdraw_online begin ##########
 ####, request=withdraw_req(trans_id=7117, account_id=201508070000002593, user_id=201508070000001593, btype=8, stype=2, amount=155, card=card_in
-fo(card_no=, user_name=, card_type=2), product_id=0, bank_branch=, bank_branch_no=, desc=ÓÃ»§ÏßÉÏÌáÏÖ, cb_ip=127.0.0.1, cb_port=0, orig_trans_i
+fo(card_no=, user_name=, card_type=2), product_id=0, bank_branch=, bank_branch_no=, desc=ç”¨æˆ·çº¿ä¸Šæç°, cb_ip=127.0.0.1, cb_port=0, orig_trans_i
 d=0, orig_btype=0)
 
 ntpdate 1.cn.pool.ntp.org
@@ -1529,7 +1529,7 @@ ntpdate 1.cn.pool.ntp.org
 226 Directory send OK.
 ftp>
 
-telnet½Å±¾×Ô¶¯»¯·±Ëø£¬ ¿ÉÓÃnetcat¡£
+telnetè„šæœ¬è‡ªåŠ¨åŒ–ç¹é”ï¼Œ å¯ç”¨netcatã€‚
 
 cgicc:
 	cgicc::Cgicc formData;
@@ -1604,7 +1604,7 @@ do
 	order by t2.F_create_time;"
 done > payoffdetail
 
-·¢²¼ºó£¬ÔÙÉêÇëĞŞ¸Ädb:
+å‘å¸ƒåï¼Œå†ç”³è¯·ä¿®æ”¹db:
 m=0
 n=0
 l=0
@@ -1648,7 +1648,7 @@ do
 done	
 
 [p2p@p2p-server-1 ~]$ logout
-±àÂë×ª»»£º
+ç¼–ç è½¬æ¢ï¼š
 [jun@p2p-dev ~]$ iconv -f GBK -t UTF-8 utf8.txt > utf8UTF8.txt
 
 	const uint8_t DESC[]={0xE6, 0x8A, 0x95, 0xE8, 0xB5, 0x84, 0x0};
@@ -1656,33 +1656,33 @@ done
 
 	yeahka::deposit::deposit_req invest_deposit_req;
 	invest_deposit_req.__set_trans_id(trans_id);
-	invest_deposit_req.__set_dtype(dtype);										//³äÖµ·½Ê½
-	invest_deposit_req.__set_btype(bus_type::b_investment);						//Í¶×Ê³äÖµ
-	invest_deposit_req.__set_account_id(account_id);							//Í¶×ÊÓÃ»§µÄaccount id
-	invest_deposit_req.__set_user_id(user_id);									//Í¶×ÊÓÃ»§µÄuid
-	invest_deposit_req.__set_amount(amount);									//³äÖµ½ğ¶î
-	invest_deposit_req.__set_product_id(loan_id);								//±êµÄid
+	invest_deposit_req.__set_dtype(dtype);										//å……å€¼æ–¹å¼
+	invest_deposit_req.__set_btype(bus_type::b_investment);						//æŠ•èµ„å……å€¼
+	invest_deposit_req.__set_account_id(account_id);							//æŠ•èµ„ç”¨æˆ·çš„account id
+	invest_deposit_req.__set_user_id(user_id);									//æŠ•èµ„ç”¨æˆ·çš„uid
+	invest_deposit_req.__set_amount(amount);									//å……å€¼é‡‘é¢
+	invest_deposit_req.__set_product_id(loan_id);								//æ ‡çš„id
 
 	snprintf(tmp, sizeof(tmp), "%s %ld", DESC, loan_id);
 
 [jun@p2p-dev ~]$ iconv -f UTF-8 -t GBK utf8UTF8.txt > utf8GBK.txt
 [jun@p2p-dev ~]$ cat FILE
-Í¶×Ê
+æŠ•èµ„
 [jun@p2p-dev ~]$ od -c FILE
 0000000 346 212 225 350 265 204  \n
 0000007
 [jun@p2p-dev ~]$ od -x FILE
 0000000 8ae6 e895 84b5 000a
 0000007
-2016Äê 03ÔÂ 15ÈÕ ĞÇÆÚ¶ş 18:22:11 CST
+2016å¹´ 03æœˆ 15æ—¥ æ˜ŸæœŸäºŒ 18:22:11 CST
 152C8F65F8E272DEBEAC935235E089E287DD9FCAE5B0CC07E91F760D06F23E2FE8BF21F9452992F6CB5E49BEDB875698
 40BFAB8643D839B662FDBB88B0ADC465A994BCB5B57E1D39160DCE298D77494FEFDC8B4C00680A0B
-ÉèÖÃ±íºó×º£º
+è®¾ç½®è¡¨åç¼€ï¼š
         stringstream table_suffix;
         table_suffix.fill('0');
         table_suffix.width(3);
         table_suffix << i;
-½«ÕûĞÍ×ªÎª×Ö·û´®ÓĞ±ØÒªÂğ£¿		
+å°†æ•´å‹è½¬ä¸ºå­—ç¬¦ä¸²æœ‰å¿…è¦å—ï¼Ÿ		
 		stringstream sql;
 		sql << " select ";
 		sql << InvestmentTableCols;
@@ -1693,13 +1693,13 @@ done
 		sql << " F_state="
 				<< CommonUtil::intToString(investment_state::invest_order);		
 
--rw------- 1 root root 394981376 3ÔÂ  15 00:25 core.loan_service.1457972755.22140
--rw------- 1 root root 394985472 3ÔÂ  15 21:06 core.loan_service.1458047178.6329
+-rw------- 1 root root 394981376 3æœˆ  15 00:25 core.loan_service.1457972755.22140
+-rw------- 1 root root 394985472 3æœˆ  15 21:06 core.loan_service.1458047178.6329
 				
 [127.0.0.1][20160111 16:26:31.417273][error][yk_api_mysql.cpp:122][execute][139907892176640]-- mysq_error(1062):Duplicate entry '2-17-722012' f
 or key 'i_btype_operation_transid'  insert into p2p.t_loan_flow_93 ( F_flow_id,F_loan_id,F_loan_title,F_repayment_id,F_bus_type,F_amount,F_loan
 _state,F_uid,F_name,F_operation,F_investor_uid,F_investor_name,F_remark,F_trans_id,F_create_time )  values  ( 201601110000030093,20160111000000
-0093,'ËÙ´û-201601110000',0,2,1000000,4,201507170000104593,'',17,0,'','withdraw_transfer_request',722012,'2016-01-11 16:26:31' )
+0093,'é€Ÿè´·-201601110000',0,2,1000000,4,201507170000104593,'',17,0,'','withdraw_transfer_request',722012,'2016-01-11 16:26:31' )
 [127.0.0.1][20160111 16:26:31.417337][error][Loan_Lend/Loan_Lend_For_P2P.cpp:126][lend_for_p2p_loan_type][139907892176640]-- insert withdraw_tr
 ansfer_request flow fail,loan id is 201601110000000093,bus_type::b_pay_loan,loan total amount is 5ld,loan state is 1000000, loan lender uid is
 4,trans id is 201507170000104593
@@ -1707,17 +1707,17 @@ ansfer_request flow fail,loan id is 201601110000000093,bus_type::b_pay_loan,loan
 
 delete from p2p.t_loan_flow_93 where F_bus_type = 2 and F_operation = 17 and F_trans_id = 722019;
 
-ÕıÊ½»·¾³µÄ·¢²¼Á÷³Ì£º
-Õı³£Á÷³Ì£º
-1¡¢1£©¿ª·¢×Ô²â¡¢2£©×ª²âºÍ´úÂëreview¡¢3£©viktor³ö¾ß²âÊÔ±¨¸æ¡¢4£©¿ª·¢·¢³ö·¢²¼ÉêÇëÓÊ¼ş¡¢5£©globeÉóÅú¡¢6£©ÔËÎ¬×é£¨ricky£©Ö´ĞĞ·¢²¼¡£
+æ­£å¼ç¯å¢ƒçš„å‘å¸ƒæµç¨‹ï¼š
+æ­£å¸¸æµç¨‹ï¼š
+1ã€1ï¼‰å¼€å‘è‡ªæµ‹ã€2ï¼‰è½¬æµ‹å’Œä»£ç reviewã€3ï¼‰viktorå‡ºå…·æµ‹è¯•æŠ¥å‘Šã€4ï¼‰å¼€å‘å‘å‡ºå‘å¸ƒç”³è¯·é‚®ä»¶ã€5ï¼‰globeå®¡æ‰¹ã€6ï¼‰è¿ç»´ç»„ï¼ˆrickyï¼‰æ‰§è¡Œå‘å¸ƒã€‚
 
-½ô¼±·¢²¼£º
-2¡¢¶ÔÓÚÑÏÖØÎÊÌâÖ´ĞĞ½ô¼±·¢²¼Á÷³Ì£º1£©¿ª·¢Ö±½Ó·¢²¼ÉêÇë£¨ÓÊ¼ş£©£¬2£©´úÂëreviewÎÊÌâĞŞÕıÇé¿ö£¬3£©globeÅú£¬4£©¿ª·¢Ö´ĞĞ·¢²¼Á÷³Ì¡£
+ç´§æ€¥å‘å¸ƒï¼š
+2ã€å¯¹äºä¸¥é‡é—®é¢˜æ‰§è¡Œç´§æ€¥å‘å¸ƒæµç¨‹ï¼š1ï¼‰å¼€å‘ç›´æ¥å‘å¸ƒç”³è¯·ï¼ˆé‚®ä»¶ï¼‰ï¼Œ2ï¼‰ä»£ç reviewé—®é¢˜ä¿®æ­£æƒ…å†µï¼Œ3ï¼‰globeæ‰¹ï¼Œ4ï¼‰å¼€å‘æ‰§è¡Œå‘å¸ƒæµç¨‹ã€‚
 
-Ã¿´Î·¢²¼¶¼ÒªÓĞ·¢²¼ÓÊ¼ş£¨°üº¬¸ÄÅäÖÃ£©£¬½ô¼±Çé¿ö¿Éºó²¹£¬µ«²»ÄÜÈ±£¬Ë½ÏÂ²»ÔÊĞí·¢²¼¡£
-·¢²¼ÉêÇëÓÊ¼ş°üº¬£º1£©¸Ä¶¯µãÃèÊö¼°Ó°Ïì·¶Î§¡£2£©´úÂëreview½á¹û¼°ĞŞÕıÇé¿ö¡£3£©´ò°üÎ»ÖÃ¼°Éı¼¶²½Öè£¬·¢²¼Ê§°ÜµÄ»ØÍË²½Öè¡£4£©ÆäËû¿ª·¢ÈËÔ±ÈÏÎªĞèÒª²¹³äµÄ×¢ÒâÊÂÏî¡£
+æ¯æ¬¡å‘å¸ƒéƒ½è¦æœ‰å‘å¸ƒé‚®ä»¶ï¼ˆåŒ…å«æ”¹é…ç½®ï¼‰ï¼Œç´§æ€¥æƒ…å†µå¯åè¡¥ï¼Œä½†ä¸èƒ½ç¼ºï¼Œç§ä¸‹ä¸å…è®¸å‘å¸ƒã€‚
+å‘å¸ƒç”³è¯·é‚®ä»¶åŒ…å«ï¼š1ï¼‰æ”¹åŠ¨ç‚¹æè¿°åŠå½±å“èŒƒå›´ã€‚2ï¼‰ä»£ç reviewç»“æœåŠä¿®æ­£æƒ…å†µã€‚3ï¼‰æ‰“åŒ…ä½ç½®åŠå‡çº§æ­¥éª¤ï¼Œå‘å¸ƒå¤±è´¥çš„å›é€€æ­¥éª¤ã€‚4ï¼‰å…¶ä»–å¼€å‘äººå‘˜è®¤ä¸ºéœ€è¦è¡¥å……çš„æ³¨æ„äº‹é¡¹ã€‚
 
-ÓĞÒâ¼û½ñÌìÌá³ö£¬Ã»Òâ¼û°´´ËÖ´ĞĞ¡£
+æœ‰æ„è§ä»Šå¤©æå‡ºï¼Œæ²¡æ„è§æŒ‰æ­¤æ‰§è¡Œã€‚
 mysql> update dbtest set id = 6 where id = 6;
 Query OK, 0 rows affected (0.00 sec)
 Rows matched: 1  Changed: 0  Warnings: 0
@@ -1734,10 +1734,10 @@ mysql> create table tcount_tbl
     -> tutorial_author varchar(40) NOT NULL,
     -> tutorial_count  INT
     -> ) TYPE=InnoDB;
-ÉèÖÃ¡°×Ô¶¯Ìá½»¡±Ä£Ê½
+è®¾ç½®â€œè‡ªåŠ¨æäº¤â€æ¨¡å¼
 SET AUTOCOMMIT = 0
-Ã¿ÌõSQL¶¼ÊÇÍ¬Ò»¸öÊÂÎñµÄ²»Í¬ÃüÁî£¬Ö®¼äÓÉ COMMIT »ò ROLLBACK¸ô¿ª
-µôÏßºó£¬Ã»ÓĞ COMMIT µÄÊÂÎñ¶¼±»·ÅÆú	
+æ¯æ¡SQLéƒ½æ˜¯åŒä¸€ä¸ªäº‹åŠ¡çš„ä¸åŒå‘½ä»¤ï¼Œä¹‹é—´ç”± COMMIT æˆ– ROLLBACKéš”å¼€
+æ‰çº¿åï¼Œæ²¡æœ‰ COMMIT çš„äº‹åŠ¡éƒ½è¢«æ”¾å¼ƒ	
 
 [zk: localhost:2181(CONNECTED) 1] ls /
 [dubbo, zookeeper, p2p]
@@ -1748,14 +1748,14 @@ SET AUTOCOMMIT = 0
 [zk: localhost:2181(CONNECTED) 4] ls /p2p
 [SettlementService, UserService, IDService, DepositService, WithdrawService, InvestMentService, TestProxyService, AccountService, LoanService, MsgService]
 
-       ¡¤   --silent, -s
+       Â·   --silent, -s
 
            Silent mode. Produce less output. This option can be given multiple times to produce less and less output.
 
            This option results in nontabular output format and escaping of special characters. Escaping may be disabled by using
            raw mode; see the description for the --raw option.
 
-       ¡¤   --skip-column-names, -N
+       Â·   --skip-column-names, -N
 
            Do not write column names in results.
 
@@ -1766,13 +1766,13 @@ mysql -uroot -pAndy@yeahka.com p2p -e "select * from t_loan_93" -N -s |sed -e 's
 
 mysqldump -u root -pAndy@yeahka.com -t  -T/tmp p2p t_loan_93 --fields-terminated-by=','
 
-Ã¿ÔÂ»¹¿î°üº¬»¹±¾½ğºÍ»¹Ï¢¡£
-µÈ¶î±¾Ï¢£ºÃ¿ÔÂ»¹¿îÊı¶îÏàÍ¬¡£
- Ê¹ÓÃËµÃ÷£º
-1¡¢±¾¼ÆËã½á¹ûÒÔ¡°µÈ¶î±¾Ï¢¡±»¹¿î·½Ê½¼ÆËã¡£
-2¡¢±¾ÔÂ»¹Ï¢=±¾ÔÂÓà¶î¡ÁÔÂÀûÂÊ
-3¡¢±¾ÔÂ»¹±¾=Ã¿ÔÂ»¹¿î¶î-±¾ÔÂ»¹Ï¢
-4¡¢±¾±í¼ÆËã½á¹ûÓĞ¹ØÊı¾İ½ö¹©²Î¿¼£¬²»×÷Îª¿Û¿îÒÀ¾İ¡£
+æ¯æœˆè¿˜æ¬¾åŒ…å«è¿˜æœ¬é‡‘å’Œè¿˜æ¯ã€‚
+ç­‰é¢æœ¬æ¯ï¼šæ¯æœˆè¿˜æ¬¾æ•°é¢ç›¸åŒã€‚
+ ä½¿ç”¨è¯´æ˜ï¼š
+1ã€æœ¬è®¡ç®—ç»“æœä»¥â€œç­‰é¢æœ¬æ¯â€è¿˜æ¬¾æ–¹å¼è®¡ç®—ã€‚
+2ã€æœ¬æœˆè¿˜æ¯=æœ¬æœˆä½™é¢Ã—æœˆåˆ©ç‡
+3ã€æœ¬æœˆè¿˜æœ¬=æ¯æœˆè¿˜æ¬¾é¢-æœ¬æœˆè¿˜æ¯
+4ã€æœ¬è¡¨è®¡ç®—ç»“æœæœ‰å…³æ•°æ®ä»…ä¾›å‚è€ƒï¼Œä¸ä½œä¸ºæ‰£æ¬¾ä¾æ®ã€‚
 
 scale=8
 500000*(0.07/12)*(1+0.07/12)^120
@@ -1780,11 +1780,11 @@ scale=8
 (1+(0.07/12))^120-1
 1.00966057
 5861.50664639/1.00966057
-5805.42295158  //Ã¿ÔÂÓ¦»¹±¾Ï¢¡£
-»¹Ï¢£º 500000*0.07/12
+5805.42295158  //æ¯æœˆåº”è¿˜æœ¬æ¯ã€‚
+è¿˜æ¯ï¼š 500000*0.07/12
 500000*0.07/12
 2916.6666666
-»¹±¾£º 5805.42 - 2916.67
+è¿˜æœ¬ï¼š 5805.42 - 2916.67
 
 [127.0.0.1][20160111 20:18:02.257731][trace][yk_api_logger.cpp:49][init_log][140272925079520]-- deposit.cgi start:-----------------------------
 ------------
@@ -1815,21 +1815,21 @@ DepositService.WhitelistKey=67110781899517887019790697174943
 
 withhold_orderquery
 whitelist_submit
-Í³¼ÆÉÏµÄ³ÇÊĞ»¯Ë®Æ½Îª59.8%
+ç»Ÿè®¡ä¸Šçš„åŸå¸‚åŒ–æ°´å¹³ä¸º59.8%
 
-£¨Êı¾İÓÉÊÜ·Ã×¨¼ÒÌá¹©£©
+ï¼ˆæ•°æ®ç”±å—è®¿ä¸“å®¶æä¾›ï¼‰
 
-¡ñ2014ÄêÉîÛÚ³£×¡ÈË¿Ú1077 .8 9Íò£¬ÆäÖĞ»§¼®ÈË¿ÚÎª332 .21ÍòÈË£¬·Ç»§¼®ÈË¿Ú745 .68ÍòÈË£¬»§¼®ÈË¿Ú½öÎª³£×¡ÈË¿ÚµÄ30 .8%
+â—2014å¹´æ·±åœ³å¸¸ä½äººå£1077 .8 9ä¸‡ï¼Œå…¶ä¸­æˆ·ç±äººå£ä¸º332 .21ä¸‡äººï¼Œéæˆ·ç±äººå£745 .68ä¸‡äººï¼Œæˆ·ç±äººå£ä»…ä¸ºå¸¸ä½äººå£çš„30 .8%
 
-ÉîÛÚ·Ç»§¼®³£×¡ÈË¿Ú¼ÓÔİ×¡¼°Î´°ìÖ¤µÄ£¬³ÆÖ®ÎªÁ÷¶¯ÈË¿Ú£¬´ï1500Íò
+æ·±åœ³éæˆ·ç±å¸¸ä½äººå£åŠ æš‚ä½åŠæœªåŠè¯çš„ï¼Œç§°ä¹‹ä¸ºæµåŠ¨äººå£ï¼Œè¾¾1500ä¸‡
 
-×ÜÈË¿ÚÔ¼1800Íò
+æ€»äººå£çº¦1800ä¸‡
 
-¡ñÉîÛÚ³£×¡ÈË¿ÚÕ¼×ÜÈË¿ÚµÄ±ÈÀı£¬¼´Í³¼ÆÉÏµÄÈË¿Ú³ÇÊĞ»¯Ë®Æ½Îª59 .8%
+â—æ·±åœ³å¸¸ä½äººå£å æ€»äººå£çš„æ¯”ä¾‹ï¼Œå³ç»Ÿè®¡ä¸Šçš„äººå£åŸå¸‚åŒ–æ°´å¹³ä¸º59 .8%
 
-¶ø»§¼®ÈË¿ÚÕ¼×ÜÈË¿ÚµÄ±ÈÀı£¬¼´ÕæÊµµÄÈË¿Ú³ÇÊĞ»¯Ë®Æ½Ö»ÓĞ18 .4%
+è€Œæˆ·ç±äººå£å æ€»äººå£çš„æ¯”ä¾‹ï¼Œå³çœŸå®çš„äººå£åŸå¸‚åŒ–æ°´å¹³åªæœ‰18 .4%
 
-°´ÕÕÉîÛÚÊ®¶şÎå¹æ»®£¬2015Äê»§¼®ÈË¿Ú´ïµ½400ÍòÈË£¬ÈË¿Ú³ÇÊĞ»¯Ë®Æ½Ò²Ö»ÓĞ22%	
+æŒ‰ç…§æ·±åœ³åäºŒäº”è§„åˆ’ï¼Œ2015å¹´æˆ·ç±äººå£è¾¾åˆ°400ä¸‡äººï¼Œäººå£åŸå¸‚åŒ–æ°´å¹³ä¹Ÿåªæœ‰22%	
 
 
 	//response
@@ -1849,7 +1849,7 @@ whitelist_submit
 	}
 	
 struct deposit_mq{
-    1: required i64 trans_id,         /*³äÖµ´«½øÀ´µÄÊÂÎñid*/
+    1: required i64 trans_id,         /*å……å€¼ä¼ è¿›æ¥çš„äº‹åŠ¡id*/
     2: required i64 order_id,         /*deposit order id*/
     4: required i64 account_id,       /*account id*/
     5: required i64 user_id,          /*user id*/
@@ -1857,27 +1857,27 @@ struct deposit_mq{
 }	
 
 struct withhold_mq{
-	1: required i64 trans_id,  /*³äÖµ´«½øÀ´µÄÊÂÎñid*/
+	1: required i64 trans_id,  /*å……å€¼ä¼ è¿›æ¥çš„äº‹åŠ¡id*/
 	2: required i64 order_id, 	/* deposit order id */ 
 	3: required i64 account_id, /*account id*/
-	4: required i32 withhold_result /*´ú¿Û½á¹û */
+	4: required i32 withhold_result /*ä»£æ‰£ç»“æœ */
 }
 
 
 struct withhold_callback_info{
 	int64_t partner_id;
 	int64_t req_no;		/* order id */
-	string channel;		/* ´ú¿ÛÍ¨µÀ */
-	int32_t amount;		/* ´ú¿Û½ğ¶î,µ¥Î»·Ö */
-	string account_no;	/* ÒøĞĞ¿¨ºÅ */
-	string account_name;/* ³Ö¿¨ÈËĞÕÃû */
-	string account_cert_id;	/* Éí·İÖ¤ºÅÂë */
-	int32_t account_type;  /* ÕËºÅÀàĞÍ£º0½è¼Ç¿¨£¬2ĞÅÓÃ¿¨*/
-	string bankname; /* ÒøĞĞÃû³Æ */
-	string banktype; /* ÒøĞĞ±àÂë(×ÖÄ¸¼òĞ´) */
-	string cvv; /* ĞÅÓÃ¿¨CVV*/
-	string valid_date; /* ĞÅÓÃ¿¨ÓĞĞ§ÆÚ(YYMM) */
-	string card_mobile; /* ÒøĞĞ¿¨ÊÖ»úºÅÂë */
+	string channel;		/* ä»£æ‰£é€šé“ */
+	int32_t amount;		/* ä»£æ‰£é‡‘é¢,å•ä½åˆ† */
+	string account_no;	/* é“¶è¡Œå¡å· */
+	string account_name;/* æŒå¡äººå§“å */
+	string account_cert_id;	/* èº«ä»½è¯å·ç  */
+	int32_t account_type;  /* è´¦å·ç±»å‹ï¼š0å€Ÿè®°å¡ï¼Œ2ä¿¡ç”¨å¡*/
+	string bankname; /* é“¶è¡Œåç§° */
+	string banktype; /* é“¶è¡Œç¼–ç (å­—æ¯ç®€å†™) */
+	string cvv; /* ä¿¡ç”¨å¡CVV*/
+	string valid_date; /* ä¿¡ç”¨å¡æœ‰æ•ˆæœŸ(YYMM) */
+	string card_mobile; /* é“¶è¡Œå¡æ‰‹æœºå·ç  */
 };
 
 178     deposit_req req;
@@ -1994,29 +1994,29 @@ Set-Cookie: TSf75e5b=8604fc41fff4b3cbdb726a749254a9cb1d13161467a37bcb56a03c26; P
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="https://ipcrs.pbccrc.org.cn/css/new.css" />
-<title>¸öÈËĞÅÓÃĞÅÏ¢·şÎñÆ½Ì¨</title>
+<title>ä¸ªäººä¿¡ç”¨ä¿¡æ¯æœåŠ¡å¹³å°</title>
 </head>
 <body style="background:#EEE;">
 <div>
-    <!--Ò³ÃæBanner-->
+    <!--é¡µé¢Banner-->
     <div id="banner">
     	<img src="https://ipcrs.pbccrc.org.cn/images/new_images/banner1.jpg" alt="Slideshow Image 1" class="active" />
     </div>
     <div class="banner_bot">
-       <a href="https://ipcrs.pbccrc.org.cn/login.do?method=initLogin" class="startBtn">ÂíÉÏ¿ªÊ¼</a><span class="guide">£¨ÑéÖ¤ÊÔÓÃ°æ£©</span>
+       <a href="https://ipcrs.pbccrc.org.cn/login.do?method=initLogin" class="startBtn">é©¬ä¸Šå¼€å§‹</a><span class="guide">ï¼ˆéªŒè¯è¯•ç”¨ç‰ˆï¼‰</span>
     </div>
     
-	<!--Ò³ÃæÖ÷Ìå-->
+	<!--é¡µé¢ä¸»ä½“-->
     <div id="content">
-    <!--²éÑ¯-->
+    <!--æŸ¥è¯¢-->
       <div class="query">
           <ul>
               <li>
-                <h2><span class="icon-q2"></span>ÈıÖÖĞÅÓÃĞÅÏ¢²úÆ·</h2>
-                <p>Õë¶Ô²»Í¬µÄÓÃ»§ĞèÇó£¬Ìá¹©¸öÈËĞÅÓÃĞÅÏ¢ÌáÊ¾£¬¸öÈËĞÅÓÃĞÅÏ¢¸ÅÒª£¬¸öÈËĞÅÓÃ±¨¸æÈıÖÖĞÅÓÃĞÅÏ¢²úÆ·¡£</p>
+                <h2><span class="icon-q2"></span>ä¸‰ç§ä¿¡ç”¨ä¿¡æ¯äº§å“</h2>
+                <p>é’ˆå¯¹ä¸åŒçš„ç”¨æˆ·éœ€æ±‚ï¼Œæä¾›ä¸ªäººä¿¡ç”¨ä¿¡æ¯æç¤ºï¼Œä¸ªäººä¿¡ç”¨ä¿¡æ¯æ¦‚è¦ï¼Œä¸ªäººä¿¡ç”¨æŠ¥å‘Šä¸‰ç§ä¿¡ç”¨ä¿¡æ¯äº§å“ã€‚</p>
               </li>
-              <li class="pb"><h2><span class="icon-q3"></span>¶àÖÖÑéÖ¤·½Ê½</h2><p>²ÉÓÃÒøĞĞ¿¨ÑéÖ¤¡¢Êı×ÖÖ¤ÊéÑéÖ¤¡¢ÎÊÌâÑéÖ¤µÈ¶àÖÖÑéÖ¤·½Ê½£¬È·±£Ã¿Î»ÓÃ»§¶¼ÄÜ»ñµÃ±ã½İÑéÖ¤ÌåÑé¡£</p></li>
-              <li class="pb"><h2><span class="icon-q1"></span>ÒÔ±£»¤ĞÅÏ¢°²È«ÎªÇ°Ìá</h2><p>ÑÏ¸ñµÄÉí·İÑéÖ¤£¬¶àÒò×ÓĞ£Ñé´ëÊ©£¬È·±£ĞÅÓÃĞÅÏ¢°²È«¡£</p></li>
+              <li class="pb"><h2><span class="icon-q3"></span>å¤šç§éªŒè¯æ–¹å¼</h2><p>é‡‡ç”¨é“¶è¡Œå¡éªŒè¯ã€æ•°å­—è¯ä¹¦éªŒè¯ã€é—®é¢˜éªŒè¯ç­‰å¤šç§éªŒè¯æ–¹å¼ï¼Œç¡®ä¿æ¯ä½ç”¨æˆ·éƒ½èƒ½è·å¾—ä¾¿æ·éªŒè¯ä½“éªŒã€‚</p></li>
+              <li class="pb"><h2><span class="icon-q1"></span>ä»¥ä¿æŠ¤ä¿¡æ¯å®‰å…¨ä¸ºå‰æ</h2><p>ä¸¥æ ¼çš„èº«ä»½éªŒè¯ï¼Œå¤šå› å­æ ¡éªŒæªæ–½ï¼Œç¡®ä¿ä¿¡ç”¨ä¿¡æ¯å®‰å…¨ã€‚</p></li>
           </ul>
           <div class="clearfix"></div>
       </div>
@@ -2024,35 +2024,35 @@ Set-Cookie: TSf75e5b=8604fc41fff4b3cbdb726a749254a9cb1d13161467a37bcb56a03c26; P
     
 	<div class="bottom">
         <div class="wrap">
-            <h3>ÏµÍ³¹«¸æ</h3>
+            <h3>ç³»ç»Ÿå…¬å‘Š</h3>
             <ul>
-                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center.html" target="_blank">ÏµÍ³¹«¸æ</a></li>
-                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center2.html" target="_blank">ÎÂÜ°ÌáÊ¾</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center.html" target="_blank">ç³»ç»Ÿå…¬å‘Š</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center2.html" target="_blank">æ¸©é¦¨æç¤º</a></li>
             </ul>
         </div>
     	<div class="wrap">
-            <h3>Ê¹ÓÃËµÃ÷</h3>
+            <h3>ä½¿ç”¨è¯´æ˜</h3>
             <ul>
-                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center3.html" target="_blank">·şÎñÖ¸ÄÏ</a></li>
-                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center4.html" target="_blank">Æ½Ì¨½éÉÜ</a></li>
-                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center5.html" target="_blank">²Ù×÷ÊÖ²á</a></li>
-                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center6.html" target="_blank">³£¼ûÎÊÌâ½â´ğ</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center3.html" target="_blank">æœåŠ¡æŒ‡å—</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center4.html" target="_blank">å¹³å°ä»‹ç»</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center5.html" target="_blank">æ“ä½œæ‰‹å†Œ</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center6.html" target="_blank">å¸¸è§é—®é¢˜è§£ç­”</a></li>
             </ul>
         </div>
         <div class="wrap">
-            <h3>ÎÊÌâ·´À¡</h3>
+            <h3>é—®é¢˜åé¦ˆ</h3>
             <ul>
-            	<li><a href="https://ipcrs.pbccrc.org.cn/html/help_center8.html" target="_blank">ÁªÏµÎÒÃÇ</a></li>
-                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center7.jsp" target="_blank">ÎÊÌâ·´À¡µ¥</a></li>
+            	<li><a href="https://ipcrs.pbccrc.org.cn/html/help_center8.html" target="_blank">è”ç³»æˆ‘ä»¬</a></li>
+                <li><a href="https://ipcrs.pbccrc.org.cn/html/help_center7.jsp" target="_blank">é—®é¢˜åé¦ˆå•</a></li>
             </ul>
         </div>
         <div class="wrap">
-            <h3>ÓÑÇéÁ´½Ó</h3>
+            <h3>å‹æƒ…é“¾æ¥</h3>
             <ul>
-                <li><a href="http://www.pbc.gov.cn" target="_blank">ÖĞ¹úÈËÃñÒøĞĞ</a></li>
-                <li><a href="http://www.shanghai-cis.com.cn" target="_blank">ÉÏº£×ÊĞÅÓĞÏŞ¹«Ë¾</a></li>
-                <li><a href="http://a1502057.oinsite.yh.mynet.cn" target="_blank">ÖĞÕ÷(±±¾©)Õ÷ĞÅÓĞÏŞÔğÈÎ¹«Ë¾</a></li>
-                <li><a href="http://www.zhongdengwang.com" target="_blank">ÖĞÕ÷¶¯²úÈÚ×ÊµÇ¼Ç¹«Ë¾</a></li>
+                <li><a href="http://www.pbc.gov.cn" target="_blank">ä¸­å›½äººæ°‘é“¶è¡Œ</a></li>
+                <li><a href="http://www.shanghai-cis.com.cn" target="_blank">ä¸Šæµ·èµ„ä¿¡æœ‰é™å…¬å¸</a></li>
+                <li><a href="http://a1502057.oinsite.yh.mynet.cn" target="_blank">ä¸­å¾(åŒ—äº¬)å¾ä¿¡æœ‰é™è´£ä»»å…¬å¸</a></li>
+                <li><a href="http://www.zhongdengwang.com" target="_blank">ä¸­å¾åŠ¨äº§èèµ„ç™»è®°å…¬å¸</a></li>
             </ul>
         </div>
         <div class="clearfix"></div>
@@ -2078,7 +2078,7 @@ https://cashier.95516.com/b2c/showIdVerify.action?transNumber=31fabb83fc94485582
 
 curl -H 'Host: 157.166.226.25' -H 'Accept-Language: es' -H 'Cookie: ID=1234' http://cnn.com
 
-#1 ·ÃÎÊÊ×Ò³£¬»ñÈ¡cookies
+#1 è®¿é—®é¦–é¡µï¼Œè·å–cookies
 curl -c cookies -k \
      -H 'Accept: text/html, application/xhtml+xml, */*'                                     \
 	 -H 'Accept-Language: zh-CN'                                                            \
@@ -2106,7 +2106,7 @@ Host: ipcrs.pbccrc.org.cn
 Connection: Keep-Alive
 Cookie: Secure; JSESSIONID=VZVhWhMHVQf1mDJgHWPhhtXDJxbMZK3VXmCd0yMX1g8JpxZnGLXr!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=d11fd9ae42e57ae1b71c428fca8511753291f064ef7631f656a18c07
 
-#2 ·ÃÎÊ×¢²áÒ³Ãæ
+#2 è®¿é—®æ³¨å†Œé¡µé¢
 curl -b cookies -c cookies -k \
      -H 'Accept: text/html, application/xhtml+xml, */*'                                     \
      -H 'Referer: https://ipcrs.pbccrc.org.cn/top1.do'	\
@@ -2132,7 +2132,7 @@ Cookie: Secure; JSESSIONID=VZVhWhMHVQf1mDJgHWPhhtXDJxbMZK3VXmCd0yMX1g8JpxZnGLXr!
 
 org.apache.struts.taglib.html.TOKEN=9dde2eb6c81a0f2dd8569f97e4fc1688&method=checkIdentity&userInfoVO.name=%D5%D4%BF%A1&userInfoVO.certType=0&userInfoVO.certNo=50023419871203353X&_@IMGRC@_=sa5b7h&1=on	 
 
-#3 postÉí·İĞÅÏ¢
+#3 postèº«ä»½ä¿¡æ¯
 curl -b cookies -c cookies -k \
 	 -H 'Accept: text/html, application/xhtml+xml, */*'                                     \
      -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do?method=initReg'	\
@@ -2146,17 +2146,17 @@ curl -b cookies -c cookies -k \
 	 -H 'Cache-Control: no-cache'	\
 	 https://ipcrs.pbccrc.org.cn/userReg.do -d "org.apache.struts.taglib.html.TOKEN=72091183d29e46f2e25981ce4793dd9c&method=checkIdentity&userInfoVO.name=%D5%D4%BF%A1&userInfoVO.certType=0&userInfoVO.certNo=50023419871203353X&_@IMGRC@_=arrx7q&1=on"
 	 
-                                                        </label> ÑéÖ¤Âë£º</font>
+                                                        </label> éªŒè¯ç ï¼š</font>
                                                         <input class = "login_input yzm_input" maxLength="6" type="text" id="_@IMGRC@_" name="_@IMGRC@_" onfocus="if(document.getElementById('_@MSG@_')!=null)document.getElementById('_@MSG@_').innerHTML='';">
 <img src="/imgrc.do?0.08804188397584467" id="imgrc" class = "yzm_img"/>
-<a class = "yzm_a" href="###" onclick="document.getElementById('imgrc').src='/imgrc.do?a='+new Date().getTime()+';'">¿´²»Çå£¬»»Ò»¸ö</a>
+<a class = "yzm_a" href="###" onclick="document.getElementById('imgrc').src='/imgrc.do?a='+new Date().getTime()+';'">çœ‹ä¸æ¸…ï¼Œæ¢ä¸€ä¸ª</a>
 <script>document.getElementById('imgrc').style.display='';</script>
 
 GET https://ipcrs.pbccrc.org.cn/imgrc.do?a=1453432282058; HTTP/1.1
 Accept: image/png, image/svg+xml, image/*;q=0.8, */*;q=0.5
 Referer: https://ipcrs.pbccrc.org.cn/userReg.do?method=initReg
 
-»ñÈ¡ÑéÖ¤Âë£º
+è·å–éªŒè¯ç ï¼š
 curl -b cookies -c cookies -k \
      -H 'Accept: image/png, image/svg+xml, image/*;q=0.8, */*;q=0.5'                                     \
 	 -H 'Accept-Language: zh-CN'                                                            \
@@ -2178,7 +2178,7 @@ Connection: Keep-Alive
 Cookie: Secure; JSESSIONID=HLCvWhpBP2h8gSm6zlcdL2QvQgnnm9wR2r42Pv2QQNLS64rFg819!-93770802; BIGipServerpool_ipcrs_app=16WWc2DZbwnQbbaoTJ1hAFFRD1wHx5eUIbCvikCEkWYtMvHvKDr+Iqiu7rxsee8wfrtE5v1Rcbajwlj0phEMJq8kGO9BnAywgqMOoyoMNssHOGGCv33gVpkHtqTU6VYKz7NPUy50w7pIi1zMg9jD8xQxD1hxTg==; BIGipServerpool_ipcrs_web=LE1yecVBZkYozG+oTJ1hAFFRD1wHxzAoHOrkfz3jeDYRnmhSNkDaVP001d29OSizn2sEeGGpjwGU; TSf75e5b=a88278ad2b6c86e0e4c103c199e626053291f064ef7631f656a19e01
 
 
-#4 postÓÃ»§ĞÅÏ¢£º
+#4 postç”¨æˆ·ä¿¡æ¯ï¼š
 curl -b cookies -c cookies -k \
 	 -H 'Accept: text/html, application/xhtml+xml, */*'                                     \
      -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do'	\
@@ -2207,7 +2207,7 @@ Cookie: Secure; JSESSIONID=HLCvWhpBP2h8gSm6zlcdL2QvQgnnm9wR2r42Pv2QQNLS64rFg819!
 
 org.apache.struts.taglib.html.TOKEN=703f0590162f8e2504e7d797fdb83d56&method=saveUser&counttime=54&tcId=73446435&userInfoVO.loginName=zhaojun1915&userInfoVO.password=zhaojunyan1912&userInfoVO.confirmpassword=zhaojunyan1912&userInfoVO.email=zhaojun1912@gmail.com&userInfoVO.mobileTel=18520822709&userInfoVO.verifyCode=fif8h3	 
 
-»ñÈ¡ÊÖ»ú¶¯Ì¬Âë£º·µ»ØtcId£º8Î»Êı×Ö 
+è·å–æ‰‹æœºåŠ¨æ€ç ï¼šè¿”å›tcIdï¼š8ä½æ•°å­— 
 curl -b cookies -c cookies -k \
 	 -H 'Accept: text/text/plain, */*; q=0.01'                                     \
      -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do'	\
@@ -2240,7 +2240,7 @@ Cookie: Secure; JSESSIONID=HLCvWhpBP2h8gSm6zlcdL2QvQgnnm9wR2r42Pv2QQNLS64rFg819!
 
 method=getAcvitaveCode&mobileTel=18520822709
 
-¼ì²éµÇÂ¼Ãû£º·µ»Ø0±íÊ¾ÓÃ»§ÃûÎ´Ê¹ÓÃ
+æ£€æŸ¥ç™»å½•åï¼šè¿”å›0è¡¨ç¤ºç”¨æˆ·åæœªä½¿ç”¨
 curl -b cookies -c cookies -k \
 	 -H 'Accept: text/plain, */*; q=0.01'                                      \
      -H 'Referer: https://ipcrs.pbccrc.org.cn/userReg.do'	\
@@ -2271,9 +2271,9 @@ Cookie: Secure; JSESSIONID=xld8WhGKPL2lLLFTr2h2pHq3P2Hydn2vnmK5601WJN8jQQ9QxdKP!
 
 method=checkRegLoginnameHasUsed&loginname=zhaojun1914
 
-#5µÇÂ¼ £º
-µÇÂ¼»ñÈ¡ÑéÖ¤Âë£º
-»ñÈ¡ÑéÖ¤Âë£º
+#5ç™»å½• ï¼š
+ç™»å½•è·å–éªŒè¯ç ï¼š
+è·å–éªŒè¯ç ï¼š
 curl -b cookies -c cookies -k \
      -H 'Accept: image/png, image/svg+xml, image/*;q=0.8, */*;q=0.5'                                     \
 	 -H 'Accept-Language: zh-CN'                                                            \
@@ -2284,7 +2284,7 @@ curl -b cookies -c cookies -k \
 	 -H 'Connection: Keep-Alive'                                                            \
 	 "https://ipcrs.pbccrc.org.cn/imgrc.do?0.5724695249680378" > 1.png
 
-	 µÇÂ¼£º
+	 ç™»å½•ï¼š
 curl -b cookies -c cookies -k \
 	 -H 'text/html, application/xhtml+xml, */*'                                      \
      -H 'Referer: https://ipcrs.pbccrc.org.cn/page/login/loginreg.jsp'	\
@@ -2314,7 +2314,7 @@ Cookie: Secure; JSESSIONID=2mlNWhcQnMvM9z1xRsLNSr962NGNvhQ1L1NF6nx411jpBvlSznly!
 
 method=login&date=1453448368916&loginname=zhaojun1917&password=zhaojunyan1912&_@IMGRC@_=n8xpkr
 
-µãÈ·¶¨£º
+ç‚¹ç¡®å®šï¼š
 curl -b cookies -c cookies -k \
 	 -H 'text/html, application/xhtml+xml, */*'                                      \
 	 -H 'Accept-Language: zh-CN'                                                            \
@@ -2334,7 +2334,7 @@ Host: ipcrs.pbccrc.org.cn
 Connection: Keep-Alive
 Cache-Control: no-cache
 
-µãÏÂÒ»²½£º
+ç‚¹ä¸‹ä¸€æ­¥ï¼š
 curl -b cookies -c cookies -k \
 	 -H 'text/html, application/xhtml+xml, */*'                                      \
      -H 'Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do?method=index&isnew=true'	\
@@ -2363,7 +2363,7 @@ Cookie: Secure; JSESSIONID=JwK2WhpVm6jjv9dQmMNqVYqZrkHfR8bRnNtB2Kvhb5nmggCZK0tv!
 
 method=setSafetyLevelStep2
 
-ÔÙ´ÎµãÏÂÒ»²½£º
+å†æ¬¡ç‚¹ä¸‹ä¸€æ­¥ï¼š
 curl -b cookies -c cookies -k \
 	 -H 'text/html, application/xhtml+xml, */*'                                      \
      -H 'Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do'	\
@@ -2392,7 +2392,7 @@ Cookie: Secure; JSESSIONID=JwK2WhpVm6jjv9dQmMNqVYqZrkHfR8bRnNtB2Kvhb5nmggCZK0tv!
 
 org.apache.struts.taglib.html.TOKEN=195ab63eceab932747883680afcee33c&method=chooseCertify&authtype=3
 
-·ÃÎÊunionpayaction.do:
+è®¿é—®unionpayaction.do:
 
 curl -b cookies -c cookies -k \
 	 -H 'text/html, application/xhtml+xml, */*'                                      \
@@ -2422,7 +2422,7 @@ Cookie: Secure; JSESSIONID=JwK2WhpVm6jjv9dQmMNqVYqZrkHfR8bRnNtB2Kvhb5nmggCZK0tv!
 
 method=getunionpaycode
 
-·ÃÎÊÒøÁªÑéÖ¤Verify.action:
+è®¿é—®é“¶è”éªŒè¯Verify.action:
 curl -b cookiesyl -c cookiesly -k \
 	 -H 'text/html, application/xhtml+xml, */*'                                      \
      -H 'Referer: https://ipcrs.pbccrc.org.cn/unionpayAction.do'	\
@@ -2450,7 +2450,7 @@ Cache-Control: no-cache
 
 version=1.0.0&charset=GBK&certorgcode=0000000001&receiveorgcode=1000000001&encrypmethod=RSA&encrypmessage=aba3ab6c46f3213bd5fc10675d7056d837d4ce923d99676ea2f63c22cc504c2ad3c8935af1ab95a245c794354383404aa12c09124ac8733f360540c7ea1ed0a1ce54075a6cbe670cfcbf91177118168fa0a1ab66bcd92fabb2b68a57aefa66c5c64108e5efa617146a90b64e9f568346d2137195cedcf35b8aecd0bd38a74a6fb12479212556d26e828bdbb58f425e8890e0f039351465ec4d439fcac2a18a2685eee5820601d4fa94d0578b14d0ad25b846c86b16aaa6bf65fabd64ba5eb775d074f694f9bca4586e998ccddd8d50decec1ca0cdf890b6983d5f19673228cd6e5b9c4a261f8000eb23a7f8a7abe3aec2053b412bf31cb149eb593c28ea24244&signmethod=RSA&signmessage=1bfc9d0c1b9c44357846f29e30b447c04d666a8369b696bfb214d0de81d945736a6b78b84543c2c1c9a24b576f7c5cd43a3f7a47e178cde39703220bb986e680a38c0e9dfc76d140e30062cd846f2368765098535dac29030e448cb557f2b89f6517af2c680e798d56f93aad6e603b0f8ccc1a8d94b8e809428e9ff37bdb051619e6e6966ae1956af0433b6c7d8e3f2a7665a494f3673a6c7e676815acc10c5c98a864cc832b704bd9634238aa3b3e77e20001f230fd52ad45b5a64856dcd254dd09c7a6f5f52e13006f70926d3cae9b933b1085404060a1056de0b15d650b25c23d75b0b4a8b1de027826f7873a10ce3849e1a032b0baa316be9a21ebddc5f3
 
-·ÃÎÊÒøÁªAuthId.action:
+è®¿é—®é“¶è”AuthId.action:
 
 curl -b cookiesyl -c cookiesly -k \
 	 -H 'text/html, application/xhtml+xml, */*'                                      \
@@ -2479,9 +2479,9 @@ Cache-Control: no-cache
 
 accessType=0&backUrl=http%3A%2F%2Fwww.specialUrl.com&bizType=000000&certId=0&channelType=07&customerIp=218.17.162.165&encoding=UTF-8&frontUrl=http%3A%2F%2Fwww.95516.com%2F&internal.logId=325957100&internal.merReferer=https%3A%2F%2Fipcrs.pbccrc.org.cn%2FunionpayAction.do&internal.origReqInfo=%7C07%7C0100&merId=898440373210003&orderId=2016012216173203227a93e845dc4b&payTimeout=20160122164732&reserved=%7BcheckFlag%3D11100%26deriveCode%3DyZneoYQohA2Jq2AJjNGqShFAjx4%3D%26vCode%3DjH1W5ugIrie3WSuellSsi87IUbOLHEsBFcSxY9qe8g8KU1x2vNRVJL4U0YZsxEXmMWbqN0ElComLCE%2FD%2FzJWDDK9K%2Bi52%2B33CMGragYP5IF07cCvahgTKinKoXSafzDf82xzvtj8VLlXch5ZyfzAkU2233hBbRNvjeWXn%2FOAPkdXbsSNhnjKtecDX%2Ffaxn%2FSrXo8NFRKPPGYjKo2LZNzuxrabVjDb4hUiokOZTRxCrKQMASgxre4pk2QYYvWNyWz4lMbzvT4gasuFyjkbJPO5f5GSUABq21VsJ2%2Bi8THCzDTjj4KTZLVqmuOfHQf4DwwRMDqfwCnzNyqeEbhKUjXjA%3D%3D%7D&signMethod=01&signature=lO65Q92hvBl5OlxIYUzMyTsQmX24z2ZiVZ452XutAX9L9zMQH00x%2F6RvJPm4qwaCvJ%2F8Rg1kEVsjZC2ABnsevVp74CVj6DLTw49oDOQ7w8aMiNAe%2BekB2dGO5ItoQV7kbX%2BWpLr%2FKPr5LJTBWtsBo6zIWIpLl0GMfpOucKND3CHoh9NkSiMA5LkPv71vxj5l68aG1Dr%2BBTIxgD%2FrXWv4f8M7FsdS0YlLg9NMyMpYFwnCYew15BPCqb19lu27PCHRUFaB%2Fj0sE0Udblb6bjnknEM025XWo%2FtkqCbAL%2BjwXPltoO9hsM36BgIOyHegkUnnhNGtv0jgNS1EguSu0pBJXw%3D%3D&txnSubType=10&txnTime=20160122161732&txnType=72&version=1.0.0
 
-·ÃÎÊÒøÁªverifyAuth.action£º
+è®¿é—®é“¶è”verifyAuth.actionï¼š
 
-5: ÉèÖÃ°²È«¼¶±ğ
+5: è®¾ç½®å®‰å…¨çº§åˆ«
 curl -b cookies -c cookies -k \
 	 -H 'text/html, application/xhtml+xml, */*'                                      \
 	 -H 'Accept-Language: zh-CN'                                                            \
@@ -2509,7 +2509,7 @@ Cookie: Secure; JSESSIONID=2mlNWhcQnMvM9z1xRsLNSr962NGNvhQ1L1NF6nx411jpBvlSznly!
 	 
 setSafetyLevel.do?method=index&isnew=true
 
-»ñÈ¡ÒøÁªÑéÖ¤Âë£º
+è·å–é“¶è”éªŒè¯ç ï¼š
 curl -b cookies -c cookies -k \
 	 -H 'text/html, application/xhtml+xml, */*'                                      \
      -H 'Referer: https://ipcrs.pbccrc.org.cn/setSafetyLevel.do'	\
@@ -2540,13 +2540,13 @@ method=getunionpaycode
 
 ./deposit_service >>/data/p2p/deposit_service.out 2>&1 &
 
-urlencode´óĞ´
-ÒøÁªÈÏÖ¤Âë£º8k6hj3
-Ìá½»ºó·µ»Ø´íÎóĞÅÏ¢¼°Ìá½»Ê±Òì³£ĞÅÏ¢´¦Àí¡£
-ÑéÖ¤Âë£¬ ¶ÌĞÅÑéÖ¤Âë×Ô¶¯ ´¦Àí¡£¼°Òì³£´¦Àí¡£
-cookieµÄ´¦Àí
-html½âÎö £º»ñÈ¡±íµ¥Êı¾İ £¬ TOKEN
-response bodyÄ¬ÈÏÑ¹Ëõ£ºgetMethod.setRequestHeader("Accept-Encoding","gzip, deflate");  
+urlencodeå¤§å†™
+é“¶è”è®¤è¯ç ï¼š8k6hj3
+æäº¤åè¿”å›é”™è¯¯ä¿¡æ¯åŠæäº¤æ—¶å¼‚å¸¸ä¿¡æ¯å¤„ç†ã€‚
+éªŒè¯ç ï¼Œ çŸ­ä¿¡éªŒè¯ç è‡ªåŠ¨ å¤„ç†ã€‚åŠå¼‚å¸¸å¤„ç†ã€‚
+cookieçš„å¤„ç†
+htmlè§£æ ï¼šè·å–è¡¨å•æ•°æ® ï¼Œ TOKEN
+response bodyé»˜è®¤å‹ç¼©ï¼šgetMethod.setRequestHeader("Accept-Encoding","gzip, deflate");  
 
 public string UrlEncode(string str)
 {
@@ -2577,15 +2577,15 @@ Request sent 450 bytes of Cookie data:
 	TSf75e5b=b8d16a8cbc5336e8c7c6f6b74d28d82208387ab38bb9bd7c56a864c2
 Secure; Secure; JSESSIONID=synfWykCNG726gV9Gb7xwkZVpTbh71qy71gpLVVHhLV6Jwp1trhQ!-1301997820; BIGipServerpool_ipcrs_app=pv0yUVLKJucsSMmoTJ1hAFFRD1wHx3/fiFZ3+wzNLq31acaC0Id4v0lPxyY50gMzu531ud7zxD4amaz4Tg86ZhSB/5iW71aSGOVt/aId8AVeaoLG/r4vPa6MVARQcypUi+rRzl5xq2y7GhClsW2MmNe/jcmEQQ==; BIGipServerpool_ipcrs_web=5N3sGL02PPvgBz6oTJ1hAFFRD1wHx0jH209ZJJfhwJigx7NGGLPOuHR2hkBDyBjN26FWIsZHS3xs; TSf75e5b=b8d16a8cbc5336e8c7c6f6b74d28d82208387ab38bb9bd7c56a864c2
 	
-Çë½ÌÒ»¸öÎÊÌâ£¬ÓÃsedÃüÁî£¬´ÓÎÄ¼şÖĞ¶ÁÈëº¬×Ö·û´®¡°ASD¡±µÄĞĞ£¬²¢ÓÃ¡°9981¡±Ìæ»»µôÕâĞ©ĞĞÖĞµÄµÚ4¡¢5¡¢6¡¢7¸ö×Ö·ûµÄÄÚÈİ¡£Àı£º
-ASDvaerafderfa  Ìæ»»³É
+è¯·æ•™ä¸€ä¸ªé—®é¢˜ï¼Œç”¨sedå‘½ä»¤ï¼Œä»æ–‡ä»¶ä¸­è¯»å…¥å«å­—ç¬¦ä¸²â€œASDâ€çš„è¡Œï¼Œå¹¶ç”¨â€œ9981â€æ›¿æ¢æ‰è¿™äº›è¡Œä¸­çš„ç¬¬4ã€5ã€6ã€7ä¸ªå­—ç¬¦çš„å†…å®¹ã€‚ä¾‹ï¼š
+ASDvaerafderfa  æ›¿æ¢æˆ
 ASD9981afderfa  
-ÔõÃ´Ğ´Ñ½£¿
+æ€ä¹ˆå†™å‘€ï¼Ÿ
 sed -r '/ASD/s/(...).{4}(.*)/\19981\2/' INFILE
 ASD9981afderfa
 
-ÓÃ»§µÇÂ¼³É¹¦ºó£¬ »á´ò¿ªÌáÊ¾½ñÌìµÚ¼¸´ÎµÇÂ¼ ¡£
-·ÃÎÊreportAction.do
+ç”¨æˆ·ç™»å½•æˆåŠŸåï¼Œ ä¼šæ‰“å¼€æç¤ºä»Šå¤©ç¬¬å‡ æ¬¡ç™»å½• ã€‚
+è®¿é—®reportAction.do
 GET https://ipcrs.pbccrc.org.cn/reportAction.do?method=queryReport HTTP/1.1
 Accept: text/html, application/xhtml+xml, */*
 Referer: https://ipcrs.pbccrc.org.cn/menu.do
@@ -2596,7 +2596,7 @@ Host: ipcrs.pbccrc.org.cn
 Connection: Keep-Alive
 Cookie: Secure; JSESSIONID=G262WpvFbJbJYQg01vpxTCHZdQXyJhKbtRMYJmWZFnytRXRB1QYc!-1301997820; BIGipServerpool_ipcrs_app=pv0yUVLKJucsSMmoTJ1hAFFRD1wHx3/fiFZ3+wzNLq31acaC0Id4v0lPxyY50gMzu531ud7zxD4amaz4Tg86ZhSB/5iW71aSGOVt/aId8AVeaoLG/r4vPa6MVARQcypUi+rRzl5xq2y7GhClsW2MmNe/jcmEQQ==; BIGipServerpool_ipcrs_web=5N3sGL02PPvgBz6oTJ1hAFFRD1wHx0jH209ZJJfhwJigx7NGGLPOuHR2hkBDyBjN26FWIsZHS3xs; TSf75e5b=797157ec9b39f3a1d704f357601ef8c308387ab38bb9bd7c56a9afe5
 
-reportAction.do·µ»Øpdf µÄresponse header:
+reportAction.doè¿”å›pdf çš„response header:
 HTTP/1.1 200 OK
 Date: Thu, 28 Jan 2016 06:17:55 GMT
 X-Frame-Options: SAMEORIGIN
@@ -2610,16 +2610,16 @@ Content-Type: application/octet-stream;charset=utf-8
 Set-Cookie: TSf75e5b=8d27a8bad588b737fc82187921239f3308387ab38bb9bd7c56a9b18a; Path=/
 Content-Length: 12646
 	
-curlµÄeasy½Ó¿ÚÖĞÌá¹©ÁË5¸öÓëcookieÓĞ¹ØµÄoption£¬ÆäÖĞ£¬CURLOPT_COOKIEFILE£¬CURLOPT_COOKIEJAR£¬CURLOPT_COOKIELIST¶¼»á´ò¿ªcurlµÄcookieÒıÇæ£¬Ê¹µÃcurlÔÚÊÕµ½http responseÊ±½âÎöheader fieldÖĞµÄcookie¡£
+curlçš„easyæ¥å£ä¸­æä¾›äº†5ä¸ªä¸cookieæœ‰å…³çš„optionï¼Œå…¶ä¸­ï¼ŒCURLOPT_COOKIEFILEï¼ŒCURLOPT_COOKIEJARï¼ŒCURLOPT_COOKIELISTéƒ½ä¼šæ‰“å¼€curlçš„cookieå¼•æ“ï¼Œä½¿å¾—curlåœ¨æ”¶åˆ°http responseæ—¶è§£æheader fieldä¸­çš„cookieã€‚
 
-ÉèÖÃCURLOPT_COOKIEFILE»áÊ¹curlÏÂÒ»´Î·¢ÇëÇóÊ±´ÓÖ¸¶¨µÄÎÄ¼şÖĞ¶ÁÈ¡cookie¡£ 
-ÉèÖÃCURLOPT_COOKIEJAR»áÊ¹curlÔÚµ÷ÓÃ curl_easy_cleanupµÄÊ±ºò°Ñcookie±£´æµ½Ö¸¶¨µÄÎÄ¼şÖĞ¡£
-ÉèÖÃCURLOPT_COOKIELIST»á°ÑÖ¸¶¨µÄcookie×Ö·û´®ÁĞ±í¼ÓÈëeasy handleÎ¬»¤µÄcookieÁĞ±íÖĞ¡£Ã¿¸öcookie×Ö·û´®ÒªÃ´·ûºÏHTTP response headerµÄ"Set-Cookie: NAME=VALUE;..."¸ñÊ½£¬ÒªÃ´·ûºÏNetscape cookie¸ñÊ½¡£
+è®¾ç½®CURLOPT_COOKIEFILEä¼šä½¿curlä¸‹ä¸€æ¬¡å‘è¯·æ±‚æ—¶ä»æŒ‡å®šçš„æ–‡ä»¶ä¸­è¯»å–cookieã€‚ 
+è®¾ç½®CURLOPT_COOKIEJARä¼šä½¿curlåœ¨è°ƒç”¨ curl_easy_cleanupçš„æ—¶å€™æŠŠcookieä¿å­˜åˆ°æŒ‡å®šçš„æ–‡ä»¶ä¸­ã€‚
+è®¾ç½®CURLOPT_COOKIELISTä¼šæŠŠæŒ‡å®šçš„cookieå­—ç¬¦ä¸²åˆ—è¡¨åŠ å…¥easy handleç»´æŠ¤çš„cookieåˆ—è¡¨ä¸­ã€‚æ¯ä¸ªcookieå­—ç¬¦ä¸²è¦ä¹ˆç¬¦åˆHTTP response headerçš„"Set-Cookie: NAME=VALUE;..."æ ¼å¼ï¼Œè¦ä¹ˆç¬¦åˆNetscape cookieæ ¼å¼ã€‚
 
-CURLOPT_COOKIEÓÃÓÚÉèÖÃÒ»¸ö·ÖºÅ·Ö¸ôµÄ¡°NAME=VALUE¡±ÁĞ±í£¬ÓÃÓÚÔÚHTTP request headerÖĞÉèÖÃCookie header¡£
+CURLOPT_COOKIEç”¨äºè®¾ç½®ä¸€ä¸ªåˆ†å·åˆ†éš”çš„â€œNAME=VALUEâ€åˆ—è¡¨ï¼Œç”¨äºåœ¨HTTP request headerä¸­è®¾ç½®Cookie headerã€‚
 error_code::e_createtempfile_error
 
-curlÄÚ²¿Ê¹ÓÃCookieºÍCookieInfoÁ½¸östruct±£´æcookieĞÅÏ¢¡£ ÎªÒ»¸öeasy handleÉèÖÃCURLOPT_SHAREÑ¡Ïî£¬²¢ÇÒÖ¸¶¨µÄshare handleÆôÓÃÁËcookie¹²Ïí¹¦ÄÜ£¬ Ôòeasy handle»áÊ¹ÓÃshare handleÖĞµÄ¹²ÏícookieÁĞ±í¡£
+curlå†…éƒ¨ä½¿ç”¨Cookieå’ŒCookieInfoä¸¤ä¸ªstructä¿å­˜cookieä¿¡æ¯ã€‚ ä¸ºä¸€ä¸ªeasy handleè®¾ç½®CURLOPT_SHAREé€‰é¡¹ï¼Œå¹¶ä¸”æŒ‡å®šçš„share handleå¯ç”¨äº†cookieå…±äº«åŠŸèƒ½ï¼Œ åˆ™easy handleä¼šä½¿ç”¨share handleä¸­çš„å…±äº«cookieåˆ—è¡¨ã€‚
 	
 	
 	struct ipcrs_conn_ret{
@@ -2685,23 +2685,23 @@ curlÄÚ²¿Ê¹ÓÃCookieºÍCookieInfoÁ½¸östruct±£´æcookieĞÅÏ¢¡£ ÎªÒ»¸öeasy handleÉèÖÃCU
 	3: required string cert_no,
 	}
 	
-	/* ·¢Æğµ½ÈËĞĞµÄÁ¬½Ó£¬»ñÈ¡cookieĞÅÏ¢±£´æ²¢·µ»ØÒ»¸ösessionid¸øapp */
+	/* å‘èµ·åˆ°äººè¡Œçš„è¿æ¥ï¼Œè·å–cookieä¿¡æ¯ä¿å­˜å¹¶è¿”å›ä¸€ä¸ªsessionidç»™app */
 	ipcrs_conn_ret get_ipcrs_conn(),
-	/* Í¨¹ısessionid»ñÈ¡Ò»¸öÏà¹ØÁªµÄÑéÖ¤Âë , ·µ»ØĞÎÊ½ÎªÍ¼Æ¬µÄ¶ş½øÖÆ×Ö·û´®*/
+	/* é€šè¿‡sessionidè·å–ä¸€ä¸ªç›¸å…³è”çš„éªŒè¯ç  , è¿”å›å½¢å¼ä¸ºå›¾ç‰‡çš„äºŒè¿›åˆ¶å­—ç¬¦ä¸²*/
 	ipcrs_securitycode_ret get_securitycode(1: string sessionid),
 	
-	/* Í¨¹ısessionid,ÏòÈËĞĞ·¢Æğ¶ÌĞÅÑéÖ¤ÂëÇëÇó */
+	/* é€šè¿‡sessionid,å‘äººè¡Œå‘èµ·çŸ­ä¿¡éªŒè¯ç è¯·æ±‚ */
 	types.error_code get_mobile_activecode(1: string sessionid),
-	/* ÓÃ»§×¢²á */
+	/* ç”¨æˆ·æ³¨å†Œ */
 	types.error_code user_register(1: register_info info),
-	/* ÓÃ»§²¹³äÓÃ»§ĞÅÏ¢ */
+	/* ç”¨æˆ·è¡¥å……ç”¨æˆ·ä¿¡æ¯ */
 	types.error_code user_supplement(1: supplement_info info),
-	/* ½«´ÓÒøÁª»ñÈ¡µÄÈÏÖ¤ÂëÌá½»µ½ÈËĞĞÏµÍ³ */
+	/* å°†ä»é“¶è”è·å–çš„è®¤è¯ç æäº¤åˆ°äººè¡Œç³»ç»Ÿ */
 	check_unionpaycode_ret check_unionpaycode(1: check_unionpaycode_info info),	
-	/* ÓÃ»§µÇÂ¼ÈËĞĞÏµÍ³ */
+	/* ç”¨æˆ·ç™»å½•äººè¡Œç³»ç»Ÿ */
 	types.error_code user_login(1: userinfo info),
-		/* ÓÃ»§»ñÈ¡ĞÅÓÃ±¨¸æ£¬ ·µ»ØÎªpdfÎÄ¼şµÄ¶ş½øÖÆ×Ö·û´® */
-	/* ²¢ÇÒ½«ÆäÓÃcert_noÃüÃû±£´æµ½ÎÄ¼şÏµÍ³ÖĞ,·½±ãºóĞø²éÑ¯Ê¹ÓÃ */
+		/* ç”¨æˆ·è·å–ä¿¡ç”¨æŠ¥å‘Šï¼Œ è¿”å›ä¸ºpdfæ–‡ä»¶çš„äºŒè¿›åˆ¶å­—ç¬¦ä¸² */
+	/* å¹¶ä¸”å°†å…¶ç”¨cert_noå‘½åä¿å­˜åˆ°æ–‡ä»¶ç³»ç»Ÿä¸­,æ–¹ä¾¿åç»­æŸ¥è¯¢ä½¿ç”¨ */
 	reportquery_ret report_query(1: reportquery_req req),
 	
 	
@@ -2718,7 +2718,7 @@ curlÄÚ²¿Ê¹ÓÃCookieºÍCookieInfoÁ½¸östruct±£´æcookieĞÅÏ¢¡£ ÎªÒ»¸öeasy handleÉèÖÃCU
 	sessionlock;
 	
 	
-#Èç¹û´æÔÚ¸Ã½Å±¾,ÄÇÃ´Ìæ»»serverÇ°,ÔİÍ£ËùÓĞserver
+#å¦‚æœå­˜åœ¨è¯¥è„šæœ¬,é‚£ä¹ˆæ›¿æ¢serverå‰,æš‚åœæ‰€æœ‰server
 chmod a+x /var/www/ /var/www/cgi-bin
 chmod a+x /usr/local/p2p /usr/local/p2p/service/
 mkdir -p /data
@@ -2735,7 +2735,7 @@ if [ -f "/usr/local/p2p/service/start_services.sh" ] ; then
         chmod a+x start_services.sh
         su - p2p -c"cd /usr/local/p2p/service/;./start_services.sh s"
 fi
-¡¡¡¡Í¬Ê±¼ÌĞøÖ´ĞĞ2015Äê´ºÔËµÄ¸÷Ïî´ëÊ©£º¶Ô¿ª³µÇ°15Ìì£¨²»º¬£©ÒÔÉÏÍËÆ±µÄ£¬²»ÊÕÈ¡ÍËÆ±·Ñ£»¿ª³µÇ°48Ğ¡Ê±£¨²»º¬£©ÒÔÉÏ£¬¿É¸ÄÇ©Ô¤ÊÛÆÚÄÚµÄÆäËûÁĞ³µ£»¿ª³µÇ°48Ğ¡Ê±ÒÔÄÚ£¬¿É¸ÄÇ©¿ª³µÇ°µÄÆäËûÁĞ³µ£¬Ò²¿É¸ÄÇ©¿ª³µºóÖÁÆ±ÃæÈÕÆÚµ±ÈÕ24:00Ö®¼äµÄÆäËûÁĞ³µ£¬²»°ìÀíÆ±ÃæÈÕÆÚ´ÎÈÕ¼°ÒÔºóµÄ¸ÄÇ©£»¿ª³µÖ®ºó£¬ÂÃ¿ÍÈÔ¿É¸ÄÇ©µ±ÈÕÆäËûÁĞ³µ£¬µ«Ö»ÄÜÔÚÆ±Ãæ·¢Õ¾°ìÀí¸ÄÇ©£»¸ÄÇ©£¨º¬±ä¸üµ½Õ¾£©ºóµÄ³µÆ±³Ë³µÈÕÆÚÔÚ´ºÔËÆÚ¼äµÄ£¬ÍËÆ±Ê±Ò»ÂÉ°´¿ª³µÊ±¼äÇ°²»×ã24Ğ¡Ê±±ê×¼ºËÊÕÍËÆ±·Ñ¡£ 
+ã€€ã€€åŒæ—¶ç»§ç»­æ‰§è¡Œ2015å¹´æ˜¥è¿çš„å„é¡¹æªæ–½ï¼šå¯¹å¼€è½¦å‰15å¤©ï¼ˆä¸å«ï¼‰ä»¥ä¸Šé€€ç¥¨çš„ï¼Œä¸æ”¶å–é€€ç¥¨è´¹ï¼›å¼€è½¦å‰48å°æ—¶ï¼ˆä¸å«ï¼‰ä»¥ä¸Šï¼Œå¯æ”¹ç­¾é¢„å”®æœŸå†…çš„å…¶ä»–åˆ—è½¦ï¼›å¼€è½¦å‰48å°æ—¶ä»¥å†…ï¼Œå¯æ”¹ç­¾å¼€è½¦å‰çš„å…¶ä»–åˆ—è½¦ï¼Œä¹Ÿå¯æ”¹ç­¾å¼€è½¦åè‡³ç¥¨é¢æ—¥æœŸå½“æ—¥24:00ä¹‹é—´çš„å…¶ä»–åˆ—è½¦ï¼Œä¸åŠç†ç¥¨é¢æ—¥æœŸæ¬¡æ—¥åŠä»¥åçš„æ”¹ç­¾ï¼›å¼€è½¦ä¹‹åï¼Œæ—…å®¢ä»å¯æ”¹ç­¾å½“æ—¥å…¶ä»–åˆ—è½¦ï¼Œä½†åªèƒ½åœ¨ç¥¨é¢å‘ç«™åŠç†æ”¹ç­¾ï¼›æ”¹ç­¾ï¼ˆå«å˜æ›´åˆ°ç«™ï¼‰åçš„è½¦ç¥¨ä¹˜è½¦æ—¥æœŸåœ¨æ˜¥è¿æœŸé—´çš„ï¼Œé€€ç¥¨æ—¶ä¸€å¾‹æŒ‰å¼€è½¦æ—¶é—´å‰ä¸è¶³24å°æ—¶æ ‡å‡†æ ¸æ”¶é€€ç¥¨è´¹ã€‚ 
 	
 		curl_easy_setopt(curl, CURLOPT_ENCODING , "UTF-8");
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
@@ -2854,7 +2854,7 @@ method=checkTradeCode&code=4qcjbt&reportformat=21
 SELECT '2016-02-18',F_trans_id,F_repayment_id,F_amount,F_acc_id,F_create_time FROM acc.t_biz_acc_flow_00 WHERE F_create_time >= '2016-02-17 00:00:00' AND F_create_time <= '2016-02-17 23:59:59' AND ((F_operation=2 AND F_bus_type=3 AND F_acc_id IN (2015070100002005, 2015070100002003)) OR (F_operation=2 AND F_bus_type=9 AND F_acc_id IN (2015070100002005))
  OR (F_operation=3 AND F_bus_type=3 AND F_acc_id IN (2015070100002005))
 
-»ñÈ¡ÉêÇëĞÅÓÃĞÅÏ¢¶¯Ì¬Âë
+è·å–ç”³è¯·ä¿¡ç”¨ä¿¡æ¯åŠ¨æ€ç 
 /*
  * POST https://ipcrs.pbccrc.org.cn/reportAction.do?num=0.8172506992705166 HTTP/1.1
 Host: ipcrs.pbccrc.org.cn
@@ -2872,41 +2872,41 @@ Cookie: BIGipServerpool_ipcrs_app=2SJ6LtuslNaha5gF9TwayuIh5sFUdkZ8XypX+q0FT3kmO4
 
 method=send&verifyCode=
 		*/
--rwxr-xr-x 1 root root 4184812 7ÔÂ  17 2015 libxml2.so.2.7.2
-lrwxrwxrwx 1 root root      16 7ÔÂ  17 2015 libxml2.so.2 -> libxml2.so.2.7.2
-lrwxrwxrwx 1 root root      16 7ÔÂ  17 2015 libxml2.so -> libxml2.so.2.7.2
+-rwxr-xr-x 1 root root 4184812 7æœˆ  17 2015 libxml2.so.2.7.2
+lrwxrwxrwx 1 root root      16 7æœˆ  17 2015 libxml2.so.2 -> libxml2.so.2.7.2
+lrwxrwxrwx 1 root root      16 7æœˆ  17 2015 libxml2.so -> libxml2.so.2.7.2
 		
-P2PÓÃ»§ÕË»§Á÷Ë®¶ÔÕË: ÕıÈ·
-P2PÖĞ¼äÕË»§Á÷Ë®¶ÔÕË: ÕıÈ·
-P2PÀÖË¢×ÜÕË»§Á÷Ë®¶ÔÕË: ÕıÈ·
-P2P³äÖµºÍÕË»§¶ÔÕË: ÕıÈ·
-P2PÌáÏÖºÍÕË»§¶ÔÕË: ÕıÈ·
-P2P³äÖµºÍ±êµÄ(½É·Ñ)¶ÔÕË: ÕıÈ·
-P2P³äÖµºÍÍ¶×Ê¶ÔÕË: ÕıÈ·
-P2P³äÖµºÍ±êµÄ(»¹¿î)¶ÔÕË: ÕıÈ·
-P2P±êµÄÏµÍ³(»¹¿î,µæ¸¶,×ª·ÖÅä)ºÍÕË»§¶ÔÕË: ÕıÈ·
-P2PÌáÏÖºÍ±êµÄ(·Å¿î)¶ÔÕË: ÕıÈ·
-P2PÍ¶×Ê(Âú±ê)ºÍ±êµÄ(Âú±ê)¶ÔÕË: ÕıÈ·
-P2PÍ¶×Ê(Í¶×Ê)ºÍ±êµÄ(Í¶×Ê³É¹¦)¶ÔÕË: ÕıÈ·
-P2P³äÖµºÍÍâ²¿ÏµÍ³¶ÔÕË: ÕıÈ·
-P2PÌáÏÖºÍÍâ²¿ÏµÍ³¶ÔÕË: ÕıÈ·
-¶ÔÕËÊıÁ¿´íÎó£¬Ó¦¶ÔÕË£º15, Êµ¼Ê¶ÔÕË£º14		
+P2Pç”¨æˆ·è´¦æˆ·æµæ°´å¯¹è´¦: æ­£ç¡®
+P2Pä¸­é—´è´¦æˆ·æµæ°´å¯¹è´¦: æ­£ç¡®
+P2Pä¹åˆ·æ€»è´¦æˆ·æµæ°´å¯¹è´¦: æ­£ç¡®
+P2På……å€¼å’Œè´¦æˆ·å¯¹è´¦: æ­£ç¡®
+P2Pæç°å’Œè´¦æˆ·å¯¹è´¦: æ­£ç¡®
+P2På……å€¼å’Œæ ‡çš„(ç¼´è´¹)å¯¹è´¦: æ­£ç¡®
+P2På……å€¼å’ŒæŠ•èµ„å¯¹è´¦: æ­£ç¡®
+P2På……å€¼å’Œæ ‡çš„(è¿˜æ¬¾)å¯¹è´¦: æ­£ç¡®
+P2Pæ ‡çš„ç³»ç»Ÿ(è¿˜æ¬¾,å«ä»˜,è½¬åˆ†é…)å’Œè´¦æˆ·å¯¹è´¦: æ­£ç¡®
+P2Pæç°å’Œæ ‡çš„(æ”¾æ¬¾)å¯¹è´¦: æ­£ç¡®
+P2PæŠ•èµ„(æ»¡æ ‡)å’Œæ ‡çš„(æ»¡æ ‡)å¯¹è´¦: æ­£ç¡®
+P2PæŠ•èµ„(æŠ•èµ„)å’Œæ ‡çš„(æŠ•èµ„æˆåŠŸ)å¯¹è´¦: æ­£ç¡®
+P2På……å€¼å’Œå¤–éƒ¨ç³»ç»Ÿå¯¹è´¦: æ­£ç¡®
+P2Pæç°å’Œå¤–éƒ¨ç³»ç»Ÿå¯¹è´¦: æ­£ç¡®
+å¯¹è´¦æ•°é‡é”™è¯¯ï¼Œåº”å¯¹è´¦ï¼š15, å®é™…å¯¹è´¦ï¼š14		
 
-P2PÓÃ»§ÕË»§Á÷Ë®¶ÔÕË: ÕıÈ·
-P2PÖĞ¼äÕË»§Á÷Ë®¶ÔÕË: ÕıÈ·
-P2PÀÖË¢×ÜÕË»§Á÷Ë®¶ÔÕË: ÕıÈ·
-P2P³äÖµºÍÕË»§¶ÔÕË: ÕıÈ·
-P2PÌáÏÖºÍÕË»§¶ÔÕË: ÕıÈ·
-P2P³äÖµºÍ±êµÄ(½É·Ñ)¶ÔÕË: ÕıÈ·
-P2P³äÖµºÍÍ¶×Ê¶ÔÕË: ÕıÈ·
-P2P³äÖµºÍ±êµÄ(»¹¿î)¶ÔÕË: ÕıÈ·
-P2P±êµÄÏµÍ³(»¹¿î,µæ¸¶,×ª·ÖÅä)ºÍÕË»§¶ÔÕË: ÕıÈ·
-P2PÌáÏÖºÍ±êµÄ(·Å¿î)¶ÔÕË: ÕıÈ·
-P2PÍ¶×Ê(Âú±ê)ºÍ±êµÄ(Âú±ê)¶ÔÕË: ÕıÈ·
-P2PÍ¶×Ê(Í¶×Ê)ºÍ±êµÄ(Í¶×Ê³É¹¦)¶ÔÕË: ÕıÈ·
-P2P³äÖµºÍÍâ²¿ÏµÍ³¶ÔÕË: ÕıÈ·
-P2PÌáÏÖºÍÍâ²¿ÏµÍ³¶ÔÕË: ÕıÈ·
-P2P³äÖµ(POSÁ÷Ë®)ºÍÍâ²¿ÏµÍ³¶ÔÕË: ÕıÈ·
+P2Pç”¨æˆ·è´¦æˆ·æµæ°´å¯¹è´¦: æ­£ç¡®
+P2Pä¸­é—´è´¦æˆ·æµæ°´å¯¹è´¦: æ­£ç¡®
+P2Pä¹åˆ·æ€»è´¦æˆ·æµæ°´å¯¹è´¦: æ­£ç¡®
+P2På……å€¼å’Œè´¦æˆ·å¯¹è´¦: æ­£ç¡®
+P2Pæç°å’Œè´¦æˆ·å¯¹è´¦: æ­£ç¡®
+P2På……å€¼å’Œæ ‡çš„(ç¼´è´¹)å¯¹è´¦: æ­£ç¡®
+P2På……å€¼å’ŒæŠ•èµ„å¯¹è´¦: æ­£ç¡®
+P2På……å€¼å’Œæ ‡çš„(è¿˜æ¬¾)å¯¹è´¦: æ­£ç¡®
+P2Pæ ‡çš„ç³»ç»Ÿ(è¿˜æ¬¾,å«ä»˜,è½¬åˆ†é…)å’Œè´¦æˆ·å¯¹è´¦: æ­£ç¡®
+P2Pæç°å’Œæ ‡çš„(æ”¾æ¬¾)å¯¹è´¦: æ­£ç¡®
+P2PæŠ•èµ„(æ»¡æ ‡)å’Œæ ‡çš„(æ»¡æ ‡)å¯¹è´¦: æ­£ç¡®
+P2PæŠ•èµ„(æŠ•èµ„)å’Œæ ‡çš„(æŠ•èµ„æˆåŠŸ)å¯¹è´¦: æ­£ç¡®
+P2På……å€¼å’Œå¤–éƒ¨ç³»ç»Ÿå¯¹è´¦: æ­£ç¡®
+P2Pæç°å’Œå¤–éƒ¨ç³»ç»Ÿå¯¹è´¦: æ­£ç¡®
+P2På……å€¼(POSæµæ°´)å’Œå¤–éƒ¨ç³»ç»Ÿå¯¹è´¦: æ­£ç¡®
 
 http://127.0.0.1:16823/proxy_on.pac
 https://pac.itzmx.com/abc.pac
@@ -2916,7 +2916,7 @@ redis-cli -h machine -p port -n db
 [root@p2p-dev fastdfs-master]# ps -ef |grep fdfs
 root     27141     1  0  2015 ?        00:25:17 bin/fdfs_trackerd conf/tracker.conf
 root     27150     1  0  2015 ?        00:25:01 bin/fdfs_storaged conf/storage.conf
-fastfs¸ùÄ¿Â¼ £º/usr/local/fastdfs
+fastfsæ ¹ç›®å½• ï¼š/usr/local/fastdfs
 
 
 userinfo.userid   
@@ -2932,12 +2932,12 @@ rpm2cpio xxx.rpm | cpio -div
 mysqldump  --databases test  --skip-opt --quick --extended-insert=false --lock-all-tables --master-data=2  -u root -p123456 >  /tmp/test.sql
 mysqldump  --databases test  --skip-opt --quick --extended-insert=false  --single-transaction   --master-data=2  -u root -p123456 >  /tmp/test.sql
 [root@p2p-dev x86_64]# ls -l ./usr/local/p2p/service/custinfoauth_service
--rwxrwxrwx 1 root root 3591873 3ÔÂ   3 14:43 ./usr/local/p2p/service/custinfoauth_service
--rwxr-xr-x 1 root root 10507867 3ÔÂ   3 14:39 custinfoauth_service
+-rwxrwxrwx 1 root root 3591873 3æœˆ   3 14:43 ./usr/local/p2p/service/custinfoauth_service
+-rwxr-xr-x 1 root root 10507867 3æœˆ   3 14:39 custinfoauth_service
 
-myisam: ²»Ö§³ÖÊÂÎñ£¬ ±íËø¡£µ«Ö§³ÖÈ«ÎÄË÷Òı ¡£OTAP¡£
-»º³å³ØÖ»»º³åË÷ÒıÎÄ¼ş²»»º³åÊı¾İÎÄ¼ş¡£
-NDB£º share nothing.  Êı¾İÈ«²¿·ÅÄÚ´æÖĞ¡£
+myisam: ä¸æ”¯æŒäº‹åŠ¡ï¼Œ è¡¨é”ã€‚ä½†æ”¯æŒå…¨æ–‡ç´¢å¼• ã€‚OTAPã€‚
+ç¼“å†²æ± åªç¼“å†²ç´¢å¼•æ–‡ä»¶ä¸ç¼“å†²æ•°æ®æ–‡ä»¶ã€‚
+NDBï¼š share nothing.  æ•°æ®å…¨éƒ¨æ”¾å†…å­˜ä¸­ã€‚
 
 	p2p_api::Client<yeahka::withdraw::withdrawClient> g_withdraw;
 	g_withdraw.init(ptrProperties, "WithdrawService", 1);
@@ -2958,7 +2958,7 @@ NDB£º share nothing.  Êı¾İÈ«²¿·ÅÄÚ´æÖĞ¡£
 		return -2;
 	}
 
-	Á¬½Ó³Ø£º
+	è¿æ¥æ± ï¼š
 	int withdraw_callback(const withdraw_callback_req& req, CommonUtil::PropertiesPtr& ptrProperties) {
 	int ret = 0;
 
@@ -3019,11 +3019,11 @@ old deposit&product_id=100525&uin=&key=67110781899517887019790697174943
 [127.0.0.1][20160308 10:26:31.313622][trace][depositservice.cpp:1070][withhold_order][139990033995520]-- withhold order url : http://192.168.10.115/cgi-bin/d
 eductpay.cgi?amount=1&command_type=create_pay_order&merchant_order_id=201603080000002000&merchant_uid=&notify_args=&notify_url=&pay_type=11&product_amount=1&
 product_args=withhold deposit&product_desc=withhold deposit&product_id=100525&uin=&sign=7ED19EF11FBCECDDC59E2CA86082813E0EDD1805
-[127.0.0.1][20160308 10:26:31.313703][trace][depositservice.cpp:1208][get_withhold_url][139990033995520]-- data for sha1: account_name=Ğ»Ô½½ò&account_no=6214
-830251362967&account_type=0&bank_name=ÕĞÉÌÒøĞĞ&bank_type=CMB&cmd=pay&id_card=460025198801253032&merchant_order_id=201603080000002000&merchant_uid=CHINAPAY&ke
+[127.0.0.1][20160308 10:26:31.313703][trace][depositservice.cpp:1208][get_withhold_url][139990033995520]-- data for sha1: account_name=è°¢è¶Šæ´¥&account_no=6214
+830251362967&account_type=0&bank_name=æ‹›å•†é“¶è¡Œ&bank_type=CMB&cmd=pay&id_card=460025198801253032&merchant_order_id=201603080000002000&merchant_uid=CHINAPAY&ke
 y=67110781899517887019790697174943
 [127.0.0.1][20160308 10:26:31.313742][trace][depositservice.cpp:1137][withhold_request][139990033995520]-- withhold request url: http://192.168.10.115/cgi-bi
-n/deductpay.cgi?account_name=Ğ»Ô½½ò&account_no=6214830251362967&account_type=0&bank_name=ÕĞÉÌÒøĞĞ&bank_type=CMB&cmd=pay&id_card=460025198801253032&merchant_o
+n/deductpay.cgi?account_name=è°¢è¶Šæ´¥&account_no=6214830251362967&account_type=0&bank_name=æ‹›å•†é“¶è¡Œ&bank_type=CMB&cmd=pay&id_card=460025198801253032&merchant_o
 rder_id=201603080000002000&merchant_uid=CHINAPAY&sign=3C5D42C5DCEC7EA45F75012CD23A4B43AC2FC267
 	
 data for sha1: amount=1&command_type=create_pay_or
@@ -3032,26 +3032,26 @@ withhold_deposit&product_id=100525&uin=ykfinance&key=526554788995178870197906971
 [127.0.0.1][20160308 10:57:46.971559][trace][depositservice.cpp:1070][withhold_order][140605084628736]-- withhold order url : http://192.168.21.243/cgi-bin/d
 eductpayitf.cgi?amount=1&command_type=create_pay_order&merchant_order_id=201603080000003000&merchant_uid=19090&notify_args=&notify_url=&pay_type=11&product_a
 mount=1&product_args=withhold_deposit&product_desc=withhold_deposit&product_id=100525&uin=ykfinance&sign=1A19DAD3A78A3AF5411C50B60F85B566C0A00163
-[127.0.0.1][20160308 10:57:46.971618][trace][depositservice.cpp:1208][get_withhold_url][140605084628736]-- data for sha1: account_name=Ğ»Ô½½ò&account_no=6214
-830251362967&account_type=0&bank_name=ÕĞÉÌÒøĞĞ&bank_type=CMB&channel=CHINAPAY&cmd=pay&id_card=460025198801253032&merchant_order_id=201603080000003000&merchan
+[127.0.0.1][20160308 10:57:46.971618][trace][depositservice.cpp:1208][get_withhold_url][140605084628736]-- data for sha1: account_name=è°¢è¶Šæ´¥&account_no=6214
+830251362967&account_type=0&bank_name=æ‹›å•†é“¶è¡Œ&bank_type=CMB&channel=CHINAPAY&cmd=pay&id_card=460025198801253032&merchant_order_id=201603080000003000&merchan
 t_uid=19090&key=52655478899517887019790697172259
 [127.0.0.1][20160308 10:57:46.971652][trace][depositservice.cpp:1138][withhold_request][140605084628736]-- withhold request url: http://192.168.21.243/cgi-bi
-n/deductpayitf.cgi?account_name=Ğ»Ô½½ò&account_no=6214830251362967&account_type=0&bank_name=ÕĞÉÌÒøĞĞ&bank_type=CMB&channel=CHINAPAY&cmd=pay&id_card=460025198
+n/deductpayitf.cgi?account_name=è°¢è¶Šæ´¥&account_no=6214830251362967&account_type=0&bank_name=æ‹›å•†é“¶è¡Œ&bank_type=CMB&channel=CHINAPAY&cmd=pay&id_card=460025198
 801253032&merchant_order_id=201603080000003000&merchant_uid=19090&sign=CCD827D248A9F14445940026F574C6FFC3CBAAA3
 
-baron²âÊÔ¹ıµÄ£º
-curl "http://127.0.0.1/cgi-bin/payorder.cgi?command_type=create_pay_order&merchant_uid=19090&merchant_order_id=920160224092500001&product_id=100526ÒÆ¿¨P2P_debit&product_desc=deduct_p2p&product_args=22222&amount=1&product_amount=1&notify_url=&notify_args=&pay_type=11&sign=FAABE68F259FB26299F1BD22C0306056"
+baronæµ‹è¯•è¿‡çš„ï¼š
+curl "http://127.0.0.1/cgi-bin/payorder.cgi?command_type=create_pay_order&merchant_uid=19090&merchant_order_id=920160224092500001&product_id=100526ç§»å¡P2P_debit&product_desc=deduct_p2p&product_args=22222&amount=1&product_amount=1&notify_url=&notify_args=&pay_type=11&sign=FAABE68F259FB26299F1BD22C0306056"
 http://192.168.21.243/cgi-bin/payorder.cgi?amount=1&comma
 nd_type=create_pay_order&merchant_order_id=201603080000005000&merchant_uid=19090&notify_args=&notify_url=&pay_type=11&product_amount=1&product_args=deduct_p2
 p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&sign=A7D7F9F61C9A18D8162350C5BF50CD683282C5E9
 
 http://192.168.21.243/cgi-bin/payorder.cgi?amount=1&command_type=create_pay_order&merchant_order_id=201603080000004000&merchant_uid=19090&notify_args=&notify_url=&pay_type=11&product_amount=1&product_args=deduct_p2p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&sign=53AA465D4C22549E89D95C53E4C9822420285A99
 
-curl "http://127.0.0.1/cgi-bin/deductpayitf.cgi?cmd=pay&merchant_uid=19090&channel=CHINAPAY&bank_name=ÕĞÉÌÒøĞĞ&bank_type=CMB&merchant_order_id=920160224092500001&account_name=Ğ»Ô½½ò&account_no=6214830251362967
+curl "http://127.0.0.1/cgi-bin/deductpayitf.cgi?cmd=pay&merchant_uid=19090&channel=CHINAPAY&bank_name=æ‹›å•†é“¶è¡Œ&bank_type=CMB&merchant_order_id=920160224092500001&account_name=è°¢è¶Šæ´¥&account_no=6214830251362967
 &id_card=460025198801253032&account_type=1&sign=FAABE68F259FB26299F1BD22C0306056"
-http://192.168.21.243/cgi-bin/deductpayitf.cgi?account_name=Ğ»Ô½½ò&account_no=6214830251362967&account_type=0&bank_name=ÕĞÉÌÒøĞĞ&bank_type=CMB&channel=CHINAPAY&cmd=pay&id_card=460025198801253032&merchant_order_id=201603080000004000&merchant_uid=19090&sign=D76C3F19E230BA16E6F177C038E84866CFBB5151
+http://192.168.21.243/cgi-bin/deductpayitf.cgi?account_name=è°¢è¶Šæ´¥&account_no=6214830251362967&account_type=0&bank_name=æ‹›å•†é“¶è¡Œ&bank_type=CMB&channel=CHINAPAY&cmd=pay&id_card=460025198801253032&merchant_order_id=201603080000004000&merchant_uid=19090&sign=D76C3F19E230BA16E6F177C038E84866CFBB5151
 
-http://192.168.10.115/cgi-bin/deductpay.cgi?abstract=&account_cert_id=43042119841009053X&account_name=Ò¦Ê¤&account_no=622909337382411014&account_type=0&amount=1000000&bank_name=ĞËÒµÒøĞĞ&bank_type=CIB&callback_args=6163636F756E745F69643D323031353038313130303030333337363937267472616E735F69643D38303538266F726465725F69643D323031363032323930303030303034303030&callback_url=http://192.168.33.50/cgi-bin/deposit.cgi&channel=CHINAPAY&partner_id=4000000001&req_no=201602290000004000&sign=8A6EDE0D8E0594B206D8D8AA7ABB5D2545464573
+http://192.168.10.115/cgi-bin/deductpay.cgi?abstract=&account_cert_id=43042119841009053X&account_name=å§šèƒœ&account_no=622909337382411014&account_type=0&amount=1000000&bank_name=å…´ä¸šé“¶è¡Œ&bank_type=CIB&callback_args=6163636F756E745F69643D323031353038313130303030333337363937267472616E735F69643D38303538266F726465725F69643D323031363032323930303030303034303030&callback_url=http://192.168.33.50/cgi-bin/deposit.cgi&channel=CHINAPAY&partner_id=4000000001&req_no=201602290000004000&sign=8A6EDE0D8E0594B206D8D8AA7ABB5D2545464573
 
 http://192.168.21.243/cgi-bin/payorder.cgi?amount=1&comma
 nd_type=create_pay_order&merchant_order_id=201603080000005000&merchant_uid=19090&notify_args=&notify_url=&pay_type=11&product_amount=1&product_args=deduct_p2
@@ -3059,11 +3059,11 @@ p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&sign=A7D7F9F61C9A18D81
 ---------------------------
 RTX
 ---------------------------
-²Ù×÷³¬Ê±
+æ“ä½œè¶…æ—¶
 
 
 ---------------------------
-È·¶¨   
+ç¡®å®š   
 ---------------------------
 
 
@@ -3076,7 +3076,7 @@ amount=1&command_type=create_pay_order&merchant_order_id=201603080000005000&merc
 amount=1&command_type=create_pay_order&merchant_order_id=201603080000008000&merchant_uid=19090&pay_type=11&product_amount=1&product_args=deduct_p2p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&key=52655478899517887019790697172259
 http://192.168.21.243/cgi-bin/payorder.cgi?amount=1&command_type=create_pay_order&merchant_order_id=201603080000008000&merchant_uid=19090&pay_type=11&product_amount=1&product_args=deduct_p2p&product_desc=deduct_p2p&product_id=100525&uin=ykfinance&sign=0D9A620F31FC0150231EE75EF0E3972CFD35A1C8
 
-ÎŞclientpool
+æ— clientpool
 libDepositService.a
 
 g++ -I../../../ -I../../../CommonBusiness/include/depositservice -I../../../CommonBusiness/include/types -I../../../CommonInclude -I/usr/include/mysql/ -I/usr/local/mysql/include/mysql/ -I/usr/include/libxml2/ -I../ -I./ -I../                                         -Wall -Werror -DTEST_SERVER -DLEPOSPAY_SHOULD_SENDSMS -std=c++0x -Wno-pmf-conversions -g -DDEBUG_GLOBAL   -c -o deposit.o deposit.cpp
@@ -3084,15 +3084,15 @@ g++ -I../../../ -I../../../CommonBusiness/include/depositservice -I../../../Comm
 
 
 http://192.168.21.243/cgi-bin/deductpayitf.cgi?account_na
-me=Ò¦Ê¤&account_no=622909337382411014&account_type=0&bank_name=ĞËÒµÒøĞĞ&bank_type=CIB&channel=CHINAPAY&cmd=pay&id_card=43042119841009053X&merchant_order_id=2
+me=å§šèƒœ&account_no=622909337382411014&account_type=0&bank_name=å…´ä¸šé“¶è¡Œ&bank_type=CIB&channel=CHINAPAY&cmd=pay&id_card=43042119841009053X&merchant_order_id=2
 01603100000001000&merchant_uid=19090&notify_arg=6163636F756E745F69643D323031353038303730303030303032353933267472616E735F69643D38383038266F726465725F69643D323
 031363033313030303030303031303030&notify_url=http://192.168.33.50/cgi-bin/deposit.cgi&sign=16FE7666EDD0E88BC5BD3E4A44E9DE9E5FE50F40
 
-Baron(Ğ»Ô½½ò) 03-10 17:04:55
+Baron(è°¢è¶Šæ´¥) 03-10 17:04:55
 curl "http://mobileykpay.yeahka.com/cgi-bin/payorder.cgi?command_type=create_pay_order&merchant_uid=19090&uin=ykfinance&merchant_order_id=820160310092500004&product_id=100525&product_desc=deduct_p2p&product_args=22222&amount=1&product_amount=1&notify_url=&notify_args=&pay_type=11&sign=FAABE68F259FB26299F1BD22C0306056"
 
-curl "http://mobileykpay.yeahka.com/cgi-bin/deductpayitf.cgi?cmd=pay&merchant_uid=19090&channel=CHINAPAY&bank_name=ÕĞÉÌÒøĞĞ&bank_type=CMB&merchant_order_id=820160310092500004&account_name=Ğ»Ô½½ò
-Baron(Ğ»Ô½½ò) 03-10 17:04:55
+curl "http://mobileykpay.yeahka.com/cgi-bin/deductpayitf.cgi?cmd=pay&merchant_uid=19090&channel=CHINAPAY&bank_name=æ‹›å•†é“¶è¡Œ&bank_type=CMB&merchant_order_id=820160310092500004&account_name=è°¢è¶Šæ´¥
+Baron(è°¢è¶Šæ´¥) 03-10 17:04:55
 &account_no=6214830251362967&id_card=460025198801253032&account_type=0&notify_url=http://192.168.21.243/cgi-bin/deductpay_notifytest.cgi&notify_arg=hahahaxxxx&sign=FAABE68F259FB26299F1BD22C0306056"
 
 
@@ -3159,8 +3159,8 @@ account_id=201603100000001000&trans_id=8808&order_id=201603100000001000
   int64_t amount;
   std::string desc;
   
-alter table chck.t_inside_deposit_flow add F_deposit_type tinyint not null default 0 comment '³äÖµÀàĞÍ';
-alter table chck.t_outside_deposit_flow add F_deposit_type tinyint not null default 0 comment '³äÖµÀàĞÍ';
+alter table chck.t_inside_deposit_flow add F_deposit_type tinyint not null default 0 comment 'å……å€¼ç±»å‹';
+alter table chck.t_outside_deposit_flow add F_deposit_type tinyint not null default 0 comment 'å……å€¼ç±»å‹';
 
 INSERT INTO chck.t_deposit_check (F_date,F_amount_l,F_order_id_l,F_acc_id_l,F_uid_l,F_create_time_l,F_amount_r,F_order_id_r,F_payorder_id_r,F_uid_r,F_create_time_r) 
 (SELECT '2016-03-11',t1.F_amount,t1.F_order_id,t1.F_acc_id,t1.F_uid,t1.F_create_time,t2.F_amount,t2.F_order_id,t2.F_payorder_id,t2.F_uid,t2.F_create_time FROM chck.t_inside_deposit_flow t1 LEFT JOIN chck.t_outside_deposit_flow t2 ON t1.F_date=t2.F_date And t1.F_order_id=t2.F_order_id And t1.F_order_id!=0 And t2.F_order_id!=0 WHERE t1.F_date='2016-03-11') 
@@ -3178,10 +3178,10 @@ p 'ApplicationGlobalData.h'::mq_ip
 
 
 eclipse c++:
-ÏÈ°²×° mingw £¬È»ºóĞÂ½¨c/c++ÏîÄ¿¡£compiler index Ñ¡Ôñmingw. ´Ómakefile project from exsiting code.
-if (!res || res->next())  return false; //´æÔÚ
+å…ˆå®‰è£… mingw ï¼Œç„¶åæ–°å»ºc/c++é¡¹ç›®ã€‚compiler index é€‰æ‹©mingw. ä»makefile project from exsiting code.
+if (!res || res->next())  return false; //å­˜åœ¨
 
-/home/jun/internetfinancialserver_test/p2p/Service/loanservice/src/: ³É¹¦.
+/home/jun/internetfinancialserver_test/p2p/Service/loanservice/src/: æˆåŠŸ.
 (gdb) where
 #0  0x00000032452e8f33 in epoll_wait () from /lib64/libc.so.6
 #1  0x0000000000afbcf2 in epoll_dispatch (base=0x1e112c0, tv=<value optimized out>) at epoll.c:407
@@ -3264,27 +3264,27 @@ sum+=i;
  }
  
  
- gdb finish Íê³Éº¯Êı¡£·µ»ØÉÏ²ã¡£
+ gdb finish å®Œæˆå‡½æ•°ã€‚è¿”å›ä¸Šå±‚ã€‚
  break +offset 
 break -offset 
-ÔÚµ±Ç°ĞĞºÅµÄÇ°Ãæ»òºóÃæµÄoffsetĞĞÍ£×¡¡£offisetÎª×ÔÈ»Êı¡£ break filename:linenum 
-ÔÚÔ´ÎÄ¼şfilenameµÄlinenumĞĞ´¦Í£×¡¡£ break filename:function 
-ÔÚÔ´ÎÄ¼şfilenameµÄfunctionº¯ÊıµÄÈë¿Ú´¦Í£×¡¡£ break *address
-ÔÚ³ÌĞòÔËĞĞµÄÄÚ´æµØÖ·´¦Í£×¡¡£ break 
-breakÃüÁîÃ»ÓĞ²ÎÊıÊ±£¬±íÊ¾ÔÚÏÂÒ»ÌõÖ¸Áî´¦Í£×¡¡£ break ... if <condition>
-...¿ÉÒÔÊÇÉÏÊöµÄ²ÎÊı£¬condition±íÊ¾Ìõ¼ş£¬ÔÚÌõ¼ş³ÉÁ¢Ê±Í£×¡¡£±ÈÈçÔÚÑ­»·¾³ÌåÖĞ£¬¿ÉÒÔÉèÖÃbreak if i=100£¬±íÊ¾ µ±iÎª100Ê±Í£×¡³ÌĞò¡£ ²é¿´¶ÏµãÊ±£¬¿ÉÊ¹ÓÃinfoÃüÁî£¬ÈçÏÂËùÊ¾£º£¨×¢£ºn±íÊ¾¶ÏµãºÅ£©
+åœ¨å½“å‰è¡Œå·çš„å‰é¢æˆ–åé¢çš„offsetè¡Œåœä½ã€‚offisetä¸ºè‡ªç„¶æ•°ã€‚ break filename:linenum 
+åœ¨æºæ–‡ä»¶filenameçš„linenumè¡Œå¤„åœä½ã€‚ break filename:function 
+åœ¨æºæ–‡ä»¶filenameçš„functionå‡½æ•°çš„å…¥å£å¤„åœä½ã€‚ break *address
+åœ¨ç¨‹åºè¿è¡Œçš„å†…å­˜åœ°å€å¤„åœä½ã€‚ break 
+breakå‘½ä»¤æ²¡æœ‰å‚æ•°æ—¶ï¼Œè¡¨ç¤ºåœ¨ä¸‹ä¸€æ¡æŒ‡ä»¤å¤„åœä½ã€‚ break ... if <condition>
+...å¯ä»¥æ˜¯ä¸Šè¿°çš„å‚æ•°ï¼Œconditionè¡¨ç¤ºæ¡ä»¶ï¼Œåœ¨æ¡ä»¶æˆç«‹æ—¶åœä½ã€‚æ¯”å¦‚åœ¨å¾ªç¯å¢ƒä½“ä¸­ï¼Œå¯ä»¥è®¾ç½®break if i=100ï¼Œè¡¨ç¤º å½“iä¸º100æ—¶åœä½ç¨‹åºã€‚ æŸ¥çœ‹æ–­ç‚¹æ—¶ï¼Œå¯ä½¿ç”¨infoå‘½ä»¤ï¼Œå¦‚ä¸‹æ‰€ç¤ºï¼šï¼ˆæ³¨ï¼šnè¡¨ç¤ºæ–­ç‚¹å·ï¼‰
 
 
-ÃüÁîĞĞ¹¤¾ßµÄÒ»Ğ©¼òµ¥²Ù×÷ÈçÏÂ£º
+å‘½ä»¤è¡Œå·¥å…·çš„ä¸€äº›ç®€å•æ“ä½œå¦‚ä¸‹ï¼š
 
-1. ÏÔÊ¾¸ùÄ¿Â¼ÏÂ¡¢ÎÄ¼ş£º ls / Ê¹ÓÃ ls ÃüÁîÀ´²é¿´µ±Ç° ZooKeeper ÖĞËù°üº¬µÄÄÚÈİ
-2. ÏÔÊ¾¸ùÄ¿Â¼ÏÂ¡¢ÎÄ¼ş£º ls2 / ²é¿´µ±Ç°½ÚµãÊı¾İ²¢ÄÜ¿´µ½¸üĞÂ´ÎÊıµÈÊı¾İ
-3. ´´½¨ÎÄ¼ş£¬²¢ÉèÖÃ³õÊ¼ÄÚÈİ£º create /zk "test" ´´½¨Ò»¸öĞÂµÄ znode½Úµã¡° zk ¡±ÒÔ¼°ÓëËü¹ØÁªµÄ×Ö·û´®
-4. »ñÈ¡ÎÄ¼şÄÚÈİ£º get /zk È·ÈÏ znode ÊÇ·ñ°üº¬ÎÒÃÇËù´´½¨µÄ×Ö·û´®
-5. ĞŞ¸ÄÎÄ¼şÄÚÈİ£º set /zk "zkbak" ¶Ô zk Ëù¹ØÁªµÄ×Ö·û´®½øĞĞÉèÖÃ
-6. É¾³ıÎÄ¼ş£º delete /zk ½«¸Õ²Å´´½¨µÄ znode É¾³ı
-7. ÍË³ö¿Í»§¶Ë£º quit
-8. °ïÖúÃüÁî£º help
+1. æ˜¾ç¤ºæ ¹ç›®å½•ä¸‹ã€æ–‡ä»¶ï¼š ls / ä½¿ç”¨ ls å‘½ä»¤æ¥æŸ¥çœ‹å½“å‰ ZooKeeper ä¸­æ‰€åŒ…å«çš„å†…å®¹
+2. æ˜¾ç¤ºæ ¹ç›®å½•ä¸‹ã€æ–‡ä»¶ï¼š ls2 / æŸ¥çœ‹å½“å‰èŠ‚ç‚¹æ•°æ®å¹¶èƒ½çœ‹åˆ°æ›´æ–°æ¬¡æ•°ç­‰æ•°æ®
+3. åˆ›å»ºæ–‡ä»¶ï¼Œå¹¶è®¾ç½®åˆå§‹å†…å®¹ï¼š create /zk "test" åˆ›å»ºä¸€ä¸ªæ–°çš„ znodeèŠ‚ç‚¹â€œ zk â€ä»¥åŠä¸å®ƒå…³è”çš„å­—ç¬¦ä¸²
+4. è·å–æ–‡ä»¶å†…å®¹ï¼š get /zk ç¡®è®¤ znode æ˜¯å¦åŒ…å«æˆ‘ä»¬æ‰€åˆ›å»ºçš„å­—ç¬¦ä¸²
+5. ä¿®æ”¹æ–‡ä»¶å†…å®¹ï¼š set /zk "zkbak" å¯¹ zk æ‰€å…³è”çš„å­—ç¬¦ä¸²è¿›è¡Œè®¾ç½®
+6. åˆ é™¤æ–‡ä»¶ï¼š delete /zk å°†åˆšæ‰åˆ›å»ºçš„ znode åˆ é™¤
+7. é€€å‡ºå®¢æˆ·ç«¯ï¼š quit
+8. å¸®åŠ©å‘½ä»¤ï¼š help
 
 [zk: localhost:2181(CONNECTED) 8] get /p2p/custinfoauth_sessionkey
 2015-12-10 14:23:52|TmilI3ZP4v2BhUjl2UNPsqZF8y8RHYZ6|0ee92121e5aebf2240a263d24b049311
@@ -3313,18 +3313,18 @@ d, F_trans_id, F_amount, F_bus_type, F_operation, F_withdraw_type, F_loan_id, F_
 
 bjam toolset=msvc-11.0 variant=debug,release threading=multi link=static
 
-// KEY_DATA : ¼ÓÃÜÃÜÔ¿¡£³¤¶È24×Ö½Ú¡£
+// KEY_DATA : åŠ å¯†å¯†é’¥ã€‚é•¿åº¦24å­—èŠ‚ã€‚
 try {
 ????byte[] KEY_DATA = {1,8,-49,-31,77,90,10,121,-14,109,107,38,29,68,59,5,82,49,31,42,-25,67,96,15};
 ????Cipher cipher = Cipher.getInstance("DESede/ECB/PKCS5Padding");
-????SecretKeySpec key = new SecretKeySpec(KEY_DATA, "DESede");//Éú³É¼ÓÃÜ½âÃÜĞèÒªµÄKey
+????SecretKeySpec key = new SecretKeySpec(KEY_DATA, "DESede");//ç”ŸæˆåŠ å¯†è§£å¯†éœ€è¦çš„Key
 ????cipher.init(Cipher.ENCRYPT_MODE, key);
 ????byte[] res = cipher.doFinal(data.getBytes());
 } catch (Exception e) {
 ????e.printStackTrace();
 }
 
-'532129198412150719'£º aes ¼ÓÃÜ£º
+'532129198412150719'ï¼š aes åŠ å¯†ï¼š
 ADEG9h0rrfISxSBwMiwQeXqjbMmRJW5k1ATNIyWNH00=
 ADEG9h0rrfISxSBwMiwQeXqjbMmRJW5k1ATNIyWNH00= 
 
@@ -3332,80 +3332,80 @@ ADEG9h0rrfISxSBwMiwQeXqjbMmRJW5k1ATNIyWNH00=
 	
 	
 [14, -23, 33, 33, -27, -82, -65, 34, 64, -94, 99, -46, 75, 4, -109, 17]	
-°ÑÒ»¸öPKCS#7ÎÄ¼ş´ÓPEM¸ñÊ½×ª»»³ÉDER¸ñÊ½£º
+æŠŠä¸€ä¸ªPKCS#7æ–‡ä»¶ä»PEMæ ¼å¼è½¬æ¢æˆDERæ ¼å¼ï¼š
 [cpp] view plain copy
 openssl pkcs7 -in file.pem -outform DER -out file.der   
 
-´òÓ¡ÎÄ¼şËùÓĞÖ¤Êé
+æ‰“å°æ–‡ä»¶æ‰€æœ‰è¯ä¹¦
 [cpp] view plain copy
 openssl pkcs7 -in file.pem -print_certs -out certs.pem  
 phabricator
 
 
- ÓÃopensslÃüÁîÉú³ÉÖ¤Êé
-±êÇ©£º ¼ÓÃÜ¹¤×÷Ëã·¨ssl·şÎñÆ÷½Å±¾
-2008-06-21 21:17 10652ÈËÔÄ¶Á ÆÀÂÛ(1) ÊÕ²Ø ¾Ù±¨
- ·ÖÀà£º  Security£¨38£©  
-°æÈ¨ÉùÃ÷£º±¾ÎÄÎª²©Ö÷Ô­´´ÎÄÕÂ£¬Î´¾­²©Ö÷ÔÊĞí²»µÃ×ªÔØ¡£
-Ò²ĞíºÜ¶àÈËºÍ±¾ÈËÒ»ÑùÉîÓĞÌå»á£¬Ê¹ÓÃOpenSSL¿âĞ´Ò»¸ö¼ÓÃÜÍ¨Ñ¶¹ı³Ì£¬´úÂëºÜÈİÒ×¾ÍĞ´³öÀ´ÁË£¬¿ÉÊÇÕû¸ö¹¤×÷È´»¨ÁËÁËºÃ¼¸Ìì¡£³ı½«³ÌĞò±àÒë³É¹¦Íâ£¨Ã»ÓĞ¿ÉÒÔÊ¹ÓÃµÄÖ¤ÊéÎÄ¼ş£¬±àÒë³É¹¦ÁË£¬Ëü²¢²»ÄÜÅÜÆğÀ´£¬²¢²»±íÊ¾ËüÄÜÕı³£Ê¹ÓÃ£¬ËùÒÔ......£©,»¹ĞèÉú³É±ØÒªµÄÖ¤ÊéºÍË½Ô¿ÎÄ¼şÊ¹Ë«·½ÄÜ¹»³É¹¦ÑéÖ¤¶Ô·½¡£
-ÕÒÁËn¶àµÄ×ÊÁÏ£¬ºÜ¶àÊÇËµµÄºÜÄ£ºı£¬¿´ÁËn¶àµÄÓ¢ÎÄ×ÊÁÏ£¬»¹ÊÇÃ»ÓĞ°ì·¨£¨²»ÖªµÀÊÇ²»ÊÇÍâ¹úÅóÓÑ¶¼±È½ÏÀ÷º¦£¬²»ÓÃËµÃ÷µÃÌ«Çå£¿£©£¬ÎŞÒâ¼äÕÒµ½yawl(yawl@nsfocus.com)Ğ´µÄÎÄÕÂ£¬ÄÑµÃµÄºº×Ö£¨ºÇºÇ£©¡£ÀïÃæÓĞÉú³ÉÖ¤Êé²¿·Ö£¬Ëµµ½Éú³ÉÁËCertificate Signing Request (CSR)ÎÄ¼şºó£¬¾ÍÓĞµã²»Ì«Çå³şÁË¡£ºóÃæÉú³É×ÔÇ©×ÖÖ¤ÊéÔÚºÜ¶àµØ·½¶¼¿ÉÒÔÕÒµ½µÄ£¬Ç©ÃûÕâ²¿·Ö£¬yawlËµmod_sslÓĞ±È½ÏºÃµÄ½Å±¾£¬µ«ÊÇ±ÊÕßÒ»Ê±ÕÒ²»µ½£¬¾Í×Ô¼ºÓÃopensslµÄcaÃüÁîÀ´Íê³ÉÁË£¬Ò²²»ÊÇºÜÂé·³¡£ 
+ ç”¨opensslå‘½ä»¤ç”Ÿæˆè¯ä¹¦
+æ ‡ç­¾ï¼š åŠ å¯†å·¥ä½œç®—æ³•sslæœåŠ¡å™¨è„šæœ¬
+2008-06-21 21:17 10652äººé˜…è¯» è¯„è®º(1) æ”¶è— ä¸¾æŠ¥
+ åˆ†ç±»ï¼š  Securityï¼ˆ38ï¼‰  
+ç‰ˆæƒå£°æ˜ï¼šæœ¬æ–‡ä¸ºåšä¸»åŸåˆ›æ–‡ç« ï¼Œæœªç»åšä¸»å…è®¸ä¸å¾—è½¬è½½ã€‚
+ä¹Ÿè®¸å¾ˆå¤šäººå’Œæœ¬äººä¸€æ ·æ·±æœ‰ä½“ä¼šï¼Œä½¿ç”¨OpenSSLåº“å†™ä¸€ä¸ªåŠ å¯†é€šè®¯è¿‡ç¨‹ï¼Œä»£ç å¾ˆå®¹æ˜“å°±å†™å‡ºæ¥äº†ï¼Œå¯æ˜¯æ•´ä¸ªå·¥ä½œå´èŠ±äº†äº†å¥½å‡ å¤©ã€‚é™¤å°†ç¨‹åºç¼–è¯‘æˆåŠŸå¤–ï¼ˆæ²¡æœ‰å¯ä»¥ä½¿ç”¨çš„è¯ä¹¦æ–‡ä»¶ï¼Œç¼–è¯‘æˆåŠŸäº†ï¼Œå®ƒå¹¶ä¸èƒ½è·‘èµ·æ¥ï¼Œå¹¶ä¸è¡¨ç¤ºå®ƒèƒ½æ­£å¸¸ä½¿ç”¨ï¼Œæ‰€ä»¥......ï¼‰,è¿˜éœ€ç”Ÿæˆå¿…è¦çš„è¯ä¹¦å’Œç§é’¥æ–‡ä»¶ä½¿åŒæ–¹èƒ½å¤ŸæˆåŠŸéªŒè¯å¯¹æ–¹ã€‚
+æ‰¾äº†nå¤šçš„èµ„æ–™ï¼Œå¾ˆå¤šæ˜¯è¯´çš„å¾ˆæ¨¡ç³Šï¼Œçœ‹äº†nå¤šçš„è‹±æ–‡èµ„æ–™ï¼Œè¿˜æ˜¯æ²¡æœ‰åŠæ³•ï¼ˆä¸çŸ¥é“æ˜¯ä¸æ˜¯å¤–å›½æœ‹å‹éƒ½æ¯”è¾ƒå‰å®³ï¼Œä¸ç”¨è¯´æ˜å¾—å¤ªæ¸…ï¼Ÿï¼‰ï¼Œæ— æ„é—´æ‰¾åˆ°yawl(yawl@nsfocus.com)å†™çš„æ–‡ç« ï¼Œéš¾å¾—çš„æ±‰å­—ï¼ˆå‘µå‘µï¼‰ã€‚é‡Œé¢æœ‰ç”Ÿæˆè¯ä¹¦éƒ¨åˆ†ï¼Œè¯´åˆ°ç”Ÿæˆäº†Certificate Signing Request (CSR)æ–‡ä»¶åï¼Œå°±æœ‰ç‚¹ä¸å¤ªæ¸…æ¥šäº†ã€‚åé¢ç”Ÿæˆè‡ªç­¾å­—è¯ä¹¦åœ¨å¾ˆå¤šåœ°æ–¹éƒ½å¯ä»¥æ‰¾åˆ°çš„ï¼Œç­¾åè¿™éƒ¨åˆ†ï¼Œyawlè¯´mod_sslæœ‰æ¯”è¾ƒå¥½çš„è„šæœ¬ï¼Œä½†æ˜¯ç¬”è€…ä¸€æ—¶æ‰¾ä¸åˆ°ï¼Œå°±è‡ªå·±ç”¨opensslçš„caå‘½ä»¤æ¥å®Œæˆäº†ï¼Œä¹Ÿä¸æ˜¯å¾ˆéº»çƒ¦ã€‚ 
 
-ËµËµ±¾ÈËµÄ²Ù×÷»·¾³£ºÎŞÅÌ¹¤×÷Õ¾£¨ÓĞÈ¨ÏŞÎÊÌâÊ¹ÓÃÆğÀ´²»Ì«·½±ã£©£¬²Ù×÷Ä¿Â¼ÊÇopenssl/bin£¨Ã»°ì·¨¸Ä²»ÁË»·¾³±äÁ¿£¬Èç¹ûÄã¿ÉÒÔ¸ÄµÄ»°£¬¾Í²»ÓÃÔÚÕâ¸öÄ¿Â¼ÏÂ¹¤×÷ÁË£©£¬ÎªÁË·½±ã±¾ÈË°ÑappsÏÂµÄopenssl.cnfÒ²¸´ÖÆµ½ÁËÕâ¸öÄ¿Â¼ÏÂÀ´¡£ÎÄ¼şÃû¶¼ÊÇÒÔ±¾ÈËÊ¹ÓÃµÄÀ´ËµÁË£º
+è¯´è¯´æœ¬äººçš„æ“ä½œç¯å¢ƒï¼šæ— ç›˜å·¥ä½œç«™ï¼ˆæœ‰æƒé™é—®é¢˜ä½¿ç”¨èµ·æ¥ä¸å¤ªæ–¹ä¾¿ï¼‰ï¼Œæ“ä½œç›®å½•æ˜¯openssl/binï¼ˆæ²¡åŠæ³•æ”¹ä¸äº†ç¯å¢ƒå˜é‡ï¼Œå¦‚æœä½ å¯ä»¥æ”¹çš„è¯ï¼Œå°±ä¸ç”¨åœ¨è¿™ä¸ªç›®å½•ä¸‹å·¥ä½œäº†ï¼‰ï¼Œä¸ºäº†æ–¹ä¾¿æœ¬äººæŠŠappsä¸‹çš„openssl.cnfä¹Ÿå¤åˆ¶åˆ°äº†è¿™ä¸ªç›®å½•ä¸‹æ¥ã€‚æ–‡ä»¶åéƒ½æ˜¯ä»¥æœ¬äººä½¿ç”¨çš„æ¥è¯´äº†ï¼š
 
-1.Ê×ÏÈÒªÉú³É·şÎñÆ÷¶ËµÄË½Ô¿(keyÎÄ¼ş):
+1.é¦–å…ˆè¦ç”ŸæˆæœåŠ¡å™¨ç«¯çš„ç§é’¥(keyæ–‡ä»¶):
 openssl genrsa -des3 -out server.key 1024
-ÔËĞĞÊ±»áÌáÊ¾ÊäÈëÃÜÂë,´ËÃÜÂëÓÃÓÚ¼ÓÃÜkeyÎÄ¼ş(²ÎÊıdes3±ãÊÇÖ¸¼ÓÃÜËã·¨,µ±È»Ò²¿ÉÒÔÑ¡ÓÃÆäËûÄãÈÏÎª°²È«µÄËã·¨.),ÒÔºóÃ¿µ±Ğè¶ÁÈ¡´ËÎÄ¼ş(Í¨¹ıopensslÌá¹©µÄÃüÁî»òAPI)¶¼ĞèÊäÈë¿ÚÁî.Èç¹û¾õµÃ²»·½±ã,Ò²¿ÉÒÔÈ¥³ıÕâ¸ö¿ÚÁî,µ«Ò»¶¨Òª²ÉÈ¡ÆäËûµÄ±£»¤´ëÊ©!
-È¥³ıkeyÎÄ¼ş¿ÚÁîµÄÃüÁî:
+è¿è¡Œæ—¶ä¼šæç¤ºè¾“å…¥å¯†ç ,æ­¤å¯†ç ç”¨äºåŠ å¯†keyæ–‡ä»¶(å‚æ•°des3ä¾¿æ˜¯æŒ‡åŠ å¯†ç®—æ³•,å½“ç„¶ä¹Ÿå¯ä»¥é€‰ç”¨å…¶ä»–ä½ è®¤ä¸ºå®‰å…¨çš„ç®—æ³•.),ä»¥åæ¯å½“éœ€è¯»å–æ­¤æ–‡ä»¶(é€šè¿‡opensslæä¾›çš„å‘½ä»¤æˆ–API)éƒ½éœ€è¾“å…¥å£ä»¤.å¦‚æœè§‰å¾—ä¸æ–¹ä¾¿,ä¹Ÿå¯ä»¥å»é™¤è¿™ä¸ªå£ä»¤,ä½†ä¸€å®šè¦é‡‡å–å…¶ä»–çš„ä¿æŠ¤æªæ–½!
+å»é™¤keyæ–‡ä»¶å£ä»¤çš„å‘½ä»¤:
 openssl rsa -in server.key -out server.key
 
 2.openssl req -new -key server.key -out server.csr -config openssl.cnf
-Éú³ÉCertificate Signing Request£¨CSR£©,Éú³ÉµÄcsrÎÄ¼ş½»¸øCAÇ©ÃûºóĞÎ³É·şÎñ¶Ë×Ô¼ºµÄÖ¤Êé.ÆÁÄ»ÉÏ½«ÓĞÌáÊ¾,ÒÀÕÕÆäÖ¸Ê¾Ò»²½Ò»²½ÊäÈëÒªÇóµÄ¸öÈËĞÅÏ¢¼´¿É.
+ç”ŸæˆCertificate Signing Requestï¼ˆCSRï¼‰,ç”Ÿæˆçš„csræ–‡ä»¶äº¤ç»™CAç­¾ååå½¢æˆæœåŠ¡ç«¯è‡ªå·±çš„è¯ä¹¦.å±å¹•ä¸Šå°†æœ‰æç¤º,ä¾ç…§å…¶æŒ‡ç¤ºä¸€æ­¥ä¸€æ­¥è¾“å…¥è¦æ±‚çš„ä¸ªäººä¿¡æ¯å³å¯.
 
-3.¶Ô¿Í»§¶ËÒ²×÷Í¬ÑùµÄÃüÁîÉú³Ékey¼°csrÎÄ¼ş:
+3.å¯¹å®¢æˆ·ç«¯ä¹Ÿä½œåŒæ ·çš„å‘½ä»¤ç”ŸæˆkeyåŠcsræ–‡ä»¶:
 openssl genrsa -des3 -out client.key 1024
 openssl req -new -key client.key -out client.csr -config openssl.cnf
 
-4.CSRÎÄ¼ş±ØĞëÓĞCAµÄÇ©Ãû²Å¿ÉĞÎ³ÉÖ¤Êé.¿É½«´ËÎÄ¼ş·¢ËÍµ½verisignµÈµØ·½ÓÉËüÑéÖ¤,Òª½»Ò»´ó±ÊÇ®,ºÎ²»×Ô¼º×öCAÄØ.
+4.CSRæ–‡ä»¶å¿…é¡»æœ‰CAçš„ç­¾åæ‰å¯å½¢æˆè¯ä¹¦.å¯å°†æ­¤æ–‡ä»¶å‘é€åˆ°verisignç­‰åœ°æ–¹ç”±å®ƒéªŒè¯,è¦äº¤ä¸€å¤§ç¬”é’±,ä½•ä¸è‡ªå·±åšCAå‘¢.
 openssl req -new -x509 -keyout ca.key -out ca.crt -config openssl.cnf
 
-5.ÓÃÉú³ÉµÄCAµÄÖ¤ÊéÎª¸Õ²ÅÉú³ÉµÄserver.csr,client.csrÎÄ¼şÇ©Ãû:
+5.ç”¨ç”Ÿæˆçš„CAçš„è¯ä¹¦ä¸ºåˆšæ‰ç”Ÿæˆçš„server.csr,client.csræ–‡ä»¶ç­¾å:
 Openssl ca -in server.csr -out server.crt -cert ca.crt -keyfile ca.key -config openssl.cnf
 Openssl ca -in client.csr -out client.crt -cert ca.crt -keyfile ca.key -config openssl.cnf
 
-ÏÖÔÚÎÒÃÇËùĞèµÄÈ«²¿ÎÄ¼ş±ãÉú³ÉÁË.
+ç°åœ¨æˆ‘ä»¬æ‰€éœ€çš„å…¨éƒ¨æ–‡ä»¶ä¾¿ç”Ÿæˆäº†.
 
-Áí£º
-clientÊ¹ÓÃµÄÎÄ¼şÓĞ£ºca.crt,client.crt,client.key
-serverÊ¹ÓÃµÄÎÄ¼şÓĞ£ºca.crt,server.crt,server.key
-.crtÎÄ¼şºÍ.key¿ÉÒÔºÏµ½Ò»¸öÎÄ¼şÀïÃæ£¬±¾ÈË°Ñ2¸öÎÄ¼şºÏ³ÉÁËÒ»¸ö.pemÎÄ¼ş£¨Ö±½Ó¿½±´¹ıÈ¥¾ÍĞĞÁË£©
- ½«Ë½Ô¿ÃØcerÖ¤ÊéºÏ²¢³Ép12¸ñÊ½  
-1£©Éú³Épkcs12ÎÄ¼ş£¬µ«²»°üº¬CAÖ¤Êé£º  
+å¦ï¼š
+clientä½¿ç”¨çš„æ–‡ä»¶æœ‰ï¼šca.crt,client.crt,client.key
+serverä½¿ç”¨çš„æ–‡ä»¶æœ‰ï¼šca.crt,server.crt,server.key
+.crtæ–‡ä»¶å’Œ.keyå¯ä»¥åˆåˆ°ä¸€ä¸ªæ–‡ä»¶é‡Œé¢ï¼Œæœ¬äººæŠŠ2ä¸ªæ–‡ä»¶åˆæˆäº†ä¸€ä¸ª.pemæ–‡ä»¶ï¼ˆç›´æ¥æ‹·è´è¿‡å»å°±è¡Œäº†ï¼‰
+ å°†ç§é’¥ç§˜cerè¯ä¹¦åˆå¹¶æˆp12æ ¼å¼  
+1ï¼‰ç”Ÿæˆpkcs12æ–‡ä»¶ï¼Œä½†ä¸åŒ…å«CAè¯ä¹¦ï¼š  
 openssl pkcs12 -export -inkey ocspserverkey.pem -in ocspservercert.pem  -out ocspserverpkcs12.pfx
-2£©  Éú³Épcs12ÎÄ¼ş£¬°üº¬CAÖ¤Êé£º 
+2ï¼‰  ç”Ÿæˆpcs12æ–‡ä»¶ï¼ŒåŒ…å«CAè¯ä¹¦ï¼š 
 openssl pkcs12 -export -inkey server.key -in server.crt -CAfile ca.crt -chain -out server.pfx
-3£©  ½«pcks12ÖĞµÄĞÅÏ¢·ÖÀë³öÀ´£¬Ğ´ÈëÎÄ¼ş£º
-openssl pkcs12 ¨Cin ocsp1.pfx -out certandkey.pem
-4£©  ÏÔÊ¾pkcs12ĞÅÏ¢£º
-openssl pkcs12 ¨Cin ocsp1.pfx -info  
+3ï¼‰  å°†pcks12ä¸­çš„ä¿¡æ¯åˆ†ç¦»å‡ºæ¥ï¼Œå†™å…¥æ–‡ä»¶ï¼š
+openssl pkcs12 â€“in ocsp1.pfx -out certandkey.pem
+4ï¼‰  æ˜¾ç¤ºpkcs12ä¿¡æ¯ï¼š
+openssl pkcs12 â€“in ocsp1.pfx -info  
 ------------------------------------ 
- ¸½£º 1¡¢°Ñcert1.pem×ª»»³É.p12¸ñÊ½  
-openssl pkcs12 -export -in cert1.pem -inkey¡¡cert1.key -certfile ca.pem -out cert1.p12  
-2¡¢°Ñcert1.pem×ª»»³É.cer¸ñÊ½:Ö»Ğè°ÑÀ©Õ¹Ãû¸ÄÎª.cer¼´¿É.
+ é™„ï¼š 1ã€æŠŠcert1.pemè½¬æ¢æˆ.p12æ ¼å¼  
+openssl pkcs12 -export -in cert1.pem -inkeyã€€cert1.key -certfile ca.pem -out cert1.p12  
+2ã€æŠŠcert1.pemè½¬æ¢æˆ.ceræ ¼å¼:åªéœ€æŠŠæ‰©å±•åæ”¹ä¸º.cerå³å¯.
 
-Ê×ÏÈĞèÒª¸ãÇå³ş¼¸¸ö¸ÅÄî£º
+é¦–å…ˆéœ€è¦ææ¸…æ¥šå‡ ä¸ªæ¦‚å¿µï¼š
 
-AES¼ÓÃÜ·Ö¼¸ÖÖ·½·¨£ºECBºÍÆäËû¼¸ÖÖ£»
+AESåŠ å¯†åˆ†å‡ ç§æ–¹æ³•ï¼šECBå’Œå…¶ä»–å‡ ç§ï¼›
 
-    ECBµÄ·½Ê½²»ĞèÒªIV£¨³õÊ¼ÏòÁ¿£º¾ÍÊÇÔÙÃØÔ¿»ù´¡ÉÏÔÙÆ«ÒÆÒ»ÏÂ¸üÄÑÆÆ½â£©£¬Ö»ĞèÒªÓĞÃØÔ¿¾Í¿ÉÒÔÁË£»
+    ECBçš„æ–¹å¼ä¸éœ€è¦IVï¼ˆåˆå§‹å‘é‡ï¼šå°±æ˜¯å†ç§˜é’¥åŸºç¡€ä¸Šå†åç§»ä¸€ä¸‹æ›´éš¾ç ´è§£ï¼‰ï¼Œåªéœ€è¦æœ‰ç§˜é’¥å°±å¯ä»¥äº†ï¼›
 
-    ÆäËû·½Ê½¶¼ĞèÒªÓĞÃØÔ¿ºÍIV¡£
+    å…¶ä»–æ–¹å¼éƒ½éœ€è¦æœ‰ç§˜é’¥å’ŒIVã€‚
 
-Æä´Î£¬AES¼ÓÃÜĞèÒªÕû×éÕû×éµÄ¼ÓÃÜ£¬Ò²¾ÍÊÇËµÉÙÓÚ16¸ö×Ö·ûĞèÒª²¹×ã16¸ö×Ö·û£¬ÕıºÃµÈÓÚ16¸ö×Ö·ûĞèÒªÔÙ¶îÍâ¼ÓÉÏ16¸ö×Ö·û£¬Õâ¸ö¶«Î÷½Ğpadding£¬ÓĞNone, pkcs5padding, pkcs7paddingµÈµÈÖÖÀà£¬¾ßÌå¿ÉÒÔ¿´¿´Õâ¸çÃÇµÄÎÄÕÂ£¬C#ºÍJavaÖ§³ÖµÄ·½Ê½²»Ò»Ñù£¬ÕâÒ²»áµ¼ÖÂ²»Í¬ÓïÑÔ¼ÓµÄÃÜ½â²»¿ª¡£¡£¡£¡£
+å…¶æ¬¡ï¼ŒAESåŠ å¯†éœ€è¦æ•´ç»„æ•´ç»„çš„åŠ å¯†ï¼Œä¹Ÿå°±æ˜¯è¯´å°‘äº16ä¸ªå­—ç¬¦éœ€è¦è¡¥è¶³16ä¸ªå­—ç¬¦ï¼Œæ­£å¥½ç­‰äº16ä¸ªå­—ç¬¦éœ€è¦å†é¢å¤–åŠ ä¸Š16ä¸ªå­—ç¬¦ï¼Œè¿™ä¸ªä¸œè¥¿å«paddingï¼Œæœ‰None, pkcs5padding, pkcs7paddingç­‰ç­‰ç§ç±»ï¼Œå…·ä½“å¯ä»¥çœ‹çœ‹è¿™å“¥ä»¬çš„æ–‡ç« ï¼ŒC#å’ŒJavaæ”¯æŒçš„æ–¹å¼ä¸ä¸€æ ·ï¼Œè¿™ä¹Ÿä¼šå¯¼è‡´ä¸åŒè¯­è¨€åŠ çš„å¯†è§£ä¸å¼€ã€‚ã€‚ã€‚ã€‚
 
-¶ÁÈ¡Ö¤Êé£º
-Ö±½Ó´ÓÎÄ¼şÖĞ¶ÁÈ¡£º
+è¯»å–è¯ä¹¦ï¼š
+ç›´æ¥ä»æ–‡ä»¶ä¸­è¯»å–ï¼š
 cert = PEM_read_X509(fp, NULL, NULL, NULL);
-´ÓBIOÖĞ¶ÁÈ¡£º
+ä»BIOä¸­è¯»å–ï¼š
     /* Read in signer certificate and private key */
     tbio = BIO_new_file("signer.pem", "r");
 
@@ -3414,12 +3414,12 @@ cert = PEM_read_X509(fp, NULL, NULL, NULL);
 
     scert = PEM_read_bio_X509(tbio, NULL, 0, NULL);
 
-¶ÁÈ¡Ë½Ô¿£º
-´ÓBIOÖĞ¶ÁÈ¡£º
+è¯»å–ç§é’¥ï¼š
+ä»BIOä¸­è¯»å–ï¼š
     BIO_reset(tbio);
 
     skey = PEM_read_bio_PrivateKey(tbio, NULL, 0, NULL);
-´ÓÎÄ¼şÖĞ¶ÁÈ¡£º
+ä»æ–‡ä»¶ä¸­è¯»å–ï¼š
     rewind(fp);
     pkey = PEM_read_PrivateKey(fp, NULL, NULL, NULL);	
 	
@@ -3431,13 +3431,13 @@ globe: 18520868915
 		
 file:///C:/Users/Admin/Documents/Fiddler2/Scripts/BrowserPAC.js
 fidder4 : 
-ÉèÖÃ¿É½âÃÜhttps°ü¡£
-È¡Ïûsystem proxy
+è®¾ç½®å¯è§£å¯†httpsåŒ…ã€‚
+å–æ¶ˆsystem proxy
 set lan proxy : 127.0.0.1, 8888
 
 
-ÓĞÊ±ÎÒÃÇĞèÒªRPM°üÖĞµÄÄ³¸öÎÄ¼ş£¬ÈçºÎ½âÑ¹RPM°üÄØ£¿
-RPM°üÀ¨ÊÇÊ¹ÓÃcpio¸ñÊ½´ò°üµÄ£¬Òò´Ë¿ÉÒÔÏÈ×ª³ÉcpioÈ»ºó½âÑ¹£¬ÈçÏÂËùÊ¾£º
+æœ‰æ—¶æˆ‘ä»¬éœ€è¦RPMåŒ…ä¸­çš„æŸä¸ªæ–‡ä»¶ï¼Œå¦‚ä½•è§£å‹RPMåŒ…å‘¢ï¼Ÿ
+RPMåŒ…æ‹¬æ˜¯ä½¿ç”¨cpioæ ¼å¼æ‰“åŒ…çš„ï¼Œå› æ­¤å¯ä»¥å…ˆè½¬æˆcpioç„¶åè§£å‹ï¼Œå¦‚ä¸‹æ‰€ç¤ºï¼š
 rpm2cpio xxx.rpm | cpio -div
 		
 [root@p2p-dev ~]# ps -ef |grep zookeeper
@@ -3488,23 +3488,23 @@ mongodb-win32-x86_64-2.0.0.zip
 
 C:\mongo\bin\mongod --dbpath=c:\ db --logpath=c:\mongo\logs\mongodb.log --install
 
-ÃæÏòÎÄµµµÄ NoSQL Êı¾İ¿âÖ÷Òª½â¾öµÄÎÊÌâ²»ÊÇ¸ßĞÔÄÜµÄ²¢·¢¶ÁĞ´£¬¶øÊÇ±£Ö¤º£Á¿Êı¾İ´æ´¢
-µÄÍ¬Ê±£¬¾ßÓĞÁ¼ºÃµÄ²éÑ¯ĞÔÄÜ¡£
+é¢å‘æ–‡æ¡£çš„ NoSQL æ•°æ®åº“ä¸»è¦è§£å†³çš„é—®é¢˜ä¸æ˜¯é«˜æ€§èƒ½çš„å¹¶å‘è¯»å†™ï¼Œè€Œæ˜¯ä¿è¯æµ·é‡æ•°æ®å­˜å‚¨
+çš„åŒæ—¶ï¼Œå…·æœ‰è‰¯å¥½çš„æŸ¥è¯¢æ€§èƒ½ã€‚
 
 use p2p;
 CREATE TABLE `t_auth_rec` (
-  `F_sysseqnb` varchar(27) NOT NULL DEFAULT '000000000000000000000000' COMMENT 'Á÷Ë®ºÅ',
-  `F_insert_module` varchar(64) NOT NULL COMMENT '²åÈë¼ÇÂ¼µÄÄ£¿éÃû,Èç£ºhdcompare, idverify, ocr',
-  `F_status` varchar(4) NOT NULL COMMENT 'ÒµÎñ´¦Àí×´Ì¬:01£ºÕıÔÚ´¦ÀíÖĞ£»00£º³É¹¦£»±íÊ¾´Ë´ÎÉí·İÕæÎ±»òÉí·İÈÏÖ¤Í¨¹ı£»03£ºÊ§°Ü£»±íÊ¾Éí·İÕæÎ±»òÉí·İÈÏÖ¤Ê§°Ü£¬¾ßÌåÔ­Òò²Î¼ûrespCd,respInfo',
-  `F_errinfo` varchar(100) DEFAULT NULL COMMENT '´íÎóĞÅÏ¢',
-  `F_certseq` varchar(20) DEFAULT NULL COMMENT 'Éí·İÖ¤ºÅ',
-  `F_mpssim` varchar(8) DEFAULT NULL COMMENT '¹«°²±È¶Ô·ÖÖµ',
-  `F_insert_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '²åÈëÊ±¼ä',
-  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '¸üĞÂÊ±¼ä'
+  `F_sysseqnb` varchar(27) NOT NULL DEFAULT '000000000000000000000000' COMMENT 'æµæ°´å·',
+  `F_insert_module` varchar(64) NOT NULL COMMENT 'æ’å…¥è®°å½•çš„æ¨¡å—å,å¦‚ï¼šhdcompare, idverify, ocr',
+  `F_status` varchar(4) NOT NULL COMMENT 'ä¸šåŠ¡å¤„ç†çŠ¶æ€:01ï¼šæ­£åœ¨å¤„ç†ä¸­ï¼›00ï¼šæˆåŠŸï¼›è¡¨ç¤ºæ­¤æ¬¡èº«ä»½çœŸä¼ªæˆ–èº«ä»½è®¤è¯é€šè¿‡ï¼›03ï¼šå¤±è´¥ï¼›è¡¨ç¤ºèº«ä»½çœŸä¼ªæˆ–èº«ä»½è®¤è¯å¤±è´¥ï¼Œå…·ä½“åŸå› å‚è§respCd,respInfo',
+  `F_errinfo` varchar(100) DEFAULT NULL COMMENT 'é”™è¯¯ä¿¡æ¯',
+  `F_certseq` varchar(20) DEFAULT NULL COMMENT 'èº«ä»½è¯å·',
+  `F_mpssim` varchar(8) DEFAULT NULL COMMENT 'å…¬å®‰æ¯”å¯¹åˆ†å€¼',
+  `F_insert_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'æ’å…¥æ—¶é—´',
+  `F_update_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'æ›´æ–°æ—¶é—´'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8  
 	
 set tx_isolation='read-uncommitted';
-tx isolation : »á»°¼¶±ğĞŞ¸Ä£¬ÒªÖØĞÂ¿ªÆôÊÂÎñ²ÅÓĞĞ§¡£
+tx isolation : ä¼šè¯çº§åˆ«ä¿®æ”¹ï¼Œè¦é‡æ–°å¼€å¯äº‹åŠ¡æ‰æœ‰æ•ˆã€‚
 	
 You can think of MVCC as a twist on row-level locking; it avoids the need for locking
 at all in many cases and can have much lower overhead. Depending on how it is im-
@@ -3513,17 +3513,17 @@ write operations.
 InnoDB uses MVCC to achieve high concurrency, and it implements all four SQL stan-
 dard isolation levels. It defaults to the REPEATABLE READ  isolation  level, and  it has a 
 next-key  locking strategy that prevents phantom reads in this isolation level: rather than
-locking only the rows you¡¯ve touched in a query, InnoDB locks gaps in the index struc-
+locking only the rows youâ€™ve touched in a query, InnoDB locks gaps in the index struc-
 ture as well, preventing phantoms from being inserted.
 
 
-debianÓ²ÅÌ°²×°£º
- ³ı´ËÖ®Íâ»¹ĞèÒªÏÂÔØvmlinuzºÍinitrd.gz£¬ÕâÁ½¸öÎÄ¼ş²»ÄÜ´Ó¾µÏñÖĞÌáÈ¡£¬¶øÊÇĞèÒªµ½¹ÙÍøÉÏÑ¡È¡ÏàÓ¦µÄ°æ±¾
+debianç¡¬ç›˜å®‰è£…ï¼š
+ é™¤æ­¤ä¹‹å¤–è¿˜éœ€è¦ä¸‹è½½vmlinuzå’Œinitrd.gzï¼Œè¿™ä¸¤ä¸ªæ–‡ä»¶ä¸èƒ½ä»é•œåƒä¸­æå–ï¼Œè€Œæ˜¯éœ€è¦åˆ°å®˜ç½‘ä¸Šé€‰å–ç›¸åº”çš„ç‰ˆæœ¬
  
 
-32Î»£ºhttp://ftp.cn.debian.org/debian/dists/Debian7.1/main/installer-i386/current/images/hd-media/
+32ä½ï¼šhttp://ftp.cn.debian.org/debian/dists/Debian7.1/main/installer-i386/current/images/hd-media/
  
-64Î»£ºhttp://ftp.cn.debian.org/debian/dists/Debian7.1/main/installer-amd64/c/current/images/hd-media/
+64ä½ï¼šhttp://ftp.cn.debian.org/debian/dists/Debian7.1/main/installer-amd64/c/current/images/hd-media/
 # NeoSmart NeoGrub Bootloader Configuration File
 #
 # This is the NeoGrub configuration file, and should be located at C:\NST\menu.lst
@@ -3535,16 +3535,16 @@ kernel /vmlinuz  root=casper iso-scan/filename=/debian-7.0.0-amd64-DVD-1.iso
 initrd /initrd.gz
 boot
 
-HTTPÈ¨ÍşÖ¸ÄÏ£º
-¶Ô·Ç°²È«×Ö·û½øĞĞ±àÂë ¡£¿Í»§¶ËÓ¦ÓÃ³ÌĞòÔÚÏòÆäËüÓ¦ÓÃ³ÌĞò·¢ËÍÈÎÒâURLÖ®Ç°£¬×îºÃ°ÑËùÓĞ²»°²È«»òÕß°®ÏŞ×Ö·û¶¼½øĞĞ×ª»»¡£
-ÎŞÂÛ¶ÔÏó°áÒÆµ½Ê²Ã´µØ·½£¬URN¶¼ÄÜÎª¶ÔÏóÌá¹©Ò»¸öÎÈ¶¨µÄÃû³Æ ¡£
-HTTP±¨ÎÄµÄÈı¸ö²¿·Ö£º1 ±¨ÎÄÆğÊ¼ĞĞ 2 ¸÷ÖÖÊ×²¿ 3 ÕıÎÄ
-ÆğÊ¼ĞĞºÍÊ×²¿ Ã¿ĞĞ¶¼ ÒÔ\r\n½áÊø ¡£Í¬Ê±Ó¦¸Ã¼æÈİ\n×Ö·û½áÊø ¡£
+HTTPæƒå¨æŒ‡å—ï¼š
+å¯¹éå®‰å…¨å­—ç¬¦è¿›è¡Œç¼–ç  ã€‚å®¢æˆ·ç«¯åº”ç”¨ç¨‹åºåœ¨å‘å…¶å®ƒåº”ç”¨ç¨‹åºå‘é€ä»»æ„URLä¹‹å‰ï¼Œæœ€å¥½æŠŠæ‰€æœ‰ä¸å®‰å…¨æˆ–è€…çˆ±é™å­—ç¬¦éƒ½è¿›è¡Œè½¬æ¢ã€‚
+æ— è®ºå¯¹è±¡æ¬ç§»åˆ°ä»€ä¹ˆåœ°æ–¹ï¼ŒURNéƒ½èƒ½ä¸ºå¯¹è±¡æä¾›ä¸€ä¸ªç¨³å®šçš„åç§° ã€‚
+HTTPæŠ¥æ–‡çš„ä¸‰ä¸ªéƒ¨åˆ†ï¼š1 æŠ¥æ–‡èµ·å§‹è¡Œ 2 å„ç§é¦–éƒ¨ 3 æ­£æ–‡
+èµ·å§‹è¡Œå’Œé¦–éƒ¨ æ¯è¡Œéƒ½ ä»¥\r\nç»“æŸ ã€‚åŒæ—¶åº”è¯¥å…¼å®¹\nå­—ç¬¦ç»“æŸ ã€‚
 Content-Type: text/html
 Content-Length: 14613
-ËµÃ÷ÁËÖ÷ÌåÊÇÊ²Ã´ ÒÔ¼°ÓĞ¶à¾Ã¡£Ö÷ÌåÖĞ¼È¿ÉÒÔÊÇÎÄ±¾£¬ Ò²¿ÉÒÔÓĞ¶ş½øÖÆÊı¾İ ¡£
+è¯´æ˜äº†ä¸»ä½“æ˜¯ä»€ä¹ˆ ä»¥åŠæœ‰å¤šä¹…ã€‚ä¸»ä½“ä¸­æ—¢å¯ä»¥æ˜¯æ–‡æœ¬ï¼Œ ä¹Ÿå¯ä»¥æœ‰äºŒè¿›åˆ¶æ•°æ® ã€‚
 
-ÇëÇó£º
+è¯·æ±‚ï¼š
 
 method request-url version
 headers
@@ -3552,20 +3552,20 @@ headers
 entity-body 
 
 start line: GET /index.html HTTP/1.0
-method: ¿Í»§¶ËÏ£Íû·şÎñÆ÷¶Ô×ÊÔ´Ö´ĞĞµÄ¶¯×÷¡£ÊÇÒ»¸öµ¥¶ÀµÄ´Ê£¬ ±ÈÈçGET£¬ POST,HEAD
+method: å®¢æˆ·ç«¯å¸Œæœ›æœåŠ¡å™¨å¯¹èµ„æºæ‰§è¡Œçš„åŠ¨ä½œã€‚æ˜¯ä¸€ä¸ªå•ç‹¬çš„è¯ï¼Œ æ¯”å¦‚GETï¼Œ POST,HEAD
 response :
 start line: 
 version status reason-phrase
 headers
 
 entity-body
-status-code : ÈıÎ»Êı×Ö£¬ ÃèÊöÁËÇëÇó¹ı³ÌÖĞËù·¢ÉúµÄÇé¿ö¡£
+status-code : ä¸‰ä½æ•°å­—ï¼Œ æè¿°äº†è¯·æ±‚è¿‡ç¨‹ä¸­æ‰€å‘ç”Ÿçš„æƒ…å†µã€‚
 
 
-PacÎÄ¼şµØÖ·
-ÏÈ½éÉÜÒ»ÏÂÉèÖÃ¸÷¸öÏµÍ³´úÀíµÄ·½·¨¡£Ê×ÏÈ¸ø³öÁ½¸öPacÎÄ¼şµØÖ·£¬PacÎÄ¼şÓĞitzmx.comÌá¹©£¬Ï£Íû´ó¼ÒºÏÀíÊ¹ÓÃ£º
-Ö÷£ºhttps://pac.itzmx.com/abc.pac
-±¸£ºhttps://pac.itzmx.com/adc.pac
+Pacæ–‡ä»¶åœ°å€
+å…ˆä»‹ç»ä¸€ä¸‹è®¾ç½®å„ä¸ªç³»ç»Ÿä»£ç†çš„æ–¹æ³•ã€‚é¦–å…ˆç»™å‡ºä¸¤ä¸ªPacæ–‡ä»¶åœ°å€ï¼ŒPacæ–‡ä»¶æœ‰itzmx.comæä¾›ï¼Œå¸Œæœ›å¤§å®¶åˆç†ä½¿ç”¨ï¼š
+ä¸»ï¼šhttps://pac.itzmx.com/abc.pac
+å¤‡ï¼šhttps://pac.itzmx.com/adc.pac
 
 http://127.0.0.1:16823/proxy_on.pac
 
@@ -3614,50 +3614,50 @@ tcp6       0      0 127.0.0.1:39275         127.0.0.1:2882          ESTABLISHED 
 windows netstata:
 netstat -anb 
 memcached :11211
-netstat -a :ÏÔÊ¾Ö÷»úÃû¶ø²»ÊÇIP
+netstat -a :æ˜¾ç¤ºä¸»æœºåè€Œä¸æ˜¯IP
 
 bin/zkCli.sh -server 127.0.0.1:2181
 
-ĞòÁĞ»¯ºó£º±£´æÁËÀàĞÍºÍÊı¾İĞÅÏ¢¡£ÓÃÓÚ´æ´¢ºÍÍøÂç´«Êä¡£serialize, unserialize.
-JSON£º¶ÔÊı¾İÀàĞÍ²¢²»¹ØĞÄ£¬ ±ãÓÚ´æÈ¡´¦Àí£¬¸ñÊ½Á¼ºÃ key->value¶Ô¡£ËùÓĞ¶«Î÷£¬¼üÎª×Ö·û´®£¬ Öµ´ó¶àÒ²Îª×Ö·û´®¡£freeze , unfreeze.
-session ´æÈë memcached : ÒÔsessionid Îªkey ±£´æ½ømemcached.
+åºåˆ—åŒ–åï¼šä¿å­˜äº†ç±»å‹å’Œæ•°æ®ä¿¡æ¯ã€‚ç”¨äºå­˜å‚¨å’Œç½‘ç»œä¼ è¾“ã€‚serialize, unserialize.
+JSONï¼šå¯¹æ•°æ®ç±»å‹å¹¶ä¸å…³å¿ƒï¼Œ ä¾¿äºå­˜å–å¤„ç†ï¼Œæ ¼å¼è‰¯å¥½ key->valueå¯¹ã€‚æ‰€æœ‰ä¸œè¥¿ï¼Œé”®ä¸ºå­—ç¬¦ä¸²ï¼Œ å€¼å¤§å¤šä¹Ÿä¸ºå­—ç¬¦ä¸²ã€‚freeze , unfreeze.
+session å­˜å…¥ memcached : ä»¥sessionid ä¸ºkey ä¿å­˜è¿›memcached.
 $_SESSION['name'] = 'zhaojun';
 $_SESSION['city'] = 'beijing';
-½«Êı×éĞòÁĞ»¯ºó´æ´¢ ½ømemcached.
+å°†æ•°ç»„åºåˆ—åŒ–åå­˜å‚¨ è¿›memcached.
 name|s:7:"zhaojun";city|s:7:"beijing"
  stats cachedump 1 0
  
-crypt()ÓÃÀ´¼ÓÃÜÓÃ»§ÃÜÂë¡£/etc/shadow.
-Ã¿Ò»×é½ø³ÌÓĞÒ»¸ö×é³¤½ø³Ì£¬×é³¤½ø³ÌµÄpidµÈÓÚpgid.
+crypt()ç”¨æ¥åŠ å¯†ç”¨æˆ·å¯†ç ã€‚/etc/shadow.
+æ¯ä¸€ç»„è¿›ç¨‹æœ‰ä¸€ä¸ªç»„é•¿è¿›ç¨‹ï¼Œç»„é•¿è¿›ç¨‹çš„pidç­‰äºpgid.
 
-setsid()´´½¨ĞÂ»á»°¡£±ØĞëÓÉ²»ÊÇ½ø³Ì×é×é³¤µÄ½ø³Ìµ÷ÓÃ¡£·ñÔò³ö´í¡£
-¼´ÏÈfork(), ¸¸½ø³ÌÍË³ö£¬ ×Ó³ÌpidÓëpgid²»Ò»ÖÂ£¬²»ÊÇ½ø³Ì×é³¤¡£µ÷ÓÃsetsid()
-ºó½ø³Ì³ÉÎª1 »á»°Ê×½ø³Ì£¬2 µ÷ÓÃ½ø³Ì³ÉÎªĞÂ½ø³Ì×éµÄ×é³¤£¨×éIDÎªĞÂ½ø³ÌµÄID£©¡£3¸Ã½ø³ÌÃ»ÓĞ¿ØÖÆÖÕ¶Ë¡£
-»á»°Ê×½ø³ÌµÄ½ø³ÌIDÓÖ½Ğ»á»°ID.
+setsid()åˆ›å»ºæ–°ä¼šè¯ã€‚å¿…é¡»ç”±ä¸æ˜¯è¿›ç¨‹ç»„ç»„é•¿çš„è¿›ç¨‹è°ƒç”¨ã€‚å¦åˆ™å‡ºé”™ã€‚
+å³å…ˆfork(), çˆ¶è¿›ç¨‹é€€å‡ºï¼Œ å­ç¨‹pidä¸pgidä¸ä¸€è‡´ï¼Œä¸æ˜¯è¿›ç¨‹ç»„é•¿ã€‚è°ƒç”¨setsid()
+åè¿›ç¨‹æˆä¸º1 ä¼šè¯é¦–è¿›ç¨‹ï¼Œ2 è°ƒç”¨è¿›ç¨‹æˆä¸ºæ–°è¿›ç¨‹ç»„çš„ç»„é•¿ï¼ˆç»„IDä¸ºæ–°è¿›ç¨‹çš„IDï¼‰ã€‚3è¯¥è¿›ç¨‹æ²¡æœ‰æ§åˆ¶ç»ˆç«¯ã€‚
+ä¼šè¯é¦–è¿›ç¨‹çš„è¿›ç¨‹IDåˆå«ä¼šè¯ID.
 
-´´½¨ÊØ»¤½ø³ÌµÄ²½Öè£ºË«fork()
+åˆ›å»ºå®ˆæŠ¤è¿›ç¨‹çš„æ­¥éª¤ï¼šåŒfork()
 1 /*
 	 * Clear file creation mask.
 	 */
 	umask(0);
 2 Get maximum number of file descriptors.
-	ÒÔ±ãºóÃæ½«ËùÓĞfd¹Ø±Õfor() close()
+	ä»¥ä¾¿åé¢å°†æ‰€æœ‰fdå…³é—­for() close()
 	getrlimit(RLIMIT_NOFILE,&rl)
 3 Become a session leader to lose controlling TTY.
-	fork() :¸¸½ø³ÌÍË³ö¡£
-	×Ó½ø³Ì¼ÌĞøµ÷ÓÃsetsid()´´½¨»á»°£ºrun a program in a new session
+	fork() :çˆ¶è¿›ç¨‹é€€å‡ºã€‚
+	å­è¿›ç¨‹ç»§ç»­è°ƒç”¨setsid()åˆ›å»ºä¼šè¯ï¼šrun a program in a new session
 4  Ensure future opens won't allocate controlling TTYs.
-	ÔÙ´Îfork():¸¸½ø³ÌÍË³ö¡£
-	×Ó½ø³Ìchdir("/")ÇĞ»»µ½¸ùÄ¿Â¼ ¡£±ÜÃâ umountÎÊÌâ¡£
-5 ¹Ø±ÕËùÓĞÎÄ¼şÃèÊö·û¡£ Attach file descriptors 0, 1, and 2 to /dev/null.
+	å†æ¬¡fork():çˆ¶è¿›ç¨‹é€€å‡ºã€‚
+	å­è¿›ç¨‹chdir("/")åˆ‡æ¢åˆ°æ ¹ç›®å½• ã€‚é¿å… umounté—®é¢˜ã€‚
+5 å…³é—­æ‰€æœ‰æ–‡ä»¶æè¿°ç¬¦ã€‚ Attach file descriptors 0, 1, and 2 to /dev/null.
 	fd0 = open("/dev/null", O_RDWR)
 	fd1 = dup(fd0);
 	fd2 = dup(fd0);
-6 Initialize the log file.³ÌĞòÖĞĞèÒª¼ÇÂ¼ÈÕÖ¾£¬Ö±½ÓÓÃsyslogº¯ÊıÍ¨¹ıÓòÊı¾İ±¨socketÎÄ¼ş£¨/dev/log)·¢ËÍ¸øsyslogd½ø³Ì¡£/var/log/messagesÎÄ¼şÖĞ£¬µ«¿ÉÓÚ/etc/rsyslog.confÅäÖÃ¡£
+6 Initialize the log file.ç¨‹åºä¸­éœ€è¦è®°å½•æ—¥å¿—ï¼Œç›´æ¥ç”¨syslogå‡½æ•°é€šè¿‡åŸŸæ•°æ®æŠ¥socketæ–‡ä»¶ï¼ˆ/dev/log)å‘é€ç»™syslogdè¿›ç¨‹ã€‚/var/log/messagesæ–‡ä»¶ä¸­ï¼Œä½†å¯äº/etc/rsyslog.confé…ç½®ã€‚
 	openlog(cmd, LOG_CONS, LOG_DAEMON);
-	syslogdÌá¹©µÄ·şÎñÊÇ½«Ò»Ìõ´íÎóÏûÏ¢Ğ´ÈëÈÕÖ¾ÎÄ¼ş£¬¿ÉÒÔÊÇÍøÂçÖĞ¡£µ¥ÏòÍ¨ĞÅ¡£
+	syslogdæä¾›çš„æœåŠ¡æ˜¯å°†ä¸€æ¡é”™è¯¯æ¶ˆæ¯å†™å…¥æ—¥å¿—æ–‡ä»¶ï¼Œå¯ä»¥æ˜¯ç½‘ç»œä¸­ã€‚å•å‘é€šä¿¡ã€‚
 	
-·şÎñÆ÷£º¾­³£Í¨¹ı×Ó½ø³ÌÌá¹©·şÎñ fork () + exec()¡£Îª±ÜÃâ×Ó½ø³ÌÖĞ»ñµÃ¸¸½ø³ÌÖĞ´ò¿ªµÄÄ³¸öfd .
+æœåŠ¡å™¨ï¼šç»å¸¸é€šè¿‡å­è¿›ç¨‹æä¾›æœåŠ¡ fork () + exec()ã€‚ä¸ºé¿å…å­è¿›ç¨‹ä¸­è·å¾—çˆ¶è¿›ç¨‹ä¸­æ‰“å¼€çš„æŸä¸ªfd .
 int set_cloexec(int fd){
 	int val;
 	if (( val = fcntl(fd, F_GETFD, 0)) < 0)
@@ -3666,10 +3666,10 @@ int set_cloexec(int fd){
 	return (fcntl(fd, F_SETFD, val));
 }
 	
-ÊØ»¤½ø³ÌµÄĞÅºÅ´¦Àí£º
+å®ˆæŠ¤è¿›ç¨‹çš„ä¿¡å·å¤„ç†ï¼š
 /*
-	µ÷ÓÃ½ø³ÌblockËùÓĞĞÅºÅ£¬ÔÙ´´½¨µ¥¶ÀµÄÏß³Ì×¨ÃÅ´¦ÀíÖ¸¶¨ĞÅºÅ.
-	ÁíÒ»ÖÖ·½·¨ £¬µ¥½ø³ÌÖĞÖ±½Ó°ó¶¨ĞÅºÅ´¦Àíº¯Êı¡£
+	è°ƒç”¨è¿›ç¨‹blockæ‰€æœ‰ä¿¡å·ï¼Œå†åˆ›å»ºå•ç‹¬çš„çº¿ç¨‹ä¸“é—¨å¤„ç†æŒ‡å®šä¿¡å·.
+	å¦ä¸€ç§æ–¹æ³• ï¼Œå•è¿›ç¨‹ä¸­ç›´æ¥ç»‘å®šä¿¡å·å¤„ç†å‡½æ•°ã€‚
 */
 	sigfillset(&mask);
 	if ((err = pthread_sigmask(SIG_BLOCK, &mask, NULL)) != 0)
@@ -3685,11 +3685,11 @@ thr_fn(void *arg)
 	int err, signo;
 
 	for (;;) {
-		/*Ïß³Ì×èÈûÖ±µ½ÓĞmask(Í¨³£ÎªËùÓĞĞÅºÅ
+		/*çº¿ç¨‹é˜»å¡ç›´åˆ°æœ‰mask(é€šå¸¸ä¸ºæ‰€æœ‰ä¿¡å·
 			sigset_t mask;
 			sigfillset(&mask);
 			
-		)ÖĞĞÅºÅ³öÏÖ£¬²¢½«ÊÕµ½µÄĞÅºÅÂë´æÈësigno*/
+		)ä¸­ä¿¡å·å‡ºç°ï¼Œå¹¶å°†æ”¶åˆ°çš„ä¿¡å·ç å­˜å…¥signo*/
 		err = sigwait(&mask, &signo);
 		if (err != 0) {
 			syslog(LOG_ERR, "sigwait failed");
@@ -3713,20 +3713,20 @@ thr_fn(void *arg)
 	return(0);
 }
 
-/* IGNOREÄ³¸öĞÅºÅ*/
+/* IGNOREæŸä¸ªä¿¡å·*/
 	sa.sa_handler = SIG_IGN;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	if (sigaction(SIGHUP, &sa, NULL) < 0)
 		err_quit("%s: can't ignore SIGHUP", cmd);
-/* RESTOREÄ³¸öĞÅºÅ*/
+/* RESTOREæŸä¸ªä¿¡å·*/
 	sa.sa_handler = SIG_DFL;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	if (sigaction(SIGHUP, &sa, NULL) < 0)
 		err_quit("%s: can't ignore SIGHUP", cmd);
 
-Ê¹ÓÃÎÄ¼şËø£¬Ëø×¡±êÖ¾ÎÄ¼ş£¬È·±£Ö»ÓĞÒ»¸öÊØ»¤½ø³ÌµÄÊµÀıÔËĞĞ¡£
+ä½¿ç”¨æ–‡ä»¶é”ï¼Œé”ä½æ ‡å¿—æ–‡ä»¶ï¼Œç¡®ä¿åªæœ‰ä¸€ä¸ªå®ˆæŠ¤è¿›ç¨‹çš„å®ä¾‹è¿è¡Œã€‚
 	fd = open(LOCKFILE, O_RDWR|O_CREAT, LOCKMODE);
 	if (fd < 0) {
 		syslog(LOG_ERR, "can't open %s: %s", LOCKFILE, strerror(errno));
@@ -3740,11 +3740,11 @@ thr_fn(void *arg)
 		syslog(LOG_ERR, "can't lock %s: %s", LOCKFILE, strerror(errno));
 		exit(1);
 	}
-	ftruncate(fd, 0); /*½Ø¶ÏÎÄ¼ş,²¢Ğ´Èë½ø³ÌºÅ*/
+	ftruncate(fd, 0); /*æˆªæ–­æ–‡ä»¶,å¹¶å†™å…¥è¿›ç¨‹å·*/
 	sprintf(buf, "%ld", (long)getpid());
 	write(fd, buf, strlen(buf)+1);
 
-/*¸øÎÄ¼ş¼ÓĞ´Ëø*/	
+/*ç»™æ–‡ä»¶åŠ å†™é”*/	
 int lockfile(int fd){
 	struct flock f;
 	f.l_type = F_WRLCK;
@@ -3754,7 +3754,7 @@ int lockfile(int fd){
 	return(fcntl(fd, F_SETLK, &fl));
 }	
 
-/*µ¥¶ÀµÄÏß³Ì×¨ÃÅ´¦ÀíÖ¸¶¨ĞÅºÅ*/
+/*å•ç‹¬çš„çº¿ç¨‹ä¸“é—¨å¤„ç†æŒ‡å®šä¿¡å·*/
 	/*
 	 * Handle signals of interest.
 	 */
@@ -3780,25 +3780,25 @@ int lockfile(int fd){
 3.1415926535897932384626433832795028841971693993751
 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117068
 
-ĞÔÄÜµ÷ÓÅ¹¤¾ß £º
+æ€§èƒ½è°ƒä¼˜å·¥å…· ï¼š
 systemtap
 oprofile
 blktrace
 tsung
 gdb
 lmbench
-erlangÆ½Ì¨ÉÏµÄ£º
+erlangå¹³å°ä¸Šçš„ï¼š
 lcnt
 dialyzer
-ÄÚÖÃµÄ×ÔÊ¡»úÖÆ
+å†…ç½®çš„è‡ªçœæœºåˆ¶
 cerl
 
 ed2k://|file|%E9%99%88%E6%85%A7%E5%A8%B4.-.[%E6%B4%BB%E5%87%BA%E7%94%9F%E5%91%BD.II.%E6%BC%94%E5%94%B1%E4%BC%9A.Disc1].%E6%BC%94%E5%94%B1%E4%BC%9A.(DVDRip)(ED2000.COM).avi|729647104|c19575e71fae83b03dee274dc7058a34|h=HPCD4UH3QLY6SJ444WHOKL2M7JCOVXAV|/
 
-windows¶¯Ì¬¿âËÑË÷Â·¾¶ £º
-Ó¦ÓÃ³ÌĞòËùÔÚÄ¿Â¼¡úµ±Ç°Ä¿Â¼¡úWindows SYSTEMÄ¿Â¼¡úWindowsÄ¿Â¼¡úPATH»·¾³±äÁ¿Ö¸¶¨µÄÂ·¾¶
+windowsåŠ¨æ€åº“æœç´¢è·¯å¾„ ï¼š
+åº”ç”¨ç¨‹åºæ‰€åœ¨ç›®å½•â†’å½“å‰ç›®å½•â†’Windows SYSTEMç›®å½•â†’Windowsç›®å½•â†’PATHç¯å¢ƒå˜é‡æŒ‡å®šçš„è·¯å¾„
 
-±àÒëboost¿â£º
+ç¼–è¯‘booståº“ï¼š
 bootstrap.bat
 bjam toolset=msvc-12.0 variant=debug,release threading=multi link=static
 C:\Perl64\site\bin;C:\Perl64\bin;C:\ProgramData\Oracle\Java\javapath;D:\Go\bin;D:\app\developer\product\11.2.0\dbhome_1\bin;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files (x86)\Intel\OpenCL SDK\2.0\bin\x86;C:\Program Files (x86)\Intel\OpenCL SDK\2.0\bin\x64;C:\Program Files\TortoiseSVN\bin;C:\MinGW\bin;C:\MinGW\msys\1.0\bin;C:\cygwin64\bin;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;D:\2cpptools\mysql-connector-c++-noinstall-1.1.7-winx64\lib;D:\2cpptools\mysql-connector-c-6.1.6-winx64\lib;
@@ -3817,27 +3817,27 @@ openssl rc5 -in plaintext.doc -out ciphertext.bin -S C62CB1D49F158ADC -iv E9EDAC
 
 echo -n "0123456789012345" | od -A n -t x1 | sed 's/ //g'
 
-Ë½Ô¿²úÉússh¹«Ô¿ÃüÁî
+ç§é’¥äº§ç”Ÿsshå…¬é’¥å‘½ä»¤
 ssh-keygen -y -f private_key.pem > public_key.pub
-Èç¹ûÄã¾õµÃserver.keyµÄ±£»¤ÃÜÂëÌ«Âé·³ÏëÈ¥µôµÄ»°£º 
+å¦‚æœä½ è§‰å¾—server.keyçš„ä¿æŠ¤å¯†ç å¤ªéº»çƒ¦æƒ³å»æ‰çš„è¯ï¼š 
 
 openssl rsa -in server.key -out server.key.unsecure
 
-ÈçºÎÔÚŒ„ÕÉÏÊ¹ÓÃ TDD íé_°l - twMVC#12£º
+å¦‚ä½•åœ¨å¯¦å‹™ä¸Šä½¿ç”¨ TDD ä¾†é–‹ç™¼ - twMVC#12ï¼š
 https://www.youtube.com/watch?v=dZ_uZmoO2Aw
-oo 3´óÌØĞÔ£º ·â±Õ£¬¼Ì³Ğ£¬¶àÌ¬¡£
-Éè¼ÆÄ£Ê½µÄ3Ô­Ôò£ºÕë¶Ô½Ó¿Ú±à³Ì£¬¶ø²»ÊÇÕë¶ÔÊµÏÖ±à³Ì£»ÓÅÏÈÊ¹ÓÃ×éºÏ¶ø²»ÊÇ¼Ì³Ğ£»½«±ä»¯²¿·İÓë²»±ä²¿·Ö¸ôÀë¿ªÀ´¡£
-Ê¹ÓÃÖØ¹¹µÃµ½Ä£Ê½¡£
+oo 3å¤§ç‰¹æ€§ï¼š å°é—­ï¼Œç»§æ‰¿ï¼Œå¤šæ€ã€‚
+è®¾è®¡æ¨¡å¼çš„3åŸåˆ™ï¼šé’ˆå¯¹æ¥å£ç¼–ç¨‹ï¼Œè€Œä¸æ˜¯é’ˆå¯¹å®ç°ç¼–ç¨‹ï¼›ä¼˜å…ˆä½¿ç”¨ç»„åˆè€Œä¸æ˜¯ç»§æ‰¿ï¼›å°†å˜åŒ–éƒ¨ä»½ä¸ä¸å˜éƒ¨åˆ†éš”ç¦»å¼€æ¥ã€‚
+ä½¿ç”¨é‡æ„å¾—åˆ°æ¨¡å¼ã€‚
 
-Ü›ówÆ·Ù|ÈÕ
-×ÔÓÉÜ›ówèTÔìˆö
+è»Ÿé«”å“è³ªæ—¥
+è‡ªç”±è»Ÿé«”é‘„é€ å ´
 https://www.youtube.com/watch?v=PScvkvY2KeQ&index=21&list=PLy-4BQDqpthAz17I1fRQQEidnDdF2nm1x
 bash: command line: 
 ctrl + w : delete a word
 ctrl + u  : delete whole line
 vim : ctrl + z , fg
 ctrl + r: reverse-i-search
-viÉ¾³ıÄ©Î²¿Õ°×·û£º :%s/\s\+//g
+viåˆ é™¤æœ«å°¾ç©ºç™½ç¬¦ï¼š :%s/\s\+//g
 
 Submodule 'bundle/Align' (git://github.com/vim-scripts/Align.git) registered for path 'bundle/Align'
 Submodule 'bundle/ack.vim' (git://github.com/mileszs/ack.vim.git) registered for path 'bundle/ack.vim'
@@ -3884,7 +3884,7 @@ Mozilla/5.0 (iPhone; U; CPU iPhone OS 5_1_1 like Mac OS X; en) AppleWebKit/534.4
 For
 
 
-hd3000ÁÁ¶È
+hd3000äº®åº¦
 cd /S*/L*/Ext*/AppleIntelSNBGraphicsFB.kext/C*/M*
 sudo cp AppleIntelSNBGraphicsFB AppleIntelSNBGraphicsFB.backup
 sudo perl -pi -e 's|\x10\x07\x00\x00\x10\x07|\x12\x13\x00\x00\x12\x13|g' AppleIntelSNBGraphicsFB
