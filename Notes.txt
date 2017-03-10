@@ -656,3 +656,6 @@ https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
 
 oa: ps0010/zhaojun_*2
 export PS1="\u@\h \w> "
+
+172.19.7.96 zhaojun/abcd1234
+su - boss  Oper2016
