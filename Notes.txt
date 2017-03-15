@@ -659,3 +659,22 @@ export PS1="\u@\h \w> "
 
 172.19.7.96 zhaojun/Qq525875998
 su - boss  Oper2016
+
+/*2、批量执行第一步生成的语句  
+alter system kill session 'sid,serial#';  
+alter system kill session '6976,33967';*/     
+  
+/*3、查询oracle用户名，机器名，锁表对象*/  
+SELECT l.session_id sid,  
+       s.serial#,  
+       l.locked_mode,  
+       l.oracle_username,  
+       l.os_user_name,  
+       s.machine,  
+       s.terminal,  
+       o.object_name,  
+       s.logon_time  
+  FROM v$locked_object l, all_objects o, v$session s  
+ WHERE l.object_id = o.object_id  
+   AND l.session_id = s.sid  
+ ORDER BY sid, s.serial#;  
