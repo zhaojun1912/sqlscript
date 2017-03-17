@@ -816,8 +816,41 @@ order by start_date_time
 
  ALTER SYSTEM KILL SESSION '31663,45853';
 
- SELECT * FROM IT_P2938.nico_hw_ims_cdr WHERE apnni LIKE '%gncpcscf01.1a3.1cc.20170215084530%';
+ SELECT * FROM IT_P2938.nico_hw_ims_cdr WHERE apnni LIKE '%A1307FA3E82D0201736124245%';
  SELECT * FROM v$database;
 -- UPDATE IT_P2938.nico_hw_ims_cdr SET test_tag = 'T06-0803'  WHERE apnni LIKE '%gncpcscf01.19c.2c0.20170215101402%'   ;
 
  SELECT * FROM v$database;
+ SELECT * FROM IT_P2938.nico_hw_ims_cdr where test_tag IS NOT NULL ORDER BY start_date_time;
+
+--54983805  基本套餐之外的流量包查询
+select ca.co_id,cust.customer_id,cust.custcode,cust.billcycle,cust.prgcode from directory_number dirnum,contr_services conser,contract_all ca,customer_all cust
+where ca.customer_id=cust.customer_id and conser.co_id=ca.co_id
+ and substr(conser.cs_stat_chng,-1,1) in ('a','s') and dirnum.dn_id=conser.dn_id and   dirnum.dn_num='54983805';
+
+ select sn.des, cs.* from contr_services cs, mpusntab sn where co_id=6594956 and cs.sncode = sn.sncode order by cs.sncode;
+select * from mpusntab where sncode = 374;
+select * from mpusntab order by 1 desc;
+
+ select * from ptcbill_free_unit where pkg_id = 692;
+--通过tmcode唯一确定free数据流量
+select tm.des, tfu.* from ptcbill_tm_free_unit tfu, mputmview tm
+ where free_unit_id in (10691, 10692, 10693)
+and tfu.tmcode = tm.tmcode;
+
+对于ptcbill_free_unit，一般有三条记录，HK ，  HK&China  ，大中华，但是只能用其中一条
+
+----共享QoS
+        select pool_type, decode(pool_type, 4, 2, 3, 0, 2, 1)
+        from CORP_SUB_PSH_QOS_HISTORY h
+        where h.main_customer_id = 6394884
+        and   h.sub_customer_id = 6395177
+        and   h.STATUS = 'a'
+        and   h.VALIDFROM = (select max(h1.VALIDFROM) from CORP_SUB_PSH_QOS_HISTORY h1
+                             where h1.main_customer_id = h.main_customer_id
+                             and   h1.sub_customer_id = h.sub_customer_id);
+
+QoS = 2, NOT POOL SHARE QOS and NOT POOL DATA.
+QoS = 1 POOL QOS and POOL DATA.
+QoS = 0 NOT POOL QOS but POOL SHARE DATA.
+
