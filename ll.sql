@@ -768,3 +768,56 @@ AND oh.ohrefdate  <= To_Date('20161231', 'yyyymmdd')
 GROUP BY oh.customer_id, oh.ohrefdate, ca.custcode
 ORDER BY oh.ohrefdate
 ;
+SELECT l.session_id sid,
+       s.serial#,
+       l.locked_mode,
+       l.oracle_username,
+       l.os_user_name,
+       s.machine,
+       s.terminal,
+       o.object_name,
+       s.logon_time
+  FROM v$locked_object l, all_objects o, v$session s
+ WHERE l.object_id = o.object_id
+   AND l.session_id = s.sid
+   AND object_name = 'MB_CDR'
+ ORDER BY sid, s.serial#;
+
+ select
+call_type call_type,
+IMSI IMSI,
+calling_number calling_number,
+to_char(start_date_time, 'YYYYMMDDHH24MISS') start_date_time,
+ceil(GPRSUP+GPRSDOWN) volume_byte
+from mb_cdr
+where  call_type in (19, 70)
+and    teleservicecode = 'D0'
+and    imsi LIKE '454120330%'
+ and    imsi not in ('454120330000000',
+                     '454120330000001',
+                     '454120330000002',
+                     '454120330000003',
+                     '454120330000004',
+                     '454120330000005',
+                     '454120330000006',
+                     '454120330000007',
+                     '454120330000008',
+                     '454120330000009',
+                     '454120330000010',
+                     '454120330000011',
+                     '454120330000012',
+                     '454120330000013',
+                     '454120330000021',
+                     '454120330000026',
+                     '454120330000014')
+and    cdr_status = 'N'
+--for update
+order by start_date_time
+
+ ALTER SYSTEM KILL SESSION '31663,45853';
+
+ SELECT * FROM IT_P2938.nico_hw_ims_cdr WHERE apnni LIKE '%gncpcscf01.1a3.1cc.20170215084530%';
+ SELECT * FROM v$database;
+-- UPDATE IT_P2938.nico_hw_ims_cdr SET test_tag = 'T06-0803'  WHERE apnni LIKE '%gncpcscf01.19c.2c0.20170215101402%'   ;
+
+ SELECT * FROM v$database;
