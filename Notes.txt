@@ -678,3 +678,7 @@ SELECT l.session_id sid,
  WHERE l.object_id = o.object_id  
    AND l.session_id = s.sid  
  ORDER BY sid, s.serial#;  
+
+https://raw.githubusercontent.com/bannedbook/fanqiang/master/ios/ios.pac 
+D:\01DOWN\ChromeGo-lite\go.pac
+ 
