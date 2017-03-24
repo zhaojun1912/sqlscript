@@ -816,9 +816,10 @@ order by start_date_time
 
  ALTER SYSTEM KILL SESSION '31663,45853';
 
- SELECT * FROM IT_P2938.nico_hw_ims_cdr WHERE apnni LIKE '%A1307FA3E82D0201736124245%';
+ SELECT * FROM IT_P2938.nico_hw_ims_cdr WHERE apnni LIKE '%gncpcscf01.1ba.2ca.20170214095750%';
  SELECT * FROM v$database;
--- UPDATE IT_P2938.nico_hw_ims_cdr SET test_tag = 'T06-0803'  WHERE apnni LIKE '%gncpcscf01.19c.2c0.20170215101402%'   ;
+UPDATE IT_P2938.nico_hw_ims_cdr SET test_tag = 'T09-0101'  WHERE apnni LIKE '%gncpcscf01.1ab.62b.20170306064530%'  AND test_tag IS null ;
+
 
  SELECT * FROM v$database;
  SELECT * FROM IT_P2938.nico_hw_ims_cdr where test_tag IS NOT NULL ORDER BY start_date_time;
@@ -853,4 +854,20 @@ and tfu.tmcode = tm.tmcode;
 QoS = 2, NOT POOL SHARE QOS and NOT POOL DATA.
 QoS = 1 POOL QOS and POOL DATA.
 QoS = 0 NOT POOL QOS but POOL SHARE DATA.
+;
+
+ SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE                     start_date_time = To_Date('2/14/2017 4:28:57 PM', 'mm/dd/yyyy HH:mi:ss am');
+ file_name LIKE 'CMHK-VMSC-01-20170213115116-001581.dat%' AND msisdn = '85292047285';
+UPDATE IT_P2938.nico_hw_cs_cdr SET test_tag = 'T12-0104' WHERE   start_date_time = To_Date('2/13/2017 11:13:56 AM', 'mm/dd/yyyy HH:mi:ss am')
+  AND test_tag IS NULL;
+
+
+   --    msisdn = '85256407209' AND othermsisdn='56407249';
+ --
+
+ select to_date('2005-01-01 13:14:20','yyyy-MM-dd HH24:mm:ss') from dual;
+ --FILE_name = 'CMHK-VMSC-01-20170203101753-001421.dat';
+
+ select trunc(sysdate ,'year') from dual;
+UPDATE IT_P2938.nico_hw_cs_cdr SET test_tag = 'T09-0101'  WHERE apnni LIKE '%gncpcscf01.1ab.62b.20170306064530%'  AND test_tag IS null ;
 
