@@ -824,7 +824,7 @@ UPDATE IT_P2938.nico_hw_ims_cdr SET test_tag = 'T09-0101'  WHERE apnni LIKE '%gn
  SELECT * FROM v$database;
  SELECT * FROM IT_P2938.nico_hw_ims_cdr where test_tag IS NOT NULL ORDER BY start_date_time;
 
---54983805  »ù±¾Ì×²ÍÖ®ÍâµÄÁ÷Á¿°ü²éÑ¯
+--54983805  åŸºæœ¬å¥—é¤ä¹‹å¤–çš„æµé‡åŒ…æŸ¥è¯¢
 select ca.co_id,cust.customer_id,cust.custcode,cust.billcycle,cust.prgcode from directory_number dirnum,contr_services conser,contract_all ca,customer_all cust
 where ca.customer_id=cust.customer_id and conser.co_id=ca.co_id
  and substr(conser.cs_stat_chng,-1,1) in ('a','s') and dirnum.dn_id=conser.dn_id and   dirnum.dn_num='54983805';
@@ -834,14 +834,16 @@ select * from mpusntab where sncode = 374;
 select * from mpusntab order by 1 desc;
 
  select * from ptcbill_free_unit where pkg_id = 692;
---Í¨¹ıtmcodeÎ¨Ò»È·¶¨freeÊı¾İÁ÷Á¿
+--é€šè¿‡tmcodeå”¯ä¸€ç¡®å®šfreeæ•°æ®æµé‡
 select tm.des, tfu.* from ptcbill_tm_free_unit tfu, mputmview tm
  where free_unit_id in (10691, 10692, 10693)
 and tfu.tmcode = tm.tmcode;
 
-¶ÔÓÚptcbill_free_unit£¬Ò»°ãÓĞÈıÌõ¼ÇÂ¼£¬HK £¬  HK&China  £¬´óÖĞ»ª£¬µ«ÊÇÖ»ÄÜÓÃÆäÖĞÒ»Ìõ
 
-----¹²ÏíQoS
+å¯¹äºptcbill_free_unitï¼Œä¸€èˆ¬æœ‰ä¸‰æ¡è®°å½•ï¼ŒHK ï¼Œ  HK&China  ï¼Œå¤§ä¸­åï¼Œä½†æ˜¯åªèƒ½ç”¨å…¶ä¸­ä¸€æ¡
+
+----å…±äº«QoS
+
         select pool_type, decode(pool_type, 4, 2, 3, 0, 2, 1)
         from CORP_SUB_PSH_QOS_HISTORY h
         where h.main_customer_id = 6394884
