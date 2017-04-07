@@ -45,7 +45,7 @@ SELECT 11224882 - 1024*1024*6 FROM dual;
 SELECT * FROM rtx_070101 WHERE r_p_customer_id = 6238481 AND r_p_contract_id  =6432204  AND sncode = ;
 
 
---æŸ¥æ‰¾æ‰€æœ‰å­è´¦å·çš„imei
+--²éÕÒËùÓĞ×ÓÕËºÅµÄimei
 SELECT l.sub_co_id ,dn.dn_num HKG_MSISDN, mv.imei, cs.cs_sparam1 CHN_MSISDN, l.sub_customer_id
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  directory_number dn, DW_CONTRACT_IMEI_MVIEW mv, DW_HANDSET_MODEL
 hd
@@ -64,7 +64,7 @@ ORDER BY hkg_msisdn
 
 SELECT * FROM contr_services WHERE co_id = 5979591;
 
---æŸ¥æ‰¾å¤§é™†å‰¯å·
+--²éÕÒ´óÂ½¸±ºÅ
 SELECT l.sub_co_id ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN, l.sub_customer_id
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs, contr_services cs1, directory_number dn
 WHERE custcode = '1.5483165'
@@ -78,7 +78,7 @@ AND cs.cs_Seqno=cs1.cs_seqno
 AND cs1.dn_id = dn.dn_id     ;
 
 
---æŸ¥è¯¢åˆ†é’Ÿé‡åŠæµé‡ä½¿ç”¨æ˜ç»†ï¼ˆæ¯å·ç æ¯æœˆä¸€æ¡æ•°æ®ï¼‰ ï¼Œ æ¯æœˆæ±‡æ€»ã€‚
+--²éÑ¯·ÖÖÓÁ¿¼°Á÷Á¿Ê¹ÓÃÃ÷Ï¸£¨Ã¿ºÅÂëÃ¿ÔÂÒ»ÌõÊı¾İ£© £¬ Ã¿ÔÂ»ã×Ü¡£
 SELECT
 tm.tmcode,
 tm.des,
@@ -107,7 +107,7 @@ SELECT *FROM ptcbill_sub_psh_fu_cat  WHERE  main_customer_id =4308519 ;
 SELECT *FROM customer_all WHERE custcode = '1.4392172';  --6333805
 SELECT * FROM mputmtab WHERE tmcode = 739;
 SELECT * FROM customer_all WHERE custcode = '1.6051560';
---æŸ¥è¯¢ä¸»è´¦å·ä¸‹æ‰€æœ‰å­è´¦å·çš„æµé‡é™åˆ¶
+--²éÑ¯Ö÷ÕËºÅÏÂËùÓĞ×ÓÕËºÅµÄÁ÷Á¿ÏŞÖÆ
 SELECT dn.dn_num, volume/1024 "volume(GB)", l.sub_customer_id,  cvh.co_id, seq_no, cvh.ent_date, cs.tmcode, cs.spcode, cs.sncode FROM contr_volume_history cvh,
 ptcbill_main_sub_lnk l ,contr_services cs, directory_number dn
 WHERE l.sub_co_id = cvh.co_id
@@ -119,7 +119,7 @@ AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
 and cs.dn_id = dn.dn_id
 ORDER BY dn_num;
 
---æŸ¥è¯¢ä¸»è´¦å·ä¸‹æ‰€æœ‰å­è´¦å·çš„æµé‡é™åˆ¶
+--²éÑ¯Ö÷ÕËºÅÏÂËùÓĞ×ÓÕËºÅµÄÁ÷Á¿ÏŞÖÆ
 SELECT dn.dn_num, volume/1024 "volume(GB)", l.sub_customer_id,  cvh.co_id /*,  seq_no, cvh.ent_date, cs.tmcode, cs.spcode, cs.sncode */ FROM contr_volume_history cvh,
 ptcbill_main_sub_lnk l ,contr_services cs, directory_number dn , customer_all ca
 WHERE l.sub_co_id = cvh.co_id
@@ -459,7 +459,7 @@ AND cs.co_id = l.sub_co_id
 AND cs.dn_id = dn.dn_Id
 GROUP BY trunc(original_start_d_t) ,rtx.r_p_customer_Id, rtx.r_p_contract_id,  dn.dn_num;
 
---é¦™æ¸¯
+--Ïã¸Û
 SELECT l.sub_customer_id,
 l.sub_co_id, dn.dn_num,
 Sum(CASE  rtx_type  when 'A' THEN  rounded_volume/60 ELSE 0 END)
@@ -477,7 +477,7 @@ AND cs.co_id = l.sub_co_id
 AND cs.dn_id = dn.dn_Id
 AND Trunc(rtx.original_start_d_t) = To_Date('20161026', 'yyyymmdd')
 GROUP BY l.sub_customer_id, l.sub_co_id,  dn.dn_num;
---å¤§é™†
+--´óÂ½
 SELECT dn.dn_num, Sum(CASE  rtx_type  when 'A' THEN  Nvl(rounded_volume,0)/60 ELSE 0 END)
 as HK_DATA, Sum(CASE   rtx_type when 'R' THEN  Nvl(rounded_volume,0)/60 ELSE 0 END) as CHINA_DATA, Sum(Nvl(rounded_volume,0)/60)
 FROM rtx_060201 rtx ,
@@ -643,7 +643,7 @@ AND l.sub_co_id = cs.co_id
 AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
 AND cs.sncode = 1;
 
-/*æŸ¥è¯¢å…¬å¸è´¦å·ä¸‹å„ç°ç”Ÿæ•ˆç”¨æˆ·æ˜¯å¦å¼€é€šæŸæœåŠ¡*/
+/*²éÑ¯¹«Ë¾ÕËºÅÏÂ¸÷ÏÖÉúĞ§ÓÃ»§ÊÇ·ñ¿ªÍ¨Ä³·şÎñ*/
 WITH t AS
 ( SELECT ca.custcode, dn.dn_num, co.co_id FROM ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, contract_all co,directory_number dn, mpusntab sn
  WHERE main_customer_id = ca.customer_id
@@ -824,7 +824,7 @@ UPDATE IT_P2938.nico_hw_ims_cdr SET test_tag = 'T09-0101'  WHERE apnni LIKE '%gn
  SELECT * FROM v$database;
  SELECT * FROM IT_P2938.nico_hw_ims_cdr where test_tag IS NOT NULL ORDER BY start_date_time;
 
---54983805  åŸºæœ¬å¥—é¤ä¹‹å¤–çš„æµé‡åŒ…æŸ¥è¯¢
+--54983805  »ù±¾Ì×²ÍÖ®ÍâµÄÁ÷Á¿°ü²éÑ¯
 select ca.co_id,cust.customer_id,cust.custcode,cust.billcycle,cust.prgcode from directory_number dirnum,contr_services conser,contract_all ca,customer_all cust
 where ca.customer_id=cust.customer_id and conser.co_id=ca.co_id
  and substr(conser.cs_stat_chng,-1,1) in ('a','s') and dirnum.dn_id=conser.dn_id and   dirnum.dn_num='54983805';
@@ -834,15 +834,15 @@ select * from mpusntab where sncode = 374;
 select * from mpusntab order by 1 desc;
 
  select * from ptcbill_free_unit where pkg_id = 692;
---é€šè¿‡tmcodeå”¯ä¸€ç¡®å®šfreeæ•°æ®æµé‡
+--Í¨¹ıtmcodeÎ¨Ò»È·¶¨freeÊı¾İÁ÷Á¿
 select tm.des, tfu.* from ptcbill_tm_free_unit tfu, mputmview tm
  where free_unit_id in (10691, 10692, 10693)
 and tfu.tmcode = tm.tmcode;
 
 
-å¯¹äºptcbill_free_unitï¼Œä¸€èˆ¬æœ‰ä¸‰æ¡è®°å½•ï¼ŒHK ï¼Œ  HK&China  ï¼Œå¤§ä¸­åï¼Œä½†æ˜¯åªèƒ½ç”¨å…¶ä¸­ä¸€æ¡
+¶ÔÓÚptcbill_free_unit£¬Ò»°ãÓĞÈıÌõ¼ÇÂ¼£¬HK £¬  HK&China  £¬´óÖĞ»ª£¬µ«ÊÇÖ»ÄÜÓÃÆäÖĞÒ»Ìõ
 
-----å…±äº«QoS
+----¹²ÏíQoS
 
         select pool_type, decode(pool_type, 4, 2, 3, 0, 2, 1)
         from CORP_SUB_PSH_QOS_HISTORY h
@@ -872,4 +872,18 @@ UPDATE IT_P2938.nico_hw_cs_cdr SET test_tag = 'T12-0104' WHERE   start_date_time
 
  select trunc(sysdate ,'year') from dual;
 UPDATE IT_P2938.nico_hw_cs_cdr SET test_tag = 'T09-0101'  WHERE apnni LIKE '%gncpcscf01.1ab.62b.20170306064530%'  AND test_tag IS null ;
+ WITH t   AS ( SELECT customer_id FROM customer_all WHERE passportno = '05711286')
+ 
+ 
+SELECT ca.customer_id, coa.co_id, dn.dn_num HKG_MSISDN,  cs.cs_sparam1 CHN_MSISDN FROM customer_all ca, contr_services cs, contr_services cs1, directory_number dn,    contract_all coa,  t
+WHERE ca.customer_id = t.customer_id
+AND cs.co_id = coa.co_id
+AND SubStr(cs.cs_stat_chng, -1) IN ('a', 's')
+AND coa.customer_id = ca.customer_id
+AND cs.sncode = 237
+AND cs.co_id = cs1.co_id
+AND cs.cs_Seqno=cs1.cs_seqno
+AND cs1.dn_id = dn.dn_id  
+ORDER BY hkg_msisdn;
+
 
