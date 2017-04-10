@@ -682,3 +682,4 @@ SELECT l.session_id sid,
 https://raw.githubusercontent.com/bannedbook/fanqiang/master/ios/ios.pac 
 D:\01DOWN\ChromeGo-lite\go.pac
  
+awk 'BEGIN{FS="\n";OFS="\n"; RS="\n[ \t\n]*\n|^\n+"} {print $1,$2,$4, $5}' Lost.S05E01.720p.BluRay.x264-SiNNERS.srt  >1.txt
