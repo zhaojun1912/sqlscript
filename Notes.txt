@@ -683,3 +683,16 @@ https://raw.githubusercontent.com/bannedbook/fanqiang/master/ios/ios.pac
 D:\01DOWN\ChromeGo-lite\go.pac
  
 ps0010@IT-SZ09 /d> awk 'BEGIN{FS="\n";OFS="\n"; RS="\n[ \t\n]*\n|^\n+" } {print $1,$2,$4, $5 > FILENAME }' *.srt
+
+IT_P2938.nico_hw_cs_cdr.call_type ( =1 MO;
+=2 MT
+=3 CF
+=4 RoamingRecord (RCF) will appear when roaming or inter call. 
+=5 SMS MT
+=6 SMS MO
+=0 Transit ) no need to look into in the test cases.
+
+    Please help check for 6 Apr testing.
+
+1)	Check record in IT_P2938.nico_hw_cs_cdr when “HW IGWB CDR” mark “Y”
+2)	Check record in IT_P2938.nico_hw_ims_cdr when “HW CCF CDR” mark “Y”

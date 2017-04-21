@@ -857,12 +857,21 @@ QoS = 2, NOT POOL SHARE QOS and NOT POOL DATA.
 QoS = 1 POOL QOS and POOL DATA.
 QoS = 0 NOT POOL QOS but POOL SHARE DATA.
 ;
+SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE   start_date_time = To_Date('2/13/2017 11:11:59 AM','mm/dd/yyyy HH:mi:ss am') ;
+ SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE   start_date_time = To_Date('3/9/2017 3:51:38 PM','mm/dd/yyyy HH:mi:ss am') ;
+  SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE   start_date_time = To_Date('2/24/2017 3:51:38 PM','mm/dd/yyyy HH:mi:ss am') ;
+  SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE   start_date_time = To_Date('5-Apr-17  	11:38:55','dd-Mon-yy HH24:mi:ss') ;
+  UPDATE IT_P2938.nico_hw_cs_cdr
+SET test_tag = '23-T03-0103', test_page='23 E2E-Roaming(MIT)' WHERE  To_Date('3/17/2017 4:21:26 PM', 'mm/dd/yyyy HH:mi:ss am') = start_date_time ;
 
- SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE                     start_date_time = To_Date('2/14/2017 4:28:57 PM', 'mm/dd/yyyy HH:mi:ss am');
- file_name LIKE 'CMHK-VMSC-01-20170213115116-001581.dat%' AND msisdn = '85292047285';
-UPDATE IT_P2938.nico_hw_cs_cdr SET test_tag = 'T12-0104' WHERE   start_date_time = To_Date('2/13/2017 11:13:56 AM', 'mm/dd/yyyy HH:mi:ss am')
-  AND test_tag IS NULL;
+ --SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE file_name LIKE '%CMHK-GMSC-01-20170309172141-001578.dat%';
+ --SELECT DISTINCT file_name FROM     IT_P2938.nico_hw_cs_cdr  ORDER BY file_name;
+-- SELECT * FROM   IT_P2938.nico_hw_cs_cdr    where
+ --file_name LIKE 'CMHK-VMSC-02-20170309170621-001115.dat%' AND msisdn = '67572227721';
+ -- AND test_tag IS NULL;
 
+
+   SELECT To_Char(start_date_time, 'HH:mi:ss am') FROM IT_P2938.nico_hw_cs_cdr;
 
    --    msisdn = '85256407209' AND othermsisdn='56407249';
  --
@@ -873,8 +882,8 @@ UPDATE IT_P2938.nico_hw_cs_cdr SET test_tag = 'T12-0104' WHERE   start_date_time
  select trunc(sysdate ,'year') from dual;
 UPDATE IT_P2938.nico_hw_cs_cdr SET test_tag = 'T09-0101'  WHERE apnni LIKE '%gncpcscf01.1ab.62b.20170306064530%'  AND test_tag IS null ;
  WITH t   AS ( SELECT customer_id FROM customer_all WHERE passportno = '05711286')
- 
- 
+
+
 SELECT ca.customer_id, coa.co_id, dn.dn_num HKG_MSISDN,  cs.cs_sparam1 CHN_MSISDN FROM customer_all ca, contr_services cs, contr_services cs1, directory_number dn,    contract_all coa,  t
 WHERE ca.customer_id = t.customer_id
 AND cs.co_id = coa.co_id
@@ -883,7 +892,9 @@ AND coa.customer_id = ca.customer_id
 AND cs.sncode = 237
 AND cs.co_id = cs1.co_id
 AND cs.cs_Seqno=cs1.cs_seqno
-AND cs1.dn_id = dn.dn_id  
+AND cs1.dn_id = dn.dn_id
 ORDER BY hkg_msisdn;
+
+SELECT * FROM PTCCPS_CALL_TYPE;
 
 
