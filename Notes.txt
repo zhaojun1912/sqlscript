@@ -696,3 +696,27 @@ IT_P2938.nico_hw_cs_cdr.call_type ( =1 MO;
 
 1)	Check record in IT_P2938.nico_hw_cs_cdr when “HW IGWB CDR” mark “Y”
 2)	Check record in IT_P2938.nico_hw_ims_cdr when “HW CCF CDR” mark “Y”
+
+適合做「每天十分鐘回音練習」的建議電
+視影集：Gilmore Girls, Seinfeld, The Good
+Wife, Grey's Anatomy, ER, Mad Men
+Six Feet Under, Modern Family, West Wing,
+The Office, Ugly Betty
+還有以下較早期的影集也不錯：Roseanne,
+Ally McBeal, MacGyver, The Wonder Years,
+M*A*S*H, Cheers
+以上的電視影集 DVD 可以到唱片行或百貨
+公司看看有沒有；有些大學的視聽圖書館也
+可能會有。要不然可以向亞馬遜 Amazon,
+Barnes & Noble, 或其他線上書店或音樂商
+郵購。（要留意分區問題！）
+
+「回音法」
+1. 首先要找到適合模仿的音檔或影片。
+2. 先把整個音檔聽過幾遍來熟悉內容與聲音。
+3. 快速地閱讀文字檔一遍，再回頭仔細地讀一遍。
+4. 再回到音檔或影片。
+5. 停一下！仔細地聽「回音」。
+6. 模仿所聽到的「回音」。
+7. 一次再一次地重複以上每一個的步驟。
+8. 練習時間十分鐘結束。
