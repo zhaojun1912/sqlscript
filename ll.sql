@@ -676,7 +676,7 @@ SELECT * FROM contr_services WHERE co_id = 6432204 AND sncode IN ( 24,31,175,423
 SELECT *FROM mpusntab;
 
 --sim (serial no.)
-select * from CONTR_DEVICES;
+--select * from CONTR_DEVICES;
 
 SELECT oh.customer_id, oh.ohrefdate, ot.otname, ot.otmerch, CASE when ot.otname LIKE '%.R.R.%' THEN otmerch
                                                                  when ot.otname LIKE '%.r.r.%' THEN otmerch

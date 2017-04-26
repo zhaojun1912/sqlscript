@@ -517,7 +517,7 @@ Usage: pbrp.sh -bc<billcycle> -billdate<billdate_yyyymmdd> [-postingperiod<posti
 export NLS_LANG="TRADITIONAL CHINESE_AMERICA.ZHS16GBK"
 pos： P2683/b 
 		P2870/b
-eip: zhaojun_yan
+eip: zhaojun_yan*2
 
 customer_all: cs_type:客户类型 d:deactived, a, s. csdeactivated:失效时间,在合同失效日期后3个月之前失效。
               cscusttype: F: firm, P: private
@@ -720,3 +720,24 @@ Barnes & Noble, 或其他線上書店或音樂商
 6. 模仿所聽到的「回音」。
 7. 一次再一次地重複以上每一個的步驟。
 8. 練習時間十分鐘結束。
+
+POS：
+http://sb1.hk.chinamobile.com:8888/forms/frmservlet?config=posjpi
+http://app.hk.chinamobile.com:8888/forms/frmservlet?config=posjpi
+http://10.3.12.47:20001/provision/main.action?ssLogin=true&BMEWebToken=00240b76-b34a-4c87-8f79-8ff72c81d580
+https://10.250.19.50/login.html
+https://10.250.7.150/login.html
+
+IT8	PRov+-13
+TESTER_POST
+	PRov+-12
+
+1
+	PGtester1
+	Huawei12#$$
+
+PT01
+f
+p2411
+b
+J:\2-Billing_Team\Documentation\MD_BATCH\6 - TestPlan\CMHK\Phase 2
