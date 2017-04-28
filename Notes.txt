@@ -741,3 +741,4 @@ f
 p2411
 b
 J:\2-Billing_Team\Documentation\MD_BATCH\6 - TestPlan\CMHK\Phase 2
+script: c:\Program Files(x86)\Java\jre1.8.0_121\bin\resume_printer.vbs
