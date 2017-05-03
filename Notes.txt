@@ -755,3 +755,28 @@ cd $newdir
 
 
 echo "DONE!"
+Dear Wai,
+
+Call_type:
+--# callType #--
+  if (isDefined(theSource.mtCallRecord) ) {
+    theTarget.cDR.callType ::= "2";
+  }
+  else if (isDefined(theSource.forwardCallRecord)) {
+    theTarget.cDR.callType ::= "3";
+  }
+  else if ( isDefined(theSource.outGatewayRecord) || isDefined(theSource.incGatewayRecord) ) {
+    theTarget.cDR.callType ::= "0";
+  }
+  else if (isDefined(theSource.roamingRecord)) {
+    theTarget.cDR.callType ::= "4";
+  }
+  else if (isDefined(theSource.mtSMSRecord)) {
+    theTarget.cDR.callType ::= "5";
+  }
+  else if (isDefined(theSource.moSMSRecord)) {
+    theTarget.cDR.callType ::= "6";
+  }
+  else {
+    theTarget.cDR.callType ::= "1";
+  }
