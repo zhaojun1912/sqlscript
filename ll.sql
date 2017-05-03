@@ -1,23 +1,48 @@
 SELECT * FROM directory_number   WHERE dn_num = '56407060';
+--single user information query:
 SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode,cs.spcode,cs.sncode, cs.spcode,cs.sncode,cs.dn_id,
 dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
 WHERE
---dn.dn_num = '51096556'
-ca.custcode = '1.6338176'
+dn.dn_num = '56407060'
+--ca.custcode = '1.6338176'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
 AND coa.customer_id = ca.customer_id     --ORDER BY csactivated
 AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
+;
 
-SELECT * FROM ptcapp_usage_hist WHERE co_id =5805013  AND customer_id =  5638718 AND date_billed = To_Date('20161201', 'yyyymmdd');
+--corporate user information query:
+SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode,cs.spcode,cs.sncode, cs.spcode,cs.sncode,cs.dn_id,
+dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
+FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, ptcbill_main_sub_lnk l
+WHERE
+ca.custcode = '1.5809747'
+--ca.customer_id = 6187521
+--coa.co_id = 5979591
+and ca.customer_id = l.main_customer_id
+AND dn.dn_id = cs.dn_id
+AND cs.co_id = coa.co_id
+AND coa.customer_id = l.sub_customer_id     --ORDER BY csactivated
+AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
+;
+select * from mpusptab where spcode = 208;
+select * from mputmview where tmcode = 509;
+select * from contract_all coa,  customer_all ca, ptcbill_main_sub_lnk l  
+where coa.customer_id = l.sub_customer_id
+and ca.customer_id = l.main_customer_id
+and ca.custcode = '1.5809747';
+
+SELECT * FROM ptcapp_usage_hist WHERE co_id =5805013  AND customer_id =  5638718 AND date_billed = To_Date('20160401', 'yyyymmdd');
 SELECT * FROM ptcbill_co_usage_summary WHERE co_id = 5805013;
-
+select * from rtx_010402;
 SELECT * FROM contr_volume_history WHERE customer_id = 6248151 ORDER BY ent_date;
-
-SELECT * FROM customer_all ca WHERE custcode  = '1.6235072';
+SELECT * FROM customer_all ca WHERE custcode  = '1.3998670';
+select * from customer_all ca where customer_id = 5744027;
+select * from contract_all where customer_id = 5744027;
+select * from MBSADM.ptcbill_main_sub_lnk l where main_customer_id = 3914124;
 SELECT * FROM ptcbill_main_sub_lnk WHERE sub_customer_id  =   5638718;
 SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 3843789 AND sub_co_id IN (6488826,
 6488827,
@@ -65,9 +90,9 @@ ORDER BY hkg_msisdn
 SELECT * FROM contr_services WHERE co_id = 5979591;
 
 --查找大陆副号
-SELECT l.sub_co_id ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN, l.sub_customer_id
-FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs, contr_services cs1, directory_number dn
-WHERE custcode = '1.5483165'
+SELECT l.sub_customer_id, l.sub_co_id ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN, l.sub_customer_id, ca1.tmcode,tm.des, coa.co_signed
+FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1
+WHERE ca.custcode = '1.5809747'
 AND ca.customer_id = l.main_customer_id
 AND l.exp_date IS null
 AND l.sub_co_id = cs.co_id
@@ -75,8 +100,17 @@ AND cs.sncode = 237
 AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
 AND cs.co_id = cs1.co_id
 AND cs.cs_Seqno=cs1.cs_seqno
-AND cs1.dn_id = dn.dn_id     ;
+AND cs1.dn_id = dn.dn_id    
+and tm.tmcode = ca1.tmcode
+and coa.customer_id = l.sub_customer_id
+and ca1.customer_id = l.sub_customer_id
+;
 
+select * from mputmview where tmcode = 742;
+select * from mpusptab ;
+select * from contract_all;
+select * from contract_history;
+select * from ptcbill_main_sub_lnk;
 
 --查询分钟量及流量使用明细（每号码每月一条数据） ， 每月汇总。
 SELECT
@@ -137,7 +171,7 @@ ORDER BY dn_num;
 SELECT * FROM contr_volume_history WHERE co_id IN (6488826
 ) ;
 
-SELECT *FROM rtx_040101 WHERE r_p_customer_id =  6293607 AND r_p_contract_id =  6488825 AND sncode = 119 AND ;
+SELECT *FROM rtx_060401 WHERE r_p_customer_id =  6293607 AND r_p_contract_id =  6488825 AND sncode = 119 AND ;
 SELECT plcode FROM mpdpltab WHERE country = 'Russia';
 
 SELECT distinct trunc(original_start_d_t)   FROM rtx_040401
@@ -896,5 +930,9 @@ AND cs1.dn_id = dn.dn_id
 ORDER BY hkg_msisdn;
 
 SELECT * FROM PTCCPS_CALL_TYPE;
+--rtx_0X0401 当期未出账rtx
+select * from rtx_060401;
+
+select distinct(trunc(start_d_t)) from rtx_060301 ;
 
 
