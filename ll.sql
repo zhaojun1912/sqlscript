@@ -904,6 +904,18 @@ SET test_tag = '23-T03-0103', test_page='23 E2E-Roaming(MIT)' WHERE  To_Date('3/
  --file_name LIKE 'CMHK-VMSC-02-20170309170621-001115.dat%' AND msisdn = '67572227721';
  -- AND test_tag IS NULL;
 
+SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE file_name LIKE '%CMHK-VMSC-02-20170407123058-001523.dat%' ORDER BY START_date_time; 
+SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE   start_date_time = To_Date('22.02.2017 15:38:24','dd.mm.yyyy HH24:mi:ss') ;
+SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE   start_date_time = To_Date('4/7/2017 12:22:29 PM','mm/dd/yyyy HH:mi:ss am') ;
+
+
+  UPDATE IT_P2938.nico_hw_cs_cdr
+SET test_tag = '20-T02-0113', test_page='20 E2E-SIMN Service(MIT)' WHERE  To_Date('2/24/2017 5:16:32 PM', 'mm/dd/yyyy HH:mi:ss am') = start_date_time ;
+   UPDATE IT_P2938.nico_hw_cs_cdr
+SET test_tag = '20-T01-0207', test_page='20 E2E-SIMN Service(MIT)' WHERE   file_name LIKE '%CMHK-VMSC-02-20170217145614-000759.dat%' AND duration =9 AND ton = 0 ;
+
+
+
 
    SELECT To_Char(start_date_time, 'HH:mi:ss am') FROM IT_P2938.nico_hw_cs_cdr;
 
