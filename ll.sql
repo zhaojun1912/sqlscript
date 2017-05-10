@@ -35,45 +35,57 @@ AND l.sub_customer_id = ca1.customer_id
 
 select dir.dn_num "MSISDN",
        original_start_d_t "Date Initiated",
-       decode(rtx.sncode,1,'Voice',3,'SMS/MMS',4,'SMS/MMS',119,'GPRS') "Type",
-       decode(rtx.sncode,1,decode(rtx.rtx_type,'A','Local Voice','R','Roaming Voice','r','Roaming Voice','L','IDD'),
+       decode(rtx.sncode,1,decode(rtx.rtx_type, 'L', 'IDD Call','R', 'Roaming', 'r', 'Roaming','Voice'), 3,'SMS/MMS',4,'SMS/MMS',119,'GPRS', 237, '1CMN', 283,'IDD Call'  )"Type",
+       decode(rtx.sncode, 283, '1CMN IDD Call(Out)',1,decode(rtx.rtx_type,'A','Local Voice','R','Roaming(Out)','r','Roaming(In)','L','IDD Call(Out)'),
                          3,'SMS(In)',
-                         4,'SMS(Out)',
-                         119,decode(rtx.rtx_type,'A','Local Data','R','Roaming Data')
+                         4,decode(rtx.rtx_type, 'S', 'Inter-Operator SMS(Out)', 'L', 'International SMS(Out)', 'SMS(Out)'),
+                         119,decode(rtx.rtx_type,'A','Local Data','R','Roaming Data', 'L', 'International '),
+                         237,'1CMN'
                          )"Service",
        decode(rtx.sncode,119,'--',o_p_number) "Calling/Called NUMBER ",
        mpl.country "Country" ,
-       decode(rtx.sncode,1,nvl(ceil(rounded_volume/60),0),119,nvl(rounded_volume/60,0),rounded_volume) "Duration",
-       decode(rtx.sncode,1,'MINS',238, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
+       decode(rtx.sncode,1,nvl(ceil(rounded_volume/60),0),119,nvl(rounded_volume/60, 0),237,nvl(rounded_volume/60, 0),283,nvl(rounded_volume/60, 0),rounded_volume) "Duration",
+       decode(rtx.sncode,1,'MINS',237, 'MINS', 283, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
        'Normal' "Voice Type",
-       rtx.rated_flat_amount "Charge", rtx.rtx_type
+       round(rtx.rated_flat_amount,2) "Charge"
 from RTX_050301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
 where cust.custcode='1.6115848' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
 and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
 and rtx.r_p_customer_id=lnk.sub_customer_id
 AND rtx.r_p_contract_id = lnk.sub_co_id
 --and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
-and rtx.sncode in (1)
+--and rtx.sncode in (4)
 --and mpl.country = 'Hong Kong'
 --and rtx.rtx_type = 'A'
-and rtx.rtx_type = 'R'
-and rtx.plcode =  409
+--and rtx.rtx_type = 'S'
+--and rtx.plcode <> 409
 and rtx.rated_flat_amount<>0
-order by 1,2
-;
+and (( rtx.sncode  = 283 )  --1CMN IDD
+  or  ( rtx.sncode = 1 and rtx.rtx_type = 'L') -- IDD
+  or ( rtx.sncode = 1 and rtx.rtx_type =  'R' and rtx.plcode <> 409) -- Roaming Out
+  or ( rtx.sncode = 1 and rtx.rtx_type = 'r') -- Roaming In
+  or ( rtx.sncode = 4 and rtx.rtx_type = 'S') -- Local SMS
+  or ( rtx.sncode = 4 and rtx.rtx_type = 'L') -- IDD SMS
+)
 
+order by 3,4,2,1
+;
+select * from RTX_050301 where sncode = 4 and rtx_type = 'R';
+select * from RTX_050301 where sncode = 4 and plcode = 409;
+select * from RTX_050301 where sncode = 3 and rtx_type = 'r';
+select * from RTX_050301 where sncode = 3 and plcode = 409;
 select * from mpdpltab where plcode = 409;
 select * from ptcbill_rtx_type_group;
-select rtx.* from RTX_050301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
+select sum(rated_flat_amount) from RTX_050301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
 where cust.custcode='1.6115848' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
 and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
 and rtx.r_p_customer_id=lnk.sub_customer_id
 AND rtx.r_p_contract_id = lnk.sub_co_id
 --and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
-and rtx.sncode in (4)
+and rtx.sncode in (283)
 --and mpl.cc = 852 and mpl.country = 'China'
-and rtx_type = 'R'
---and rtx.plcode <> 1
+--and rtx_type = 'L'
+--and rtx.plcode <> 409
 and rtx.rated_flat_amount<>0
 --order by 1,2
 ;
@@ -85,7 +97,7 @@ and rtx.r_p_customer_id=lnk.sub_customer_id
 AND rtx.r_p_contract_id = lnk.sub_co_id
 --and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
 --and rtx.sncode in (1,3,4,119)
-and rtx.rated_flat_amount=0
+and rtx.rated_flat_amount<>0
 and sn.sncode = rtx.sncode
 --order by 1,2
 ;
