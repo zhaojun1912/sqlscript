@@ -15,25 +15,92 @@ AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
 ;
 
 --corporate user information query:
-SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode,cs.spcode,cs.sncode, cs.spcode,cs.sncode,cs.dn_id,
-dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
-FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, ptcbill_main_sub_lnk l
+;
+SELECT ca1.customer_id,ca1.custcode,ca1.billcycle,  coa.co_id, cs.tmcode,cs.spcode,cs.sncode, cs.spcode,cs.sncode,cs.dn_id,
+dn.dn_num, cs.cs_sparam1,ca1.csactivated, ca1.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
+FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, ptcbill_main_sub_lnk l , customer_all ca1
 WHERE
-ca.custcode = '1.5809747'
+ca.custcode = '1.6115848'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
 and ca.customer_id = l.main_customer_id
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
 AND coa.customer_id = l.sub_customer_id     --ORDER BY csactivated
-AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
+AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
+AND l.sub_customer_id = ca1.customer_id
+--AND ca1.tmcode = 682
 ;
+
+
+select dir.dn_num "MSISDN",
+       original_start_d_t "Date Initiated",
+       decode(rtx.sncode,1,'Voice',3,'SMS/MMS',4,'SMS/MMS',119,'GPRS') "Type",
+       decode(rtx.sncode,1,decode(rtx.rtx_type,'A','Local Voice','R','Roaming Voice','r','Roaming Voice','L','IDD'),
+                         3,'SMS(In)',
+                         4,'SMS(Out)',
+                         119,decode(rtx.rtx_type,'A','Local Data','R','Roaming Data')
+                         )"Service",
+       decode(rtx.sncode,119,'--',o_p_number) "Calling/Called NUMBER ",
+       mpl.country "Country" ,
+       decode(rtx.sncode,1,nvl(ceil(rounded_volume/60),0),119,nvl(rounded_volume/60,0),rounded_volume) "Duration",
+       decode(rtx.sncode,1,'MINS',238, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
+       'Normal' "Voice Type",
+       rtx.rated_flat_amount "Charge", rtx.rtx_type
+from RTX_050301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
+where cust.custcode='1.6115848' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
+and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
+and rtx.r_p_customer_id=lnk.sub_customer_id
+AND rtx.r_p_contract_id = lnk.sub_co_id
+--and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
+and rtx.sncode in (1)
+--and mpl.country = 'Hong Kong'
+--and rtx.rtx_type = 'A'
+and rtx.rtx_type = 'R'
+and rtx.plcode =  409
+and rtx.rated_flat_amount<>0
+order by 1,2
+;
+
+select * from mpdpltab where plcode = 409;
+select * from ptcbill_rtx_type_group;
+select rtx.* from RTX_050301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
+where cust.custcode='1.6115848' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
+and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
+and rtx.r_p_customer_id=lnk.sub_customer_id
+AND rtx.r_p_contract_id = lnk.sub_co_id
+--and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
+and rtx.sncode in (4)
+--and mpl.cc = 852 and mpl.country = 'China'
+and rtx_type = 'R'
+--and rtx.plcode <> 1
+and rtx.rated_flat_amount<>0
+--order by 1,2
+;
+select distinct rtx.sncode, rtx.rtx_type, sn.des, mpl.plcode, mpl.country
+from RTX_050301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
+where cust.custcode='1.6115848' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
+and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
+and rtx.r_p_customer_id=lnk.sub_customer_id
+AND rtx.r_p_contract_id = lnk.sub_co_id
+--and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
+--and rtx.sncode in (1,3,4,119)
+and rtx.rated_flat_amount=0
+and sn.sncode = rtx.sncode
+--order by 1,2
+;
+select *from RTX_050301;
+select * from mpusntab where des like '%SMS%';
+select * from mpdpltab where plcode in (1, 19, 63, 75, 100, 409);
+select * from mpdpltab where plcode = 1;
+select * from customer_all ca where custcode = '1.6115848';
 select * from mpusptab where spcode = 208;
-select * from mputmview where tmcode = 509;
-select * from contract_all coa,  customer_all ca, ptcbill_main_sub_lnk l  
+select * from mputmview where tmcode = 727;
+SELECT * FROM contr_services WHERE co_id = 6140788 AND sncode  = 1;
+select * from contract_all coa,  customer_all ca, ptcbill_main_sub_lnk l
 where coa.customer_id = l.sub_customer_id
 and ca.customer_id = l.main_customer_id
-and ca.custcode = '1.5809747';
+and ca.custcode = '1.6021493';
 
 SELECT * FROM ptcapp_usage_hist WHERE co_id =5805013  AND customer_id =  5638718 AND date_billed = To_Date('20160401', 'yyyymmdd');
 SELECT * FROM ptcbill_co_usage_summary WHERE co_id = 5805013;
@@ -52,6 +119,46 @@ SELECT * FROM ptcbill_main_sub_lnk WHERE main_customer_id = 3843789 AND sub_co_i
 6526465,
 6488828
 ) ORDER BY eff_date;
+
+--查询data only plan 用户的sim No.;
+--682 为data only plan
+SELECT l.sub_customer_id,l.sub_co_id, dn.dn_num, ca1.tmcode, tm.des, cd.cd_sm_num
+FROM customer_all ca ,   ptcbill_main_sub_lnk l , customer_all ca1 ,
+mputmview tm, contr_devices cd , contr_services cs, directory_number dn
+WHERE ca.custcode = '1.6021493'
+AND l.main_customer_id = ca.customer_id
+AND l.sub_customer_id = ca1.customer_id
+AND ca1.tmcode = tm.tmcode
+AND l.sub_co_id = cd.co_id
+AND cs.co_id = l.sub_co_id
+AND cs.dn_id = dn.dn_id
+AND cs.sncode = 1
+AND ca1.tmcode = 682
+;
+
+select dir.dn_num "MSISDN",
+       to_char(original_start_d_t,'dd/mm/yyyy HH24:Mi:SS') "Date Initiated",
+       decode(rtx.sncode,1,'Voice',3,'SMS/MMS',4,'SMS/MMS',119,'GPRS') "Type",
+       decode(rtx.sncode,1,decode(rtx.rtx_type,'A','Local Voice','R','Roaming Voice','r','Roaming Voice','L','IDD'),
+                         3,'SMS(In)',
+                         4,'SMS(Out)',
+                         119,decode(rtx.rtx_type,'A','Local Data','R','Roaming Data')
+                         )"Service",
+       decode(rtx.sncode,119,'--',o_p_number) "Calling/Called Number",
+       mpl.country "Country" ,
+       decode(rtx.sncode,1,nvl(ceil(rounded_volume/60),0),119,nvl(rounded_volume/60,0),rounded_volume) "Duration",
+       decode(rtx.sncode,1,'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
+       'Normal' "Voice Type",
+       rtx.rated_flat_amount "Charge"
+from RTX_010301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
+where cust.custcode='1.6189344' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
+and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
+and rtx.r_p_customer_id=lnk.sub_customer_id
+--and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
+and rtx.sncode in (1,3,4,119)
+and rtx.rated_flat_amount<>0
+order by 1,2
+;
 
 SELECT *FROM equipment WHERE customer_id = 5747798;
 SELECT Sum(rounded_volume/60) FROM rtx_010401 WHERE r_p_customer_id = 6293607 AND r_p_contract_id  =6488825  ;
@@ -100,7 +207,7 @@ AND cs.sncode = 237
 AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
 AND cs.co_id = cs1.co_id
 AND cs.cs_Seqno=cs1.cs_seqno
-AND cs1.dn_id = dn.dn_id    
+AND cs1.dn_id = dn.dn_id
 and tm.tmcode = ca1.tmcode
 and coa.customer_id = l.sub_customer_id
 and ca1.customer_id = l.sub_customer_id
@@ -904,7 +1011,7 @@ SET test_tag = '23-T03-0103', test_page='23 E2E-Roaming(MIT)' WHERE  To_Date('3/
  --file_name LIKE 'CMHK-VMSC-02-20170309170621-001115.dat%' AND msisdn = '67572227721';
  -- AND test_tag IS NULL;
 
-SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE file_name LIKE '%CMHK-VMSC-02-20170407123058-001523.dat%' ORDER BY START_date_time; 
+SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE file_name LIKE '%CMHK-VMSC-02-20170407123058-001523.dat%' ORDER BY START_date_time;
 SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE   start_date_time = To_Date('22.02.2017 15:38:24','dd.mm.yyyy HH24:mi:ss') ;
 SELECT * FROM IT_P2938.nico_hw_cs_cdr WHERE   start_date_time = To_Date('4/7/2017 12:22:29 PM','mm/dd/yyyy HH:mi:ss am') ;
 

@@ -780,3 +780,37 @@ Call_type:
   else {
     theTarget.cDR.callType ::= "1";
   }
+development:
+454120413868824
+6601750
+85268477494
+
+
+production:
+6663627
+133435225
+
+IDD001已做完。
+
+#!/usr/bin/sh
+newdir=$1
+if [ -z $newdir ]; then
+        echo "Error, filename needed!"
+        exit
+fi
+
+olddir=`ls -lrt |grep ^d|tail -1|awk '{print $9}'`
+cp -R $olddir $newdir
+cd $newdir
+cat 08-hw_upcc_after.txt > 01-hw_upcc_before.txt
+cat 09-hw_hlr_after.txt > 02-hw_hlr_before.txt
+cat 11-ericsson_hlr_after.txt > 04-ericsson_hlr_before.txt
+cat 12-ericsson_soap_after.txt > 05-ericsson_soap_before.txt
+
+echo "DONE!"
+
+093的
+
+date format:dd.mm.yyyy hh24:mi:ss
+		DD-MON-RRRR hh24:mi:ss
+--alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';		
