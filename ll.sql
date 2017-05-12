@@ -110,7 +110,7 @@ select * from rtx_060301;
 select * from rtx_040301;
 select * from RTX_050301 where sncode = 4 and rtx_type = 'R';
 select * from RTX_050301 where sncode = 4 and plcode = 409;
-select * from RTX_050301 where sncode = 3 and rtx_type = 'r';
+select * from RTX_050301 where sncode = 3 and rtx_type = 'r'; 
 select * from RTX_050301 where sncode = 3 and plcode = 409;
 select * from mpdpltab where plcode = 409;
 select * from ptcbill_rtx_type_group;
@@ -315,6 +315,7 @@ and cs2.co_Id = l.sub_co_id
 --order by ch.ch_status, l.sub_co_id
 ;
 
+
 select * from contr_services where co_id =5541932 and sncode = 237;
 --corporate account summary :
 select ca.custcode,ca2.customer_id, l.sub_co_id, dn.dn_num HKG_MSISDN , decode(cs2.cs_sparam1, null, '--', cs2.cs_sparam1) CHN_MSISDN, 
@@ -347,6 +348,50 @@ select * from PTCREP_BR_CUST_DATA;
 select * from PTCAPP_CUST_CO_OFFER_SUM where customer_id  = 5622287;
 select * from CORP_PLAN_DATA;
 select * from contract_history where co_id = 3642592 order by ch_seqno;
+
+SELECT ca.custcode, l.sub_customer_id, l.sub_co_id ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN,  ca1.tmcode TMCODE,tm.des, coo.LAST_CO_BIND_END_DATE
+FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1
+, PTCAPP_CUST_CO_OFFER_SUM coo
+WHERE ca.custcode in ('1.4030997','1.6394653')
+AND ca.customer_id = l.main_customer_id
+AND l.exp_date IS null
+AND l.sub_co_id = cs.co_id
+/*237 service is activated*/
+AND cs.sncode = 237
+AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
+AND cs.co_id = cs1.co_id
+AND cs.cs_Seqno=cs1.cs_seqno
+AND cs1.dn_id = dn.dn_id
+and tm.tmcode = ca1.tmcode
+and coa.customer_id = l.sub_customer_id
+and ca1.customer_id = l.sub_customer_id
+and coo.co_id = l.sub_co_id
+union
+SELECT ca.custcode, l.sub_customer_id, l.sub_co_id ,dn.dn_num HKG_MSISDN, '--' CHN_MSISDN, ca1.tmcode TMCODE,tm.des, coo.LAST_CO_BIND_END_DATE
+FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1
+, PTCAPP_CUST_CO_OFFER_SUM coo
+WHERE ca.custcode in ('1.4030997','1.6394653')
+AND ca.customer_id = l.main_customer_id
+AND l.exp_date IS null
+AND l.sub_co_id = cs.co_id
+--AND cs.sncode = 237
+and cs.sncode = 1
+AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
+AND cs.co_id = cs1.co_id
+AND cs.cs_Seqno=cs1.cs_seqno
+AND cs1.dn_id = dn.dn_id
+and tm.tmcode = ca1.tmcode
+and coa.customer_id = l.sub_customer_id
+and ca1.customer_id = l.sub_customer_id
+and coo.co_id = l.sub_co_id
+/*237 service is deactivated*/
+and not exists ( select 1 from contr_services cs2 where cs2.sncode = 237 and cs2.co_id = cs.co_id and SubStr(cs2.cs_Stat_chng,-1) IN ('a','s')) 
+order by CHN_MSISDN, TMCODE
+;
+
+select * from PTCAPP_CUST_CO_OFFER_SUM where co_id = 5651882;
+select * from ptcbill_main_sub_lnk where sub_co_id = 5541932 ;
+select * from contr_services cs where co_id = 5541932 and SubStr(cs.cs_Stat_chng,-1) IN ('a','s', 'd') and sncode = 237;
 select * from mputmview where tmcode = 742;
 select * from mpusptab ;
 select * from contract_all;
@@ -372,7 +417,7 @@ ORDER BY msisdn
 ;
 SELECT * FROM contr_services WHERE co_id =   6379001;
 SELECT *FROM contract_history WHERE co_id =   6379001;
-SELECT *FROM USER_tab_columns WHERE column_name = 'MODEL_ID';
+SELECT *FROM all_tab_columns WHERE column_name  like '%CO%_END_DATE%' and owner = 'MBSADM';
 SELECT * FROM PTCBILL_FREE_UNIT WHERE pkg_id = 421 AND free_unit_id = 10598;
 
 
