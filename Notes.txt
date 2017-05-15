@@ -813,4 +813,16 @@ echo "DONE!"
 
 date format:dd.mm.yyyy hh24:mi:ss
 		DD-MON-RRRR hh24:mi:ss
---alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';		
+--alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';	
+
+Subject: Daily Airtime Usage For the date 10/05/2017
+
+For the date 10/05/2017
+;Charge;Actual Volume ;Rounded Volume
+Local Airtime(Mins);   11,022,594;15,002,680;     19,365,227
+Local Data(MB);     880,410,178;  142,258,503;       142,315,903
+Outbound Airtime(Mins); 188,719;      211,063;   271,484
+Outbound Data(MB);  62,446,017;       5,639,038;    5,640,489
+IDD(Mins);     138,054; 620,851;      689,215
+Inbound Roamer Airtime;       2;    1; 1
+	
