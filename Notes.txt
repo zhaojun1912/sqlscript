@@ -813,4 +813,6 @@ echo "DONE!"
 
 date format:dd.mm.yyyy hh24:mi:ss
 		DD-MON-RRRR hh24:mi:ss
---alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';		
+--alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';	
+
+breakdown report :/boss/work/app/report/sql	
