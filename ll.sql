@@ -4,11 +4,11 @@ select * from customer_all ca where ca.custcode = '1.6494350';
 
 select * from customer_all ca where ca.customer_id = 3946509;
 --single user information query:
-SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, cs.tmcode,cs.spcode,cs.sncode, cs.spcode,cs.sncode,cs.dn_id,
-dn.dn_num, cs.cs_sparam1,csactivated, csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
-FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca
+SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, ca.tmcode, tm.des,cs.spcode,sp.des, cs.sncode, sn.des,cs.dn_id,
+dn.dn_num, cs1.cs_sparam1,ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
+FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn, contr_services cs1
 WHERE
-dn.dn_num = '53488536'
+dn.dn_num = '56407060'
 --ca.custcode = '1.6338176'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
@@ -16,16 +16,35 @@ dn.dn_num = '53488536'
 and cs.sncode = 1
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
-AND coa.customer_id = ca.customer_id     --ORDER BY csactivated
-AND substr(cs.cs_stat_chng, -1) IN ('a', 's');
+AND coa.customer_id = ca.customer_id    
+AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
+and ca.tmcode = tm.tmcode
+and cs.spcode = sp.spcode
+and cs.sncode = sn.sncode
+and cs1.sncode = 237
+and cs1.co_id = coa.co_id
+and substr(cs1.cs_stat_chng, -1) IN ('a', 's');
 ;
 select * from contr_services where co_id = 3642592;
+select * from mpusptab where spcode = 208;
+
+--all user services for single user:
+select cs.spcode,sp.des, cs.sncode, sn.des 
+from contr_services cs, customer_all ca, contract_all coa,mpusptab sp, mpusntab sn
+where cs.co_id = coa.co_id
+and ca.customer_id = coa.customer_id
+and ca.custcode = '2.11.52.64.100109'
+and substr(cs.cs_stat_chng, -1) IN ('a', 's')
+and cs.spcode = sp.spcode
+and cs.sncode = sn.sncode
+;
+
 --corporate user information query:`    
 SELECT ca.custcode,ca1.customer_id,ca1.custcode,ca1.billcycle,  coa.co_id, cs.tmcode,cs.spcode,cs.sncode, cs.spcode,cs.sncode,cs.dn_id,
 dn.dn_num, cs.cs_sparam1,ca1.csactivated, ca1.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, ptcbill_main_sub_lnk l , customer_all ca1
 WHERE
-ca.custcode = '1.6394653'
+ca.custcode = '1.6116945'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
 and ca.customer_id = l.main_customer_id
@@ -39,8 +58,8 @@ AND l.sub_customer_id = ca1.customer_id
 ;
 
 select distinct rtx.sncode, rtx.rtx_type, sn.des, mpl.plcode, mpl.country
-from RTX_010201 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
-where cust.custcode='1.6123385' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
+from RTX_060301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
+where cust.custcode='1.6116945' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
 and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
 and rtx.r_p_customer_id=lnk.sub_customer_id
 AND rtx.r_p_contract_id = lnk.sub_co_id
@@ -50,14 +69,27 @@ and rtx.rated_flat_amount<>0
 and sn.sncode = rtx.sncode
 --order by 1,2
 ;
+select sum(rated_flat_amount)
+from RTX_060301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
+where cust.custcode='1.6116945' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
+and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
+and rtx.r_p_customer_id=lnk.sub_customer_id
+AND rtx.r_p_contract_id = lnk.sub_co_id
+--and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
+--and rtx.sncode in (1,3,4,119)
+and rtx.rated_flat_amount<>0
+and sn.sncode = rtx.sncode
+and sn.sncode = 283
+--order by 1,2
+;
 -- for single user:;
 select dn.dn_num "MSISDN",
        original_start_d_t "Date Initiated",
        decode(rtx.sncode,1,decode(rtx.rtx_type, 'L', 'IDD Call','R', 'Roaming', 'r', 'Roaming','Voice'), 3,'SMS/MMS',4,'SMS/MMS',119,'GPRS', 237, '1CMN', 283,'IDD Call'  )"Type",
        decode(rtx.sncode, 283, '1CMN IDD Call(Out)',1,decode(rtx.rtx_type,'A','Local Voice','R','Roaming(Out)','r','Roaming(In)','L','IDD Call(Out)'),
                          3,'SMS(In)',
-                         4,decode(rtx.rtx_type, 'S', 'Inter-Operator SMS(Out)', 'L', 'International SMS(Out)', 'SMS(Out)'),
-                         119,decode(rtx.rtx_type,'A','Local Data','R','Roaming Data', 'L', 'International '),
+                         4,decode(rtx.rtx_type, 'S', 'Inter-Operator SMS(Out)', 'L', 'International SMS(Out)','R','Roaming SMS(Out)', 'SMS(Out)'),
+                         119,decode(rtx.rtx_type,'A','Local GPRS','R','Roaming GPRS'),
                          237,'1CMN'
                          )"Service",
        decode(rtx.sncode,119,'--',o_p_number) "Calling/Called NUMBER ",
@@ -76,7 +108,7 @@ and ca.custcode = '1.6304282'
 and cs.sncode = 1
 and rtx.plcode = mpl.plcode
 --and rtx.rated_flat_amount <>0
-order by 3,4,1,2;
+order by 3,4,6,1,2;
 
 -- for corporate user;
 select dir.dn_num "MSISDN",
@@ -84,8 +116,8 @@ select dir.dn_num "MSISDN",
        decode(rtx.sncode,1,decode(rtx.rtx_type, 'L', 'IDD Call','R', 'Roaming', 'r', 'Roaming','Voice'), 3,'SMS/MMS',4,'SMS/MMS',119,'GPRS', 237, '1CMN', 283,'IDD Call'  )"Type",
        decode(rtx.sncode, 283, '1CMN IDD Call(Out)',1,decode(rtx.rtx_type,'A','Local Voice','R','Roaming(Out)','r','Roaming(In)','L','IDD Call(Out)'),
                          3,'SMS(In)',
-                         4,decode(rtx.rtx_type, 'S', 'Inter-Operator SMS(Out)', 'L', 'International SMS(Out)', 'SMS(Out)'),
-                         119,decode(rtx.rtx_type,'A','Local Data','R','Roaming Data'),
+                         4,decode(rtx.rtx_type, 'S', 'Inter-Operator SMS(Out)', 'L', 'International SMS(Out)', 'R','Roaming SMS(Out)','SMS(Out)'),
+                         119,decode(rtx.rtx_type,'A','Local GPRS','R','Roaming GPRS'),
                          237,'1CMN'
                          )"Service",
        decode(rtx.sncode,119,'--',o_p_number) "Calling/Called NUMBER ",
@@ -94,8 +126,8 @@ select dir.dn_num "MSISDN",
        decode(rtx.sncode,1,'MINS',237, 'MINS', 283, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
        'Normal' "Voice Type",
        round(rtx.rated_flat_amount,2) "Charge"
-from RTX_010301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
-where cust.custcode='1.6123385' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
+from RTX_060301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
+where cust.custcode='1.6116945' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
 and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
 and rtx.r_p_customer_id=lnk.sub_customer_id
 AND rtx.r_p_contract_id = lnk.sub_co_id
@@ -108,17 +140,20 @@ AND rtx.r_p_contract_id = lnk.sub_co_id
 and rtx.rated_flat_amount<>0
 and (( rtx.sncode  = 283 )  --1CMN IDD
   or  ( rtx.sncode = 1 and rtx.rtx_type = 'L') -- HK IDD
-  or ( rtx.sncode = 1 and rtx.rtx_type =  'R' and rtx.plcode <> 409) -- Roaming Out
-  or ( rtx.sncode = 1 and rtx.rtx_type = 'r') -- Roaming In
+  or ( rtx.sncode = 1 and rtx.rtx_type =  'R' and mpl.country <> 'China') -- Roaming Out
+  or ( rtx.sncode = 1 and rtx.rtx_type = 'r' and mpl.country <> 'China') -- Roaming In
   or ( rtx.sncode = 4 and rtx.rtx_type = 'S') -- Local SMS
   or ( rtx.sncode = 4 and rtx.rtx_type = 'L') -- IDD SMS
   or ( rtx.sncode = 4 and rtx.rtx_type = 'R' and mpl.country= 'China') -- ICMN SMS
+  or ( rtx.sncode = 4 and rtx.rtx_type = 'R' and mpl.country<> 'China') -- Roaming SMS
 )
 
-order by 3,4,2,1
+order by 3,4,6,2,1
 ;
 
-select * from RTX_010401;
+select * from RTX_010401 rtx, mpdpltab mpl 
+where rtx.plcode = mpl.plcode
+and rtx.sncode = 4 and rtx.rtx_type = 'R' and mpl.country<> 'China'
 ;
 select * from mpdpltab where plcode = 410;
 
@@ -266,7 +301,7 @@ and ca1.customer_id = l.sub_customer_id
 ;
 
 --br no. 查询1CMN　PRC number.
-SELECT ca.custcode, ca.customer_id, coa.co_id ,dn.dn_num HKG_MSISDN, cs1.cs_sparam1 CHN_MSISDN, ca.tmcode,tm.des,ch.ch_validfrom, coo.LAST_CO_BIND_END_DATE
+SELECT ca.custcode, ca.customer_id, coa.co_id CONTRACT_ID,dn.dn_num HKG_MSISDN, cs1.cs_sparam1 CHN_MSISDN, ca.tmcode,tm.des RATE_PLAN,ch.ch_validfrom CONTRACT_VALIDFROM, coo.LAST_CO_BIND_END_DATE CONTRACT_END_DATE
 FROM customer_all ca,  contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, PTCAPP_CUST_CO_OFFER_SUM coo, contract_history ch 
 WHERE ca.passportno = '18045383'
 AND ca.customer_id = coa.customer_id
@@ -280,17 +315,42 @@ and SubStr(cs1.cs_Stat_chng,-1) IN ('a','s')
 and coo.co_id = coa.co_id
 and cs.co_id = cs1.co_id
 AND cs.cs_Seqno=cs1.cs_seqno
-and not exists( select 1 from ptcbill_main_sub_lnk l where l.sub_customer_id = ca.customer_id)
+--and not exists( select 1 from ptcbill_main_sub_lnk l where l.sub_customer_id = ca.customer_id)
 and ch.ch_status = 'a'
 and ch.co_id = coa.co_id
 and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.co_id)
+
+union all
+
+--select * from ptcbill_main_sub_lnk l where l.sub_co_id = 6013139;
+--br no. 查询1CMN不含PRC number.
+SELECT ca.custcode, ca.customer_id, coa.co_id ,dn.dn_num HKG_MSISDN, 'N/A' , ca.tmcode,tm.des,ch.ch_validfrom, coo.LAST_CO_BIND_END_DATE
+FROM customer_all ca,  contr_services cs,directory_number dn,mputmview tm, contract_all coa, PTCAPP_CUST_CO_OFFER_SUM coo, contract_history ch 
+WHERE ca.passportno = '18045383'
+AND ca.customer_id = coa.customer_id
+AND cs.co_id = coa.co_id
+AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
+AND cs.sncode = 1
+and cs.dn_id = dn.dn_id
+and tm.tmcode = ca.tmcode
+--and cs1.sncode = 237
+--and SubStr(cs1.cs_Stat_chng,-1) IN ('a','s')
+and coo.co_id = coa.co_id
+--and cs.co_id = cs1.co_id
+--AND cs.cs_Seqno=cs1.cs_seqno
+and not exists( select 1 from contr_services cs2 where cs2.sncode = 237 and cs2.co_id = cs.co_id and SubStr(cs2.cs_Stat_chng,-1) IN ('a','s'))
+and ch.ch_status = 'a'
+and ch.co_id = coa.co_id
+and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.co_id)
+order by custcode,customer_id
 ;
+
 
 --查询集客1CMN PRC number.
 --corporate account summary :
 
-SELECT ca.custcode, l.sub_customer_id, l.sub_co_id ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN,  ca1.tmcode TMCODE,tm.des,ch.CH_VALIDFROM, coo.LAST_CO_BIND_END_DATE
-FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1, contract_history ch
+SELECT ca.custcode MAIN_CUSTCODE, ca1.custcode CUSTCODE, l.sub_customer_id, l.sub_co_id CONTRACT_ID ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN,  ca1.tmcode TMCODE,tm.des RATE_PLAN,ch.CH_VALIDFROM CONTRACT_VALIDFROM, coo.LAST_CO_BIND_END_DATE CONTRACT_END_DATE
+FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1, contract_history ch 
 , PTCAPP_CUST_CO_OFFER_SUM coo
 WHERE ca.custcode in ('1.6102340')
 AND ca.customer_id = l.main_customer_id
@@ -309,7 +369,7 @@ and coo.co_id = l.sub_co_id
 and ch.co_id = l.sub_co_id
 and ch.ch_status = 'a'
 union all
-SELECT ca.custcode, l.sub_customer_id, l.sub_co_id ,dn.dn_num HKG_MSISDN, '--' CHN_MSISDN, ca1.tmcode TMCODE,tm.des, ch.CH_VALIDFROM,coo.LAST_CO_BIND_END_DATE
+SELECT ca.custcode, ca1.custcode,l.sub_customer_id, l.sub_co_id CONTRACT_ID ,dn.dn_num HKG_MSISDN, '--' CHN_MSISDN, ca1.tmcode TMCODE,tm.des RATE_PLAN, ch.CH_VALIDFROM,coo.LAST_CO_BIND_END_DATE
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1, contract_history ch
 , PTCAPP_CUST_CO_OFFER_SUM coo
 WHERE ca.custcode in ('1.6102340')
@@ -332,7 +392,7 @@ and ch.ch_status = 'a'
 and coa.co_id = ch.co_id
 and ch.ch_status = 'a'
 and not exists ( select 1 from contr_services cs2 where cs2.sncode = 237 and cs2.co_id = cs.co_id and SubStr(cs2.cs_Stat_chng,-1) IN ('a','s')) 
-order by CHN_MSISDN, TMCODE
+ 
 ;
 
 select * from all_TAB_COLUMNS where column_name like '%TAPIN%' and owner = 'MBSADM';
