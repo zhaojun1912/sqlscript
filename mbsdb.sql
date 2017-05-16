@@ -354,3 +354,27 @@ AND psu.date_billed IN (To_Date('20160726', 'yyyymmdd'),
 ORDER BY psu.date_billed, dn.dn_num
 ;
 
+-- Jing Li sql:;
+select dir.dn_num "MSISDN",
+       to_char(original_start_d_t,'dd/mm/yyyy HH24:Mi:SS') "Date Initiated",
+       decode(rtx.sncode,1,'Voice',3,'SMS/MMS',4,'SMS/MMS',119,'GPRS') "Type",
+       decode(rtx.sncode,1,decode(rtx.rtx_type,'A','Local Voice','R','Roaming Voice','r','Roaming Voice','L','IDD'),
+                         3,'SMS(In)',
+                         4,'SMS(Out)',
+                         119,decode(rtx.rtx_type,'A','Local Data','R','Roaming Data')
+                         )"Service",
+       decode(rtx.sncode,119,'--',o_p_number) "Calling/Called Number",
+       mpl.country "Country" ,
+       decode(rtx.sncode,1,nvl(ceil(rounded_volume/60),0),119,nvl(rounded_volume/60,0),rounded_volume) "Duration",
+       decode(rtx.sncode,1,'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
+       'Normal' "Voice Type",
+       rtx.rated_flat_amount "Charge"
+from RTX_010301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
+where cust.custcode='1.6189344' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
+and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
+and rtx.r_p_customer_id=lnk.sub_customer_id
+--and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
+and rtx.sncode in (1,3,4,119)
+and rtx.rated_flat_amount<>0
+order by 1,2
+;
