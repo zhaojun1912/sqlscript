@@ -95,7 +95,7 @@ select * from mpuzntab where zncode in (1,2);
   
   
  cmcc-web wifi: 67657304/654321
- 嵌套游标参数化。
+ Ƕ���α��������
  execute immediate : '' 
    plsql_block := 'DECLARE '                 ||
                  ' v_date DATE; '           ||
@@ -103,25 +103,25 @@ select * from mpuzntab where zncode in (1,2);
                  ' SELECT SYSDATE INTO v_date FROM DUAL; ' ||
                  ' DBMS_OUTPUT.PUT_LINE( TO_CHAR(v_date,''DD-MON_YYYY''));'||
                  'END;';
- DDL 不能接受任何绑定参数 ， 如下错误：
+ DDL ���ܽ����κΰ󶨲��� �� ���´���
    sql_stmt := 'CREATE TABLE my_student '||
              ' AS SELECT * FROM student WHERE zip = :zip';
   EXECUTE IMMEDIATE sql_stmt using v_zip;
   
-不能把模式对象的名称作为绑定参数传递给动态SQL语句。如下 错误：
+���ܰ�ģʽ�����������Ϊ�󶨲������ݸ���̬SQL��䡣���� ����
 EXECUTE  IMMEDIATE ' SELECT COUTN(*) FROM :my_table'
 into v_total_students
 USING 'my_student';
-动态SQL不能以;结束 ， PL/SQL块不能以/结束。
+��̬SQL������;���� �� PL/SQL�鲻����/������
 INVALID CHARACTOR
-绑定参数传递NULL
+�󶨲�������NULL
 v_null varchar2(1);
 EXECUTE IMMEDIATE sql_stmt using v_null;
 z12/zhou123456
 Lazarus:q9w8.e7r6 +-.
-oracle用户名特殊 字符 ： 
+oracle�û������� �ַ� �� 
 create user "mbsbat[mbsadm]" identified by mbsbat;
-赋予用户可调试权限：
+�����û��ɵ���Ȩ�ޣ�
 grant DEBUG CONNECT SESSION to student;
 grant debug any procedure to student;
 
@@ -134,11 +134,11 @@ and rated_flat_amount >0 and sncode in (3,4) and rownum<2;
 create public synonym plan_table for plan_table;  
 
 on commit delete rows
---事务级临时表：提交时删除数据
+--������ʱ�����ύʱɾ������
 on commit preserve rows
---会话级临时表：会话结束时删除数据
+--�Ự����ʱ�����Ự����ʱɾ������
 
-ORACLE对感兴趣的值加索引 。
+ORACLE�Ը���Ȥ��ֵ������ ��
 advanced queuing
 
 sqlplus : bind variable 
@@ -149,12 +149,12 @@ select * from emp where empno = :empno;
 
 Lazarus/q9w8.e7r6 +-.
 
-count(object_Id): 统计object_id非null值的条数
-count(*):统计所有列值不同时为null值的条数
-二者在object_id为非空，not null约束时等价。
+count(object_Id): ͳ��object_id��nullֵ������
+count(*):ͳ��������ֵ��ͬʱΪnullֵ������
+������object_idΪ�ǿգ�not nullԼ��ʱ�ȼۡ�
 select * from v$diag_info
 
-simple case : equal 等值判断， 不支持NULL
+simple case : equal ��ֵ�жϣ� ��֧��NULL
 student@DB11G> select case null
   2  when null then 'NULL'
   3  else 'NOT NULL'
@@ -220,11 +220,11 @@ student@DB11G> /
 
 9 rows selected.
 
-posting_period: 记账期间
-due date :到期日
-周日00：00：01到周六晚上23：59：59视为一周。
-配置文件参数：/boss/work/config/billing/billing.cfg
-系统（DB）初始化参数：表： ptcbill_system_parameter
+posting_period: �����ڼ�
+due date :������
+����00��00��01����������23��59��59��Ϊһ�ܡ�
+�����ļ�������/boss/work/config/billing/billing.cfg
+ϵͳ��DB����ʼ������������ ptcbill_system_parameter
 Main service code (sncode)
 --sncode which do not handle duplicate calls(separate by ',')
 SELECT *FROM mpusntab WHERE sncode IN (3,4,119,374,376,525);
@@ -235,8 +235,8 @@ SELECT *FROM mpusntab WHERE sncode IN (3,4,119,374,376,525);
   from     ptcbill_master_control
   where    bill_cycle = :bill_cycle
   and      bill_date = to_date(:bill_date, 'RRMMDD');
-查到数据，则check FAIL -> 程序退出 。
-没数据，则check SUCCESS.程序继续。
+�鵽���ݣ���check FAIL -> �����˳� ��
+û���ݣ���check SUCCESS.���������
 
  /* Get billing rtx table */
    select    name_rtx_table
@@ -258,18 +258,18 @@ SELECT *FROM mpusntab WHERE sncode IN (3,4,119,374,376,525);
   
  pkgadd -s ./ -d ./lrzsz-0.12.20-sol10-sparc-local
   
-使用命令：lsof -i:被占用的端口号
+ʹ�����lsof -i:��ռ�õĶ˿ں�
 [root@52listen ~]# lsof -i:88
-SELECT B.TABLE_NAME     AS "表名",
+SELECT B.TABLE_NAME     AS "����",
 
-       C.COMMENTS       AS "表说明",
-       B.COLUMN_ID      AS "字段序号",
-       B.COLUMN_NAME    AS "字段名",
-       B.DATA_TYPE      AS "字段数据类型",
-       B.DATA_LENGTH    AS "数据长度",
-       B.DATA_PRECISION AS "整数位",
-       B.DATA_SCALE     AS "小数位",
-       A.COMMENTS       AS "字段说明"
+       C.COMMENTS       AS "��˵��",
+       B.COLUMN_ID      AS "�ֶ����",
+       B.COLUMN_NAME    AS "�ֶ���",
+       B.DATA_TYPE      AS "�ֶ���������",
+       B.DATA_LENGTH    AS "���ݳ���",
+       B.DATA_PRECISION AS "����λ",
+       B.DATA_SCALE     AS "С��λ",
+       A.COMMENTS       AS "�ֶ�˵��"
   FROM ALL_COL_COMMENTS A, ALL_TAB_COLUMNS B, ALL_TAB_COMMENTS C
 
 WHERE A.TABLE_NAME IN (SELECT U.TABLE_NAME FROM USER_ALL_TABLES U)
@@ -282,8 +282,8 @@ WHERE A.TABLE_NAME IN (SELECT U.TABLE_NAME FROM USER_ALL_TABLES U)
 ORDER BY A.TABLE_NAME, B.COLUMN_ID;
 
 szjyx/62398688
-香港号码：56407060
-大陆号码：14714920294
+��ۺ��룺56407060
+��½���룺14714920294
 
 --check duplication run
 select * from PTCBILL_MASTER_CONTROL order by total_customer desc;
@@ -515,31 +515,31 @@ Usage: pbrp.sh -bc<billcycle> -billdate<billdate_yyyymmdd> [-postingperiod<posti
 + exit -1
 
 export NLS_LANG="TRADITIONAL CHINESE_AMERICA.ZHS16GBK"
-pos： P2683/b 
+pos�� P2683/b 
 		P2870/b
 eip: zhaojun_yan*2
 
-customer_all: cs_type:客户类型 d:deactived, a, s. csdeactivated:失效时间,在合同失效日期后3个月之前失效。
+customer_all: cs_type:�ͻ����� d:deactived, a, s. csdeactivated:ʧЧʱ��,�ں�ͬʧЧ���ں�3����֮ǰʧЧ��
               cscusttype: F: firm, P: private
 				
-contract_history: ch_status: 合同状态。d: deactived
+contract_history: ch_status: ��ͬ״̬��d: deactived
                   ch_validfrom: status changed time
-contract_all: co_status:无意义。 本表记录customer_id, co_id对应关系。
-contr_services:	记录合同服务详情。cs_stat_chng: 服务状态及改变日期。
-                cs_status:无意义。
+contract_all: co_status:�����塣 ������¼customer_id, co_id��Ӧ��ϵ��
+contr_services:	��¼��ͬ�������顣cs_stat_chng: ����״̬���ı����ڡ�
+                cs_status:�����塣
 UOM: 1, minutes, 2, charge , 3 call, 4, 6 secs
 454120454983764
        54983764				
-中國一咭多號地區通話： 包括
-一咭多號(接聽) 1 分鐘, 金額共 0.65
-一咭多號(打出) 87 分鐘, 金額共 56.55
-一咭多號接駁費香港號碼 1 分鐘, 金額共 0.00  别人打你香港号码，你在大陆，需要大陆运营商接驳。
-接驳服务 sncode = 237
-接收短信 sncode = 3
-发送短信 sncode = 4
+�Ї�һ�Ҷ�̖�؅^ͨԒ�� ����
+һ�Ҷ�̖(�� ) 1 ���, ���~�� 0.65
+һ�Ҷ�̖(���) 87 ���, ���~�� 56.55
+һ�Ҷ�̖���g�M���̖�a 1 ���, ���~�� 0.00  ���˴�����ۺ��룬���ڴ�½����Ҫ��½��Ӫ�̽Ӳ���
+�Ӳ����� sncode = 237
+���ն��� sncode = 3
+���Ͷ��� sncode = 4
 1CMN MO Call Rating sncode = 283
 wifi physical address: A0-88-B4-AC-78-C0
-天翼网关:http://192.168.1.1/cgi-bin/index2.asp
+��������:http://192.168.1.1/cgi-bin/index2.asp
 http://192.168.1.1/login.cgi?username=telecomadmin&psd=nE7jA%255m
 telecomadmin/nE7jA%5m
 MERCURY_5G_47DF
@@ -547,38 +547,38 @@ MERCURY_47DF
 ChinaNet-rCDx/pengliu13973559270
 
 GIT
-HEAD指向的版本就是当前版本，因此，Git允许我们在版本的历史之间穿梭，使用命令git reset --hard commit_id。
+HEADָ��İ汾���ǵ�ǰ�汾����ˣ�Git���������ڰ汾����ʷ֮�䴩��ʹ������git reset --hard commit_id��
 
-穿梭前，用git log可以查看提交历史，以便确定要回退到哪个版本。
+����ǰ����git log���Բ鿴�ύ��ʷ���Ա�ȷ��Ҫ���˵��ĸ��汾��
 
-要重返未来，用git reflog查看命令历史，以便确定要回到未来的哪个版本。
+Ҫ�ط�δ������git reflog�鿴������ʷ���Ա�ȷ��Ҫ�ص�δ�����ĸ��汾��
 
-最重要的就是称为stage（或者叫index）的暂存区
-撤销工作区修改：git checkout -- <FILE>  至最近git commit或者git add后状态。
-撤销暂存区修改：git reset <HEAD> <FILE> to unstage files.然后可撤销工作区修改。
-撤销已提交到版本库的修改： 版本回退. git reset --hard <version code>
-删除文件：rm file, 操作系统删除。
-git rm file, 版本库中删除。要commit.
-删错了， 版本库还有。 git checkout -- test.txt
-现在有了分支，就不用怕了。你创建了一个属于你自己的分支，别人看不到，还继续在原来的分支上正常工作，而你在自己的分支上干活，想提交就提交，直到开发完毕后，再一次性合并到原来的分支上，这样，既安全，又不影响别人工作。
+����Ҫ�ľ��ǳ�Ϊstage�����߽�index�����ݴ���
+�����������޸ģ�git checkout -- <FILE>  �����git commit����git add��״̬��
+�����ݴ����޸ģ�git reset <HEAD> <FILE> to unstage files.Ȼ��ɳ����������޸ġ�
+�������ύ���汾����޸ģ� �汾����. git reset --hard <version code>
+ɾ���ļ���rm file, ����ϵͳɾ����
+git rm file, �汾����ɾ����Ҫcommit.
+ɾ���ˣ� �汾�⻹�С� git checkout -- test.txt
+�������˷�֧���Ͳ������ˡ��㴴����һ���������Լ��ķ�֧�����˿���������������ԭ���ķ�֧�������������������Լ��ķ�֧�ϸɻ���ύ���ύ��ֱ��������Ϻ���һ���Ժϲ���ԭ���ķ�֧�ϣ��������Ȱ�ȫ���ֲ�Ӱ����˹�����
 
-stash功能：
-并不是你不想提交，而是工作只进行到一半，还没法提交，预计完成还需1天时间。但是，必须在两个小时内修复该bug，怎么办？
+stash���ܣ�
+�������㲻���ύ�����ǹ���ֻ���е�һ�룬��û���ύ��Ԥ����ɻ���1��ʱ�䡣���ǣ�����������Сʱ���޸���bug����ô�죿
 
-幸好，Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作。
+�Һã�Git���ṩ��һ��stash���ܣ����԰ѵ�ǰ�����ֳ������ء����������Ժ�ָ��ֳ������������
 
-查看远程库信息，使用git remote -v；
+�鿴Զ�̿���Ϣ��ʹ��git remote -v��
 
-本地新建的分支如果不推送到远程，对其他人就是不可见的；
+�����½��ķ�֧��������͵�Զ�̣��������˾��ǲ��ɼ��ģ�
 
-从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+�ӱ������ͷ�֧��ʹ��git push origin branch-name���������ʧ�ܣ�����git pullץȡԶ�̵����ύ��
 
-在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+�ڱ��ش�����Զ�̷�֧��Ӧ�ķ�֧��ʹ��git checkout -b branch-name origin/branch-name�����غ�Զ�̷�֧���������һ�£�
 
-建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+�������ط�֧��Զ�̷�֧�Ĺ�����ʹ��git branch --set-upstream branch-name origin/branch-name��
 
-从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
-TAG：所以，tag就是一个让人容易记住的有意义的名字，它跟某个commit绑在一起。
+��Զ��ץȡ��֧��ʹ��git pull������г�ͻ��Ҫ�ȴ�����ͻ��
+TAG�����ԣ�tag����һ���������׼�ס������������֣�����ĳ��commit����һ��
 
 GIT SVN:
 git svn clone -r version_start:version_end svn_addr(contain account) : checkout version
@@ -586,24 +586,24 @@ git add/commit : add or commit to local version repository.
 git svn rebase : pull up-to-date version.
 git svn dcommit : push local version to remote svn repository.
 
-万州国本车站： 6：20开始有到开县的汽车。 23块。流水班。车站支持银联卡自动机器售票。 
-火车站到国本车站， 15路 。 6：00开始有。 票价2元， 坐车到老年大学下车。
-我来总结一下：1、火车出站右手100米，写着开县的那些饭馆问问黑车，80元/人（很难说到70元/人），开县城内包送到。不要人带去哦，带去的话要收10元。2、开县-----达州汽车南站，68元/人，时间1.5小时，临江上高速；达州汽车南站------达州火车站坐22路（06：30-22：00），1.5元/人，时间0.5小时。 19路不能直达南外车站，需走段路。
+���ݹ�����վ�� 6��20��ʼ�е����ص������� 23�顣��ˮ�ࡣ��վ֧���������Զ�������Ʊ�� 
+��վ��������վ�� 15· �� 6��00��ʼ�С� Ʊ��2Ԫ�� �����������ѧ�³���
+�����ܽ�һ�£�1���𳵳�վ����100�ף�д�ſ��ص���Щ�������ʺڳ���80Ԫ/�ˣ�����˵��70Ԫ/�ˣ������س��ڰ��͵�����Ҫ�˴�ȥŶ����ȥ�Ļ�Ҫ��10Ԫ��2������-----����������վ��68Ԫ/�ˣ�ʱ��1.5Сʱ���ٽ��ϸ��٣�����������վ------���ݻ�վ��22·��06��30-22��00����1.5Ԫ/�ˣ�ʱ��0.5Сʱ�� 19·����ֱ�����⳵վ�����߶�·��
 
-渝万：247公里， 98块， 1：36.
-成渝：308公里， D车96.5， 2：02.
-				G车154， 1：27.
-京津：120公里，G车54.5， 34分钟。
-广深：到福田。 107公里， 82块。 39分钟。
-厦深：514公里， 150.5块。3:28.
+����247��� 98�飬 1��36.
+���壺308��� D��96.5�� 2��02.
+				G��154�� 1��27.
+����120���G��54.5�� 34���ӡ�
+�������� 107��� 82�顣 39���ӡ�
+���514��� 150.5�顣3:28.
 <<<<<<< HEAD
 =======
-杭深：1464公里，432块。10小时。
+���1464���432�顣10Сʱ��
 >>>>>>> 8ac704a3b6e33551d2e5c206302d7f59b7c0e5c9
-贵广：857公里， 267.5.  4：11。
-海南东环铁路：308公里， 100块。1：26.
-	西环铁路：345公里，103块， 2：26.
-武广：1068公里，463.5. 3：43.
+��㣺857��� 267.5.  4��11��
+���϶�����·��308��� 100�顣1��26.
+	������·��345���103�飬 2��26.
+��㣺1068���463.5. 3��43.
 
 python configuration:
 export PYTHONSTARTUP=pythonstartup.py
@@ -639,20 +639,20 @@ jundev@debian:~/programming/goprogramming/go/bin$ cat ~/.gitconfig
     last=log -1
     lg=log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 
-Lantern 的配置参数
+Lantern �����ò���
 
-　　主界面的右下角有一个“配置按钮”，点击之后会弹出“Lantern 的配置界面”——这个界面同样很简单，目前只有3个复选框（选项）。
-　　其中一个选项是“Proxy all traffic”，俺稍微说一下：
-　　如果你勾选了这个选项，那么所有的 HTTP 请求都会走 Lantern 的翻墙通道；反之（没有勾选），那么只有那些“被墙的网站”才会走 Lantern 的线路。Lantern 内置了一个“被屏蔽的网站列表”，以此来判断那些是“被墙的”。
+��������������½���һ�������ð�ť�������֮��ᵯ����Lantern �����ý��桱�����������ͬ���ܼ򵥣�Ŀǰֻ��3����ѡ��ѡ���
+��������һ��ѡ���ǡ�Proxy all traffic��������΢˵һ�£�
+��������㹴ѡ�����ѡ���ô���е� HTTP ���󶼻��� Lantern �ķ�ǽͨ������֮��û�й�ѡ������ôֻ����Щ����ǽ����վ���Ż��� Lantern ����·��Lantern ������һ���������ε���վ�б������Դ����ж���Щ�ǡ���ǽ�ġ���
 
-请注意：在您取消“管理系统代理”后，您的浏览器和应用程序将不会自动使用蓝灯。手动配置相关设置的方法见上文。
+��ע�⣺����ȡ��������ϵͳ�������������������Ӧ�ó��򽫲����Զ�ʹ�����ơ��ֶ�����������õķ��������ġ�
 
 https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
 
 3. Chrome
-启动Chrome用这个命令行： chrome.exe --proxy-pac-url="file://E:/foo/bar.pac"
+����Chrome����������У� chrome.exe --proxy-pac-url="file://E:/foo/bar.pac"
 
-地址栏打开 chrome://net-internals/#events
+��ַ���� chrome://net-internals/#events
 
 oa: ps0010/zhaojun_*2
 export PS1="\u@\h \w> "
@@ -660,11 +660,11 @@ export PS1="\u@\h \w> "
 172.19.7.96 zhaojun/Qq525875998
 su - boss  Oper2016
 
-/*2、批量执行第一步生成的语句  
+/*2������ִ�е�һ�����ɵ����  
 alter system kill session 'sid,serial#';  
 alter system kill session '6976,33967';*/     
   
-/*3、查询oracle用户名，机器名，锁表对象*/  
+/*3����ѯoracle�û���������������������*/  
 SELECT l.session_id sid,  
        s.serial#,  
        l.locked_mode,  
@@ -694,34 +694,34 @@ IT_P2938.nico_hw_cs_cdr.call_type ( =1 MO;
 
     Please help check for 6 Apr testing.
 
-1)	Check record in IT_P2938.nico_hw_cs_cdr when “HW IGWB CDR” mark “Y”
-2)	Check record in IT_P2938.nico_hw_ims_cdr when “HW CCF CDR” mark “Y”
+1)	Check record in IT_P2938.nico_hw_cs_cdr when ��HW IGWB CDR�� mark ��Y��
+2)	Check record in IT_P2938.nico_hw_ims_cdr when ��HW CCF CDR�� mark ��Y��
 
-適合做「每天十分鐘回音練習」的建議電
-視影集：Gilmore Girls, Seinfeld, The Good
+�m������ÿ��ʮ��犻����������Ľ��h�
+ҕӰ����Gilmore Girls, Seinfeld, The Good
 Wife, Grey's Anatomy, ER, Mad Men
 Six Feet Under, Modern Family, West Wing,
 The Office, Ugly Betty
-還有以下較早期的影集也不錯：Roseanne,
+߀�������^���ڵ�Ӱ��Ҳ���e��Roseanne,
 Ally McBeal, MacGyver, The Wonder Years,
 M*A*S*H, Cheers
-以上的電視影集 DVD 可以到唱片行或百貨
-公司看看有沒有；有些大學的視聽圖書館也
-可能會有。要不然可以向亞馬遜 Amazon,
-Barnes & Noble, 或其他線上書店或音樂商
-郵購。（要留意分區問題！）
+���ϵ��ҕӰ�� DVD ���Ե���Ƭ�л��؛
+��˾�����Л]�У���Щ��W��ҕ �D���^Ҳ
+���ܕ��С�Ҫ��Ȼ�������R�d Amazon,
+Barnes & Noble, ���������ϕ����������
+�]ُ����Ҫ����օ^���}����
 
-「回音法」
-1. 首先要找到適合模仿的音檔或影片。
-2. 先把整個音檔聽過幾遍來熟悉內容與聲音。
-3. 快速地閱讀文字檔一遍，再回頭仔細地讀一遍。
-4. 再回到音檔或影片。
-5. 停一下！仔細地聽「回音」。
-6. 模仿所聽到的「回音」。
-7. 一次再一次地重複以上每一個的步驟。
-8. 練習時間十分鐘結束。
+����������
+1. ����Ҫ�ҵ��m��ģ�µ����n��ӰƬ��
+2. �Ȱ��������n �^�ױ����Ϥ�����c����
+3. ���ٵ���x���֙nһ�飬�ٻ��^�м����xһ�顣
+4. �ٻص����n��ӰƬ��
+5. ͣһ�£��м��� ����������
+6. ģ���� ���ġ���������
+7. һ����һ�ε����}����ÿһ���Ĳ��E��
+8. �����r�gʮ��犽Y����
 
-POS：
+POS��
 http://sb1.hk.chinamobile.com:8888/forms/frmservlet?config=posjpi
 http://app.hk.chinamobile.com:8888/forms/frmservlet?config=posjpi
 http://10.3.12.47:20001/provision/main.action?ssLogin=true&BMEWebToken=00240b76-b34a-4c87-8f79-8ff72c81d580
@@ -790,7 +790,7 @@ production:
 6663627
 133435225
 
-IDD001已做完。
+IDD001�����ꡣ
 
 #!/usr/bin/sh
 newdir=$1
@@ -809,7 +809,7 @@ cat 12-ericsson_soap_after.txt > 05-ericsson_soap_before.txt
 
 echo "DONE!"
 
-093的
+093��
 
 date format:dd.mm.yyyy hh24:mi:ss
 		DD-MON-RRRR hh24:mi:ss
