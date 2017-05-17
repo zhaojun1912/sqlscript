@@ -815,6 +815,8 @@ date format:dd.mm.yyyy hh24:mi:ss
 		DD-MON-RRRR hh24:mi:ss
 --alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';	
 
+
+breakdown report :/boss/work/app/report/sql	
 Subject: Daily Airtime Usage For the date 10/05/2017
 
 For the date 10/05/2017
@@ -826,3 +828,4 @@ Outbound Data(MB);  62,446,017;       5,639,038;    5,640,489
 IDD(Mins);     138,054; 620,851;      689,215
 Inbound Roamer Airtime;       2;    1; 1
 	
+
