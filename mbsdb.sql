@@ -1,6 +1,6 @@
-56407060 å¤§é™†å·ç ï¼š14714920294
---Ryan åˆ†é’Ÿé‡sql
---æŸ¥è¯¢ä¸ªäººç”¨æˆ·çš„æŸbillcycleæœŸé—´æ¯ä¸ªå·ç ï¼ˆ1CMNï¼‰è¯­éŸ³çŸ­ä¿¡æµé‡ä½¿ç”¨é‡,è¡¨ptcbill_co_usage_summary
+56407060 ´óÂ½ºÅÂë£º14714920294
+--Ryan ·ÖÖÓÁ¿sql
+--²éÑ¯¸öÈËÓÃ»§µÄÄ³billcycleÆÚ¼äÃ¿¸öºÅÂë£¨1CMN£©ÓïÒô¶ÌĞÅÁ÷Á¿Ê¹ÓÃÁ¿,±íptcbill_co_usage_summary
 SELECT
 Sum(LOCAL_FREE_MINS_INTER),Sum(LOCAL_FREE_MINS_INTRA),Sum(CHINA_FREE_MINS),Sum(INTER_VOICE_USAGE),Sum(INTRA_VOICE_USAGE),Sum(CHINA_USAGE)
 -- a.*
@@ -30,7 +30,7 @@ ORDER BY 2
 227: QPI Mobile Monthly Package
 277: WIFI Service
 421: 4G-WIFI
-491ï¼š4G-300 Free China IDD Mins
+491£º4G-300 Free China IDD Mins
 --service code: 7 for 2/3G , 10 for LTE
 --call type:1 mo, 2 mt
 SELECT * FROM mpusntab WHERE sncode= 119;
@@ -155,17 +155,17 @@ select * from mpuzntab where zncode=231;
 
 select * from mpuzntab where zncode in (1,2);
 
----å¯¹äºforfeitçš„å¤„ç† ä»¥ä¸‹åªé’ˆå¯¹äºmonthly access fee occ
+---¶ÔÓÚforfeitµÄ´¦Àí ÒÔÏÂÖ»Õë¶ÔÓÚmonthly access fee occ
 select * from MON_DIS_PROCESS_CONTROL;
 select * from mon_dis_record;--temp table contra_occ
-select * from ptcapp_dis_occ;--å¯¹äºæœˆè´¹occ,å¦‚æœéœ€è¦æ£€æŸ¥å¯ç”¨æ€§,occå¿…é¡»é…ç½®åœ¨æ­¤è¡¨,éå¸¸é‡è¦
-select * from PTCAPP_DIS_OCC_FORFEIT;--å®šä¹‰æ˜¯å¦å¯ä»¥self-forfeit
-select * from ptcapp_occ_forfeit_cat;--å¯¹catè¿›è¡Œè¯´æ˜
-select * from ptcapp_occ_forfeit_cat_oc_lnk; --å’Œå…¶ä»–çš„occä¸èƒ½å…±å­˜
-select * from ptcapp_dis_occ_grp;--å’ŒåŒç±»åˆ«çš„occä¸èƒ½å…±å­˜
+select * from ptcapp_dis_occ;--¶ÔÓÚÔÂ·Ñocc,Èç¹ûĞèÒª¼ì²é¿ÉÓÃĞÔ,occ±ØĞëÅäÖÃÔÚ´Ë±í,·Ç³£ÖØÒª
+select * from PTCAPP_DIS_OCC_FORFEIT;--¶¨ÒåÊÇ·ñ¿ÉÒÔself-forfeit
+select * from ptcapp_occ_forfeit_cat;--¶Ôcat½øĞĞËµÃ÷
+select * from ptcapp_occ_forfeit_cat_oc_lnk; --ºÍÆäËûµÄocc²»ÄÜ¹²´æ
+select * from ptcapp_dis_occ_grp;--ºÍÍ¬Àà±ğµÄocc²»ÄÜ¹²´æ
 
-----forfeit_occ.sql å¤„ç†æºå·è½¬ç½‘mnpå’Œæ‰‹åŠ¨HSä¼˜æƒ occçš„forfeit
-select * from ptcreb_user;--ä¸€èˆ¬åªæœ‰ä¸€æ¡è®°å½•,å¹¶ä¸”rebate_program_idä¸ä¼šå­˜åœ¨äºpos_system_parameter.param_value
+----forfeit_occ.sql ´¦ÀíĞ¯ºÅ×ªÍømnpºÍÊÖ¶¯HSÓÅ»İoccµÄforfeit
+select * from ptcreb_user;--Ò»°ãÖ»ÓĞÒ»Ìõ¼ÇÂ¼,²¢ÇÒrebate_program_id²»»á´æÔÚÓÚpos_system_parameter.param_value
 select * from ptcreb_occ_lookup;
 select * from ptcreb_status_des;
 select * from ptcapp_occ_forfeit_wt;
@@ -259,7 +259,7 @@ Please kindly provide HK, China min and HK, China data usage breakdown with belo
 Customer code: 1.5769079
 
 Requested inv. mth: Jun to Nov2016
-æŸ¥è¯¢åˆ†é’Ÿé‡åŠæµé‡ä½¿ç”¨æ˜ç»†ï¼ˆæ¯å·ç æ¯æœˆä¸€æ¡æ•°æ®ï¼‰ ï¼Œ æ¯æœˆæ±‡æ€»ã€‚
+²éÑ¯·ÖÖÓÁ¿¼°Á÷Á¿Ê¹ÓÃÃ÷Ï¸£¨Ã¿ºÅÂëÃ¿ÔÂÒ»ÌõÊı¾İ£© £¬ Ã¿ÔÂ»ã×Ü¡£
 SELECT
 tm.tmcode,
 tm.des,
