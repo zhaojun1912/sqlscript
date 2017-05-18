@@ -1,9 +1,9 @@
 SELECT * FROM directory_number   WHERE dn_num = '56407060';
 select * from ptcbill_main_sub_lnk where  main_customer_id = 6435017;
-select * from customer_all ca where ca.custcode = '1.6494350';
+select * from customer_all ca where ca.custcode = '1.6116945';
 
 select * from customer_all ca where ca.customer_id = 3946509;
---single user information query:
+--single user information query( 237 assigned):
 SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, ca.tmcode, tm.des,cs.spcode,sp.des, cs.sncode, sn.des,cs.dn_id,
 dn.dn_num, cs1.cs_sparam1,ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn, contr_services cs1
@@ -25,18 +25,43 @@ and cs1.sncode = 237
 and cs1.co_id = coa.co_id
 and substr(cs1.cs_stat_chng, -1) IN ('a', 's');
 ;
+
+--single user information query( 237 not assigned):
+SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, ca.tmcode, tm.des,cs.spcode,sp.des, cs.sncode, sn.des,cs.dn_id,
+dn.dn_num, '--', ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
+FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn
+WHERE
+dn.dn_num = '56407060'
+--ca.custcode = '1.6338176'
+--ca.customer_id = 6187521
+--coa.co_id = 5979591
+--coa.co_id = 3642592
+and cs.sncode = 1
+AND dn.dn_id = cs.dn_id
+AND cs.co_id = coa.co_id
+AND coa.customer_id = ca.customer_id    
+AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
+and ca.tmcode = tm.tmcode
+and cs.spcode = sp.spcode
+and cs.sncode = sn.sncode
+;
 select * from contr_services where co_id = 3642592;
 select * from mpusptab where spcode = 208;
 
 --all user services for single user:
-select cs.spcode,sp.des, cs.sncode, sn.des 
-from contr_services cs, customer_all ca, contract_all coa,mpusptab sp, mpusntab sn
+select dn.dn_num, cs.spcode,sp.des, cs.sncode, sn.des 
+from contr_services cs, customer_all ca, contract_all coa,mpusptab sp, mpusntab sn, directory_number dn, contr_services cs2
 where cs.co_id = coa.co_id
 and ca.customer_id = coa.customer_id
-and ca.custcode = '2.11.52.64.100109'
+--and ca.custcode = '2.11.52.64.100109'
+and dn.dn_num = '56407061'
 and substr(cs.cs_stat_chng, -1) IN ('a', 's')
 and cs.spcode = sp.spcode
 and cs.sncode = sn.sncode
+and dn.dn_id = cs2.dn_id
+and cs2.sncode = 1
+and cs2.co_id = coa.co_id
+and substr(cs2.cs_stat_chng, -1) IN ('a', 's')
 ;
 
 --corporate user information query:`    
@@ -57,7 +82,8 @@ AND l.sub_customer_id = ca1.customer_id
 --AND ca1.tmcode = 682
 ;
 
-select distinct rtx.sncode, rtx.rtx_type, sn.des, mpl.plcode, mpl.country
+select rtx.sncode, rtx.rtx_type, sn.des, mpl.plcode, mpl.country, sum( rounded_volume)
+, sum(rated_flat_amount)
 from RTX_060301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
 where cust.custcode='1.6116945' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
 and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
@@ -65,19 +91,20 @@ and rtx.r_p_customer_id=lnk.sub_customer_id
 AND rtx.r_p_contract_id = lnk.sub_co_id
 --and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
 --and rtx.sncode in (1,3,4,119)
-and rtx.rated_flat_amount<>0
+--and rtx.rated_flat_amount<>0
 and sn.sncode = rtx.sncode
+group by rtx.sncode, rtx.rtx_type, sn.des, mpl.plcode, mpl.country
 --order by 1,2
 ;
-select sum(rated_flat_amount)
-from RTX_060301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
+select *
+from RTX_060401 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
 where cust.custcode='1.6116945' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
 and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
 and rtx.r_p_customer_id=lnk.sub_customer_id
 AND rtx.r_p_contract_id = lnk.sub_co_id
 --and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
 --and rtx.sncode in (1,3,4,119)
-and rtx.rated_flat_amount<>0
+--and rtx.rated_flat_amount<>0
 and sn.sncode = rtx.sncode
 and sn.sncode = 283
 --order by 1,2
@@ -368,6 +395,7 @@ and ca1.customer_id = l.sub_customer_id
 and coo.co_id = l.sub_co_id
 and ch.co_id = l.sub_co_id
 and ch.ch_status = 'a'
+and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.co_id)
 union all
 SELECT ca.custcode, ca1.custcode,l.sub_customer_id, l.sub_co_id CONTRACT_ID ,dn.dn_num HKG_MSISDN, '--' CHN_MSISDN, ca1.tmcode TMCODE,tm.des RATE_PLAN, ch.CH_VALIDFROM,coo.LAST_CO_BIND_END_DATE
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1, contract_history ch
@@ -391,6 +419,7 @@ and ch.ch_status = 'a'
 /*237 service is deactivated and 237 is unassigned*/
 and coa.co_id = ch.co_id
 and ch.ch_status = 'a'
+and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.co_id)
 and not exists ( select 1 from contr_services cs2 where cs2.sncode = 237 and cs2.co_id = cs.co_id and SubStr(cs2.cs_Stat_chng,-1) IN ('a','s')) 
  
 ;
