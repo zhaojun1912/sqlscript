@@ -1,6 +1,7 @@
-SELECT * FROM directory_number   WHERE dn_num = '56407060';
+SELECT * FROM directory_number   WHERE dn_id = 1534039;
 select * from ptcbill_main_sub_lnk where  main_customer_id = 6435017;
 select * from customer_all ca where ca.custcode = '1.6494350';
+select * from contr_services where co_id = 6216237;
 
 select * from customer_all ca where ca.customer_id = 3946509;
 --single user information query:
@@ -8,7 +9,7 @@ SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, ca.tmcode, tm.des,cs
 dn.dn_num, cs1.cs_sparam1,ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn, contr_services cs1
 WHERE
-dn.dn_num = '56407060'
+dn.dn_num = '68477114'
 --ca.custcode = '1.6338176'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
@@ -44,7 +45,7 @@ SELECT ca.custcode,ca1.customer_id,ca1.custcode,ca1.billcycle,  coa.co_id, cs.tm
 dn.dn_num, cs.cs_sparam1,ca1.csactivated, ca1.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, ptcbill_main_sub_lnk l , customer_all ca1
 WHERE
-ca.custcode = '1.6116945'
+ca.custcode = '1.3997367'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
 and ca.customer_id = l.main_customer_id
@@ -98,13 +99,13 @@ select dn.dn_num "MSISDN",
        decode(rtx.sncode,1,'MINS',237, 'MINS', 283, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
        'Normal' "Voice Type",
        rtx.rated_flat_amount "Charge"
-from rtx_040401 rtx, customer_all ca, contr_services cs, contract_all coa , mpdpltab mpl, directory_number dn
+from rtx_010401 rtx, customer_all ca, contr_services cs, contract_all coa , mpdpltab mpl, directory_number dn
 where ca.customer_id = rtx.r_p_customer_id
 and coa.co_id = rtx.r_p_contract_id
 and coa.customer_id = ca.CUSTOMER_ID
 and cs.co_id = coa.co_id
 and cs.dn_id = dn.dn_id
-and ca.custcode = '1.6304282'
+and ca.custcode = '1.4257702'
 and cs.sncode = 1
 and rtx.plcode = mpl.plcode
 --and rtx.rated_flat_amount <>0
@@ -126,8 +127,8 @@ select dir.dn_num "MSISDN",
        decode(rtx.sncode,1,'MINS',237, 'MINS', 283, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
        'Normal' "Voice Type",
        round(rtx.rated_flat_amount,2) "Charge"
-from RTX_060301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
-where cust.custcode='1.6116945' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
+from RTX_020301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
+where cust.custcode='1.3997367' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
 and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
 and rtx.r_p_customer_id=lnk.sub_customer_id
 AND rtx.r_p_contract_id = lnk.sub_co_id
@@ -283,23 +284,6 @@ AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
 
 SELECT * FROM contr_services WHERE co_id = 5979591;
 
---查找大陆副号
-SELECT ca.custcode,/* l.sub_customer_id, l.sub_co_id ,*/dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN, ca1.tmcode,tm.des, coa.co_signed
-FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1
-WHERE ca.custcode = '1.3248527'
-AND ca.customer_id = l.main_customer_id
-AND l.exp_date IS null
-AND l.sub_co_id = cs.co_id
-AND cs.sncode = 237
---AND SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
-AND cs.co_id = cs1.co_id
-AND cs.cs_Seqno=cs1.cs_seqno
-AND cs1.dn_id = dn.dn_id
-and tm.tmcode = ca1.tmcode
-and coa.customer_id = l.sub_customer_id
-and ca1.customer_id = l.sub_customer_id
-;
-
 --br no. 查询1CMN　PRC number.
 SELECT ca.custcode, ca.customer_id, coa.co_id CONTRACT_ID,dn.dn_num HKG_MSISDN, cs1.cs_sparam1 CHN_MSISDN, ca.tmcode,tm.des RATE_PLAN,ch.ch_validfrom CONTRACT_VALIDFROM, coo.LAST_CO_BIND_END_DATE CONTRACT_END_DATE
 FROM customer_all ca,  contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, PTCAPP_CUST_CO_OFFER_SUM coo, contract_history ch 
@@ -368,6 +352,7 @@ and ca1.customer_id = l.sub_customer_id
 and coo.co_id = l.sub_co_id
 and ch.co_id = l.sub_co_id
 and ch.ch_status = 'a'
+and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.co_id)
 union all
 SELECT ca.custcode, ca1.custcode,l.sub_customer_id, l.sub_co_id CONTRACT_ID ,dn.dn_num HKG_MSISDN, '--' CHN_MSISDN, ca1.tmcode TMCODE,tm.des RATE_PLAN, ch.CH_VALIDFROM,coo.LAST_CO_BIND_END_DATE
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1, contract_history ch
@@ -391,6 +376,7 @@ and ch.ch_status = 'a'
 /*237 service is deactivated and 237 is unassigned*/
 and coa.co_id = ch.co_id
 and ch.ch_status = 'a'
+and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.co_id)
 and not exists ( select 1 from contr_services cs2 where cs2.sncode = 237 and cs2.co_id = cs.co_id and SubStr(cs2.cs_Stat_chng,-1) IN ('a','s')) 
  
 ;
