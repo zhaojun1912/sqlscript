@@ -1,15 +1,21 @@
 SELECT * FROM directory_number   WHERE dn_id = 1534039;
-select * from ptcbill_main_sub_lnk where  main_customer_id = 6435017;
-select * from customer_all ca where ca.custcode = '1.6494350';
-select * from contr_services where co_id = 6216237;
+SELECT * FROM directory_number   WHERE dn_num = 56283868;
+select * from ptcbill_main_sub_lnk where  main_customer_id = 6059981;
+select * from customer_all ca where ca.custcode = '1.6123385';
+select * from customer_all ca where ca.customer_Id = ;
+select * from contr_services where dn_id = 5083885;
+select * from contr_services  cs where co_id = 6247087 and substr(cs.cs_stat_chng, -1) IN ('a', 's');
 select * from customer_all ca where ca.customer_id = 3946509;
-
+select * from contract_all coa where customer_id = 6059981;
+-- rtx_xx0401: 若未出账单，则记录未出账月服务使用记录;若已出账单，则记录上月服务使用记录。
+select * from rtx_050401;
+select *from contr_services cs1, contr_services cs2;
 --single user information query( 237 assigned):
 SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, ca.tmcode, tm.des,cs.spcode,sp.des, cs.sncode, sn.des,cs.dn_id,
 dn.dn_num, cs1.cs_sparam1,ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn, contr_services cs1
 WHERE
-dn.dn_num = '68477114'
+dn.dn_num = '56283868'
 --ca.custcode = '1.6338176'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
@@ -32,7 +38,7 @@ SELECT ca.customer_id,ca.custcode,ca.billcycle,  coa.co_id, ca.tmcode, tm.des,cs
 dn.dn_num, '--', ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn
 WHERE
-dn.dn_num = '56407060'
+dn.dn_num = '56283868'
 --ca.custcode = '1.6338176'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
@@ -50,12 +56,12 @@ select * from contr_services where co_id = 3642592;
 select * from mpusptab where spcode = 208;
 
 --all user services for single user:
-select dn.dn_num, cs.spcode,sp.des, cs.sncode, sn.des 
+select dn.dn_num,  cs.co_id, cs.spcode,sp.des, cs.sncode, sn.des 
 from contr_services cs, customer_all ca, contract_all coa,mpusptab sp, mpusntab sn, directory_number dn, contr_services cs2
 where cs.co_id = coa.co_id
 and ca.customer_id = coa.customer_id
---and ca.custcode = '2.11.52.64.100109'
-and dn.dn_num = '56407061'
+and ca.custcode = '1.6123385'
+--and dn.dn_num = '56407060'
 and substr(cs.cs_stat_chng, -1) IN ('a', 's')
 and cs.spcode = sp.spcode
 and cs.sncode = sn.sncode
@@ -63,6 +69,27 @@ and dn.dn_id = cs2.dn_id
 and cs2.sncode = 1
 and cs2.co_id = coa.co_id
 and substr(cs2.cs_stat_chng, -1) IN ('a', 's')
+order by sp.spcode, sn.sncode
+;
+
+--all user services all user under corporate main  user:
+select dn.dn_num, cs.co_id, cs.spcode,sp.des, cs.sncode, sn.des 
+from contr_services cs, customer_all ca, contract_all coa,mpusptab sp, mpusntab sn, directory_number dn, contr_services cs2, ptcbill_main_sub_lnk l
+where cs.co_id = coa.co_id
+and l.sub_customer_id = coa.customer_id
+and l.sub_co_id = coa.co_id
+and ca.custcode = '1.6123385'
+and ca.customer_id = l.main_customer_id
+and substr(cs.cs_stat_chng, -1) IN ('a', 's')
+and cs.co_id = l.sub_co_id
+and cs.spcode = sp.spcode
+and cs.sncode = sn.sncode
+and dn.dn_id = cs2.dn_id
+and cs2.co_id = l.sub_co_id
+and cs2.sncode = 1
+and cs2.co_id = coa.co_id
+and substr(cs2.cs_stat_chng, -1) IN ('a', 's')
+order by dn.dn_num, sp.spcode, sn.sncode
 ;
 
 --corporate user information query:`    
@@ -122,19 +149,22 @@ select dn.dn_num "MSISDN",
                          )"Service",
        decode(rtx.sncode,119,'--',o_p_number) "Calling/Called NUMBER ",
        mpl.country "Country" ,
+       --zp.des zone,
        decode(rtx.sncode,1,nvl(ceil(rounded_volume/60),0),119,nvl(rounded_volume/60, 0),237,nvl(rounded_volume/60, 0),283,nvl(rounded_volume/60, 0),rounded_volume) "Duration",
        decode(rtx.sncode,1,'MINS',237, 'MINS', 283, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
        'Normal' "Voice Type",
        rtx.rated_flat_amount "Charge"
-from rtx_010401 rtx, customer_all ca, contr_services cs, contract_all coa , mpdpltab mpl, directory_number dn
+from rtx_070401 rtx, customer_all ca, contr_services cs, contract_all coa , mpdpltab mpl, directory_number dn --, mpuzptab zp
 where ca.customer_id = rtx.r_p_customer_id
 and coa.co_id = rtx.r_p_contract_id
 and coa.customer_id = ca.CUSTOMER_ID
 and cs.co_id = coa.co_id
 and cs.dn_id = dn.dn_id
-and ca.custcode = '1.4257702'
+--and ca.custcode = '1.4257702'
+and dn.dn_num = 92047400
 and cs.sncode = 1
 and rtx.plcode = mpl.plcode
+--and rtx.zpcode = zp.zpcode
 --and rtx.rated_flat_amount <>0
 order by 3,4,6,1,2;
 
@@ -150,13 +180,19 @@ select dir.dn_num "MSISDN",
                          )"Service",
        decode(rtx.sncode,119,'--',o_p_number) "Calling/Called NUMBER ",
        mpl.country "Country" ,
+       --zp.des zone,
        decode(rtx.sncode,1,nvl(ceil(rounded_volume/60),0),119,nvl(rounded_volume/60, 0),237,nvl(rounded_volume/60, 0),283,nvl(rounded_volume/60, 0),rounded_volume) "Duration",
        decode(rtx.sncode,1,'MINS',237, 'MINS', 283, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
        'Normal' "Voice Type",
        round(rtx.rated_flat_amount,2) "Charge"
-from RTX_020301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl
-where cust.custcode='1.3997367' and cust.customer_id=lnk.main_customer_id and lnk.sub_co_id=conser.co_id and conser.sncode=1
-and conser.dn_id=dir.dn_id and rtx.plcode=mpl.plcode
+from RTX_010401 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl --, mpuzptab zp
+where cust.custcode='1.6123385' 
+and cust.customer_id=lnk.main_customer_id 
+and lnk.sub_co_id=conser.co_id 
+and conser.sncode=1
+and conser.dn_id=dir.dn_id 
+and rtx.plcode=mpl.plcode
+--and rtx.zpcode = zp.zpcode
 and rtx.r_p_customer_id=lnk.sub_customer_id
 AND rtx.r_p_contract_id = lnk.sub_co_id
 --and to_char(original_start_d_t,'YYYYMMDD')>='20170301' and  to_char(original_start_d_t,'YYYYMMDD')<'20170401'
@@ -184,7 +220,7 @@ where rtx.plcode = mpl.plcode
 and rtx.sncode = 4 and rtx.rtx_type = 'R' and mpl.country<> 'China'
 ;
 select * from mpdpltab where plcode = 410;
-
+select * from mpdpltab where country = 'China';
 
 select * from customer_all;
 select * from contr_services;
@@ -197,7 +233,7 @@ select * from RTX_050301 where sncode = 3 and rtx_type = 'r';
 select * from RTX_050301 where sncode = 3 and plcode = 409;
 select * from mpdpltab where plcode = 409;
 select * from ptcbill_rtx_type_group;
-
+select * from rtx_060401;
 
 select *from RTX_050301;
 select * from mpusntab where des like '%SMS%';
@@ -665,13 +701,17 @@ SELECT Ceil(unb_p_gprs_usg/60),Ceil(unb_p_roamgprs_usg/60),Ceil(unb_p_chn_roamgp
 FROM ptcapp_sub_usage WHERE customer_id = 6227103 AND co_id = 6422401;
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
 mpusntab sn
-WHERE tmcode = 727
+WHERE tmcode = 
 AND sn.sncode = fu.pkg_id
 AND   tfu.expiry_date IS null
 AND   tfu.free_unit_id = fu.free_unit_id
 --and free_unit_inter = 100
-AND   fu.pkg_id = 421
+--AND   fu.pkg_id = 421
+AND   fu.pkg_id in (504)
 ;
+select * from ptcbill_rtx_type_group ;
+select * from ptcbill_zone_group;
+select * from ptcbill_roam_group where roam_group in (5);
 
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
 mpusntab sn
@@ -738,17 +778,30 @@ ids.des = pcd.source and custcode = '1.5991896'
 AND msisdn = 98261820 ORDER BY seq;
 SELECT * FROM ptcbill_text_config ;
 SELECT * FROM ptcbpp_cfg_description WHERE ROWNUM <= 1;
+
 select * from v$parameter WHERE name LIKE 'nls%';
 SELECT * FROM v$database;
-SELECT * FROM v$session ;
 SELECT * FROM v$instance;
+SELECT s.sid, s.serial#,  sa.sql_id, sql_text, s.logon_time, s.sql_exec_start, s.machine, s.osuser, s.module FROM v$session s, v$sqlarea sa 
+where s.machine like 'DESKTOP-EOUAPMT' 
+and s.module = 'SQL Developer'
+and s.sql_id = sa.sql_id
+--and s.osuer = ''
+--and sa.sql_text like '%%'
+;
+SELECT * FROM v$session order by logon_time desc;
+select * from v$sqlarea where sql_id = '2tffg0b3b40cj';
+
+alter system kill session 'sid,serial#'; 
+alter system kill session '1204,151';
+
+
 SELECT * FROM dba_tables WHERE table_name LIKE '%NLS';
 SELECT * FROM all_tab_columns WHERE column_name = Upper('nls_language');
-SELECT * FROM v$session;
 SELECT * FROM mputmview WHERE DES LIKE '%21Mbps%';
 SELECT * FROM mputmview WHERE tmcode = 653;
 SELECT *FROM mpusntab WHERE sncode  = 525;
-SELECT * FROM mpuzptab WHERE zpcode = 7364;
+SELECT * FROM mpuzptab WHERE digits like '+8618%';
 SELECT * FROM mpdpltab WHERE plcode = 133;
 SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' and tag IN ('ITB1I','ITB1A') AND msisdn = 53031755 ORDER BY seq;
 SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' and tag IN ('ITB1R','ITB1r') AND msisdn = 53031755 ORDER BY plcode, seq;
