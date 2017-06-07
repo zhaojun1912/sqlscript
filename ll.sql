@@ -2,45 +2,34 @@ SELECT * FROM directory_number   WHERE dn_id = 1534039;
 SELECT * FROM directory_number   WHERE dn_num = 56283868;
 Get imsi from iccid.
 
+
 SELECT port_num FROM storage_medium,port WHERE SM_SERIALNUM='89852121408280038032'
     AND storage_medium.sm_id=port.sm_id
     ;
+select * from ptcbill_sub_psh_fu_cat;    
 select * from USER_TAB_COLUMNS where column_name like  'COUNTRY' and table_name like 'PTC%';
 MPDHPLMN
 select * from MPDHPLMN
  where plcode = 409 ;
 select * from PTC_IDRS_ROAM_PLMN where plcode = 409;
-PTCAPP_HANDSET_OFFER_MAPPING
-PTCAPP_HOLD_TAP_FILE
-PTCAPP_ROAM_ADJ_DATA
-PTCAPP_ROAM_DIS_AREA
-PTCAPP_ROAM_PLCODE
-PTCAPP_USAGE_OCC_AREA
-PTCBILL_1CMN_DESC
-PTCBILL_DATA_AMT_DISPLAY
-PTCBILL_DAYPASS_OFFER_USAGE
-PTCBILL_DAYPASS_RTX
-PTCBILL_DAYPASS_TARIFF
-PTCBILL_INVOICE_DETAIL_CDR
-PTCBILL_ROAM_GROUP
-PTCBILL_SPECIAL_PRECISION_CFG
 select * from PTCDMG_DN where plcode = 409;
 select * from mpusptab where spcode in(89,214);
-select * from ptcbill_main_sub_lnk where  main_customer_id = 6295349 and exp_date is null order by sub_customer_id;
+select * from ptcbill_main_sub_lnk where  main_customer_id = 3792949 and exp_date is null order by sub_customer_id;
 select * from ptcbill_main_sub_lnk where sub_customer_id = 6295350;
+select * from ptcbill_main_sub_lnk where sub_co_id = 5130254;
 select * from customer_all ca where ca.custcode = '1.6356273';
-select * from customer_all ca where ca.customer_Id = ;
+select * from customer_all ca where ca.customer_Id = 3792949;
 select * from contr_services where dn_id = 5083885;
-select * from contr_services  cs where co_id = 6610509 and substr(cs.cs_stat_chng, -1) IN ('a', 's');
+select * from contr_services  cs where co_id = 5130254 and substr(cs.cs_stat_chng, -1) IN ('a', 's');
 select * from customer_all ca where ca.customer_id = 3946509;
 select * from contract_all coa where customer_id = 6059981;
-select * from contract_history;
+select * from contract_history where co_id = 5130254;
 select * from TAPIN_RTX where calling_number = '68124860444' 
 and charging_start_datetime >= to_date('20170401', 'yyyymmdd')
 and charging_start_datetime <= to_date('20170402', 'yyyymmdd');
 SELECT * FROM ptcbill_free_unit WHERE pkg_id = 504;
 select * from ptcbill_rtx_type_group;
-select * from MBSADM.PTCBILL_ROAM_GROUP where roam_group = 5;
+select * from MBSADM.PTCBILL_ROAM_GROUP where roam_group = 15;
 select * from MBSADM.PTCBILL_ZONE_GROUP ;
 SELECT * FROM ptcapp_usage_hist where roam_amt = 294; WHERE co_id =5801773  AND customer_id =  5635626 AND date_billed = To_Date('20170521', 'yyyymmdd');
 SELECT 3/60*1024 FROM ptcapp_usage_hist WHERE co_id =6432204  AND customer_id =  6238481 AND date_billed = To_Date('20160920', 'yyyymmdd');
@@ -98,45 +87,6 @@ AND msisdn = 98261820 ORDER BY seq;
 SELECT * FROM ptcbill_text_config ;
 SELECT * FROM ptcbpp_cfg_description WHERE ROWNUM <= 1;
 
-select * from v$parameter WHERE name LIKE 'nls%';
-SELECT * FROM v$database;
-SELECT * FROM v$instance;
-
---查询锁表状态
-SELECT l.session_id sid,
-       s.serial#,
-       l.locked_mode,
-       l.oracle_username,
-       l.os_user_name,
-       s.machine,
-       s.terminal,
-       o.object_name,
-       s.logon_time
-  FROM v$locked_object l, all_objects o, v$session s
- WHERE l.object_id = o.object_id
-   AND l.session_id = s.sid
-   AND object_name = 'MB_CDR'
- ORDER BY sid, s.serial#;
- 
---查询大查询状态
-SELECT s.sid, s.serial#,  sa.sql_id, sql_text, s.logon_time, s.sql_exec_start, s.machine, s.osuser, s.module FROM v$session s, v$sqlarea sa 
-where s.machine like 'DESKTOP-EOUAPMT' 
-and s.module = 'SQL Developer'
-and s.sql_id = sa.sql_id
---and s.osuer = ''
---and sa.sql_text like '%%'
-;
-SELECT s.sid, s.serial#,  sa.sql_id, sql_text, s.logon_time, s.sql_exec_start, s.machine, s.osuser, s.module FROM v$session s, v$sqlarea sa 
-where s.machine like 'IT-SZ09' 
-and s.module = 'SQL Developer'
-and s.sql_id = sa.sql_id
---and s.osuer = ''
---and sa.sql_text like '%%'
-;
-SELECT * FROM v$session order by logon_time desc;
-
-alter system kill session 'sid,serial#'; 
-alter system kill session '173,22200';
 
 SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' and tag IN ('ITB1I','ITB1A') AND msisdn = 53031755 ORDER BY seq;
 SELECT * FROM ptcbill_invoice_detail_cdr WHERE custcode = '1.6204460' and tag IN ('ITB1R','ITB1r') AND msisdn = 53031755 ORDER BY plcode, seq;
@@ -180,8 +130,8 @@ SELECT ca.customer_id,ca.custcode,ca.cscusttype,ca.billcycle,  coa.co_id, ca.tmc
 dn.dn_num, '--', ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn
 WHERE
-dn.dn_num = '52296245'
---ca.custcode = '1.6338176'
+dn.dn_num = '54287472'
+--ca.custcode = '1.6454776'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
 and cs.sncode = 1
@@ -202,8 +152,8 @@ from contr_services cs, customer_all ca, contract_all coa,mpusptab sp, mpusntab 
 where cs.co_id = coa.co_id
 and ca.customer_id = coa.customer_id
 --and ca.custcode = '1.5883068'
-and dn.dn_num = '56284433'
-and substr(cs.cs_stat_chng, -1) IN ('a', 's')
+and dn.dn_num = '52269764'
+and substr(cs.cs_stat_chng, -1) IN ('a', 's','d')
 and cs.spcode = sp.spcode
 and cs.sncode = sn.sncode
 and dn.dn_id = cs2.dn_id
@@ -219,9 +169,9 @@ from contr_services cs, customer_all ca, contract_all coa,mpusptab sp, mpusntab 
 where cs.co_id = coa.co_id
 and l.sub_customer_id = coa.customer_id
 and l.sub_co_id = coa.co_id
-and ca.custcode = '1.6254752'
+and ca.custcode = '1.3763107'
 and ca.customer_id = l.main_customer_id
-and substr(cs.cs_stat_chng, -1) IN ('a', 's')
+and substr(cs.cs_stat_chng, -1) IN ('a', 's', 'd')
 and cs.co_id = l.sub_co_id
 and cs.spcode = sp.spcode
 and cs.sncode = sn.sncode
@@ -239,7 +189,7 @@ SELECT ca.custcode,ca1.customer_id,ca1.custcode,ca1.billcycle,  coa.co_id, cs.tm
 dn.dn_num, cs.cs_sparam1,ca1.csactivated, ca1.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, ptcbill_main_sub_lnk l , customer_all ca1
 WHERE
-ca.custcode = '1.6416812'
+ca.custcode = '1.6454776'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
 and ca.customer_id = l.main_customer_id
@@ -255,8 +205,8 @@ AND l.sub_customer_id = ca1.customer_id
 --CDR summary for corportate user:
 select rtx.sncode, rtx.rtx_type, sn.des, mpl.plcode, mpl.country, sum( rounded_volume)
 , sum(rated_flat_amount)
-from RTX_010401 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
-where cust.custcode='1.6123385' 
+from RTX_020401 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
+where cust.custcode='1.6454776' 
 and cust.customer_id=lnk.main_customer_id 
 and lnk.sub_co_id=conser.co_id 
 and conser.sncode=1
@@ -271,8 +221,8 @@ order by 1,2,3
 ;
 
 select  dir.dn_num, original_start_d_t,rtx.rtx_type,rtx.plcode,o_p_number,actual_volume,  rounded_volume, rated_flat_amount
-from RTX_010401 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
-where cust.custcode='1.6189344' 
+from RTX_020301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
+where cust.custcode='1.6454776' 
 and cust.customer_id=lnk.main_customer_id 
 and lnk.sub_co_id=conser.co_id 
 and conser.sncode=1
@@ -329,19 +279,21 @@ select dn.dn_num "MSISDN",
        decode(rtx.sncode,1,'MINS',237, 'MINS', 283, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
        'Normal' "Voice Type",
        rtx.rated_flat_amount "Charge"
-from rtx_050401 rtx, customer_all ca, contr_services cs, contract_all coa , mpdpltab mpl, directory_number dn --, mpuzptab zp
+from rtx_060401 rtx, customer_all ca, contr_services cs, contract_all coa , mpdpltab mpl, directory_number dn --, mpuzptab zp
 where ca.customer_id = rtx.r_p_customer_id
 and coa.co_id = rtx.r_p_contract_id
 and coa.customer_id = ca.CUSTOMER_ID
 and cs.co_id = coa.co_id
 and cs.dn_id = dn.dn_id
 --and ca.custcode = '1.6204422'
-and dn.dn_num = 68327988
+and dn.dn_num = 67675838
 and cs.sncode = 1
 and SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
 and rtx.plcode = mpl.plcode
 --and rtx.zpcode = zp.zpcode
 --and rtx.rated_flat_amount <>0
+and rtx.sncode = 4
+--and rtx.rtx_type = 'R'
 order by 3,4,6,1,2;
 
 -- for corporate user;
@@ -362,8 +314,8 @@ select dir.dn_num "MSISDN",
        decode(rtx.sncode,1,'MINS',237, 'MINS', 283, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
        'Normal' "Voice Type",
        round(rtx.rated_flat_amount,2) "Charge" 
-from RTX_040401 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl --, mpuzptab zp
-where cust.custcode='1.6254752' 
+from RTX_020301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl --, mpuzptab zp
+where cust.custcode='1.6454776' 
 and cust.customer_id=lnk.main_customer_id 
 and lnk.sub_co_id=conser.co_id 
 and conser.sncode=1
@@ -384,6 +336,7 @@ and (( rtx.sncode  = 283 )  --1CMN IDD
   or ( rtx.sncode = 4 and rtx.rtx_type = 'L') -- IDD SMS
   or ( rtx.sncode = 4 and rtx.rtx_type = 'R' and mpl.country= 'China') -- ICMN SMS
   or ( rtx.sncode = 4 and rtx.rtx_type = 'R' and mpl.country<> 'China') -- Roaming SMS
+  or ( rtx.sncode = 119 and rtx.rtx_type = 'R' and mpl.country = 'Japan')
 )
 order by 3,4,6,2,1
 ;
@@ -583,7 +536,7 @@ order by custcode,customer_id
 SELECT ca.custcode MAIN_CUSTCODE, ca1.custcode CUSTCODE, l.sub_customer_id, l.sub_co_id CONTRACT_ID ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN,  ca1.tmcode TMCODE,tm.des RATE_PLAN/*,ch.CH_VALIDFROM CONTRACT_VALIDFROM, coo.LAST_CO_BIND_END_DATE CONTRACT_END_DATE*/
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1, contract_history ch 
 , PTCAPP_CUST_CO_OFFER_SUM coo
-WHERE ca.custcode in ('1.6102340')
+WHERE ca.custcode in ('1.4086674')
 AND ca.customer_id = l.main_customer_id
 AND l.exp_date IS null
 AND l.sub_co_id = cs.co_id
@@ -604,7 +557,7 @@ union all
 SELECT ca.custcode, ca1.custcode,l.sub_customer_id, l.sub_co_id CONTRACT_ID ,dn.dn_num HKG_MSISDN, '--' CHN_MSISDN, ca1.tmcode TMCODE,tm.des RATE_PLAN/*, ch.CH_VALIDFROM,coo.LAST_CO_BIND_END_DATE*/
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1, contract_history ch
 , PTCAPP_CUST_CO_OFFER_SUM coo
-WHERE ca.custcode in ('1.6102340')
+WHERE ca.custcode in ('1.4086674')
 AND ca.customer_id = l.main_customer_id
 AND l.exp_date IS null
 AND l.sub_co_id = cs.co_id
@@ -627,7 +580,7 @@ and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.c
 and not exists ( select 1 from contr_services cs2 where cs2.sncode = 237 and cs2.co_id = cs.co_id and SubStr(cs2.cs_Stat_chng,-1) IN ('a','s')) 
 ;
 select * from ptcbill_co_usage_summary;
---查询分钟量及流量使用明细（每号码每月一条数据） ， 每月汇总。
+--查询流量使用明细（每号码每月一条数据） ， 每月汇总。
 SELECT
 tm.tmcode,
 tm.des,
@@ -635,14 +588,32 @@ lnk.TM_GROUP_ID,
 Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id, a.msisdn, a.invoice_date, a.FREE_GPRS, a.GPRS_USAGE,  a.EXTRA_GPRS_VOL,  a.FREE_CHINA_GPRS,  a.CHINA_GPRS_USAGE,  a.EXTRA_CHINA_GPRS_VOL, a.CHINA_LOCAL_GPRS_USAGE, a.EXTRA_GPRS_VOL + a.EXTRA_CHINA_GPRS_VOL  EXTRA_CHINA_LOCAL_GPRS_VOL
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-WHERE a.custcode IN ('1.5503463')
-AND a.invoice_date in ( To_Date('20170516','yyyymmdd'))
+WHERE a.custcode IN ('1.6221883')
+AND a.invoice_date in ( To_Date('20170511','yyyymmdd'))
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
 --AND Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') = 'Y'
 AND tm.tmcode = lnk.tmcode
 ORDER BY 8,4,3
+;
+--查询分钟量使用明细（每号码每月一条数据） ， 每月汇总。
+SELECT
+--tm.tmcode,
+--tm.des,
+--lnk.TM_GROUP_ID,
+--Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
+a.custcode, a.co_id, a.msisdn, a.invoice_date, (a.LOCAL_FREE_MINS_INTER),(a.LOCAL_FREE_MINS_INTRA),(a.CHINA_FREE_MINS),(a.INTER_VOICE_USAGE),(a.INTRA_VOICE_USAGE),(a.CHINA_USAGE)
+FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
+WHERE a.custcode IN ('1.3877686')
+--AND a.invoice_date in ( To_Date('20170316','yyyymmdd'))
+and a.invoice_date >= To_Date('20161016','yyyymmdd') and a.invoice_date <= To_Date('20170316','yyyymmdd')
+AND a.co_id = co.co_id
+AND co.customer_id = ca.customer_id
+AND ca.tmcode = tm.tmcode
+--AND Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') = 'Y'
+AND tm.tmcode = lnk.tmcode
+ORDER BY a.invoice_date, a.msisdn
 ;
 select * from ptcbill_co_usage_summary a where a.invoice_date in ( To_Date('20170501','yyyymmdd')) and a.custcode IN ('1.6356273');
 select * from ptcapp_usage_hist;
@@ -690,13 +661,13 @@ and cs.dn_id = dn.dn_id
 and cs.co_id = l.sub_co_id
 order by 7, 4,3
 ;
-
+select * from contr_volume_history where co_id = 6542161;
 --查询主账号下所有子账号的流量限制
 SELECT dn.dn_num, volume/1024 "volume(GB)", l.sub_customer_id,  cvh.co_id /*,  seq_no, cvh.ent_date, cs.tmcode, cs.spcode, cs.sncode */ FROM contr_volume_history cvh,
 ptcbill_main_sub_lnk l ,contr_services cs, directory_number dn , customer_all ca
 WHERE l.sub_co_id = cvh.co_id
 AND l.main_customer_id = ca.customer_id
-AND ca.custcode = '1.6356272'
+AND ca.custcode = '1.6221883'
 AND seq_no = (SELECT Max(seq_no) FROM contr_volume_history hh WHERE hh.co_id = cvh.co_id)
 AND  cs.co_id = l.sub_co_id
 AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
@@ -707,13 +678,13 @@ ORDER BY dn_num;
 
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
 mpusntab sn
-WHERE tmcode = 
+WHERE tmcode = 739
 AND sn.sncode = fu.pkg_id
 AND   tfu.expiry_date IS null
 AND   tfu.free_unit_id = fu.free_unit_id
---and free_unit_inter = 100
---AND   fu.pkg_id = 421
-AND   fu.pkg_id in (504)
+--and free_unit_inter = 300
+AND   fu.pkg_id = 421
+--AND   fu.pkg_id in (1)
 ;
 
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
@@ -858,16 +829,17 @@ SELECT ca.custcode, oh.ohrefdate, Sum(ot.otmerch) monthly_charge,
                                               END )roam_data_charge
 FROM orderhdr_all oh, ordertrailer ot, customer_all ca
 WHERE oh.customer_id = ca.customer_id
-AND    ca.custcode = '1.6235072'
+AND    ca.custcode = '1.3877686'
 AND   oh.ohxact = ot.otxact
 --and   (ot.otname LIKE '%.R.%' OR ot.otname LIKE '%.r.%' OR ot.otname LIKE '%U.I.F%')
 AND   oh.ohinvtype = 5
-AND oh.ohrefdate >= To_Date('20160101', 'yyyymmdd')
-AND oh.ohrefdate  <= To_Date('20161231', 'yyyymmdd')
+AND oh.ohrefdate >= To_Date('20161016', 'yyyymmdd')
+AND oh.ohrefdate  <= To_Date('20170316', 'yyyymmdd')
 
 GROUP BY oh.customer_id, oh.ohrefdate, ca.custcode
 ORDER BY oh.ohrefdate
 ;
+
 
 
  select
@@ -957,3 +929,43 @@ select to_date('2005-01-01 13:14:20','yyyy-MM-dd HH24:mm:ss') from dual;
 SELECT * FROM customer_all WHERE passportno = '18045383' and cstype = 'a';
 select trunc(sysdate ,'year') from dual;
 UPDATE IT_P2938.nico_hw_cs_cdr SET test_tag = 'T09-0101'  WHERE apnni LIKE '%gncpcscf01.1ab.62b.20170306064530%'  AND test_tag IS null ;
+
+select * from v$parameter WHERE name LIKE 'nls%';
+SELECT * FROM v$database;
+SELECT * FROM v$instance;
+
+--查询锁表状态
+SELECT l.session_id sid,
+       s.serial#,
+       l.locked_mode,
+       l.oracle_username,
+       l.os_user_name,
+       s.machine,
+       s.terminal,
+       o.object_name,
+       s.logon_time
+  FROM v$locked_object l, all_objects o, v$session s
+ WHERE l.object_id = o.object_id
+   AND l.session_id = s.sid
+   AND object_name = 'MB_CDR'
+ ORDER BY sid, s.serial#;
+ 
+--查询大查询状态
+SELECT s.sid, s.serial#,  sa.sql_id, sql_text, s.logon_time, s.sql_exec_start, s.machine, s.osuser, s.module FROM v$session s, v$sqlarea sa 
+where s.machine like 'DESKTOP-EOUAPMT' 
+and s.module = 'SQL Developer'
+and s.sql_id = sa.sql_id
+--and s.osuer = ''
+--and sa.sql_text like '%%'
+;
+SELECT s.sid, s.serial#,  sa.sql_id, sql_text, s.logon_time, s.sql_exec_start, s.machine, s.osuser, s.module FROM v$session s, v$sqlarea sa 
+where s.machine like 'IT-SZ09' 
+and s.module = 'SQL Developer'
+and s.sql_id = sa.sql_id
+--and s.osuer = ''
+--and sa.sql_text like '%%'
+;
+SELECT * FROM v$session order by logon_time desc;
+
+alter system kill session 'sid,serial#'; 
+alter system kill session '198,20547';
