@@ -827,5 +827,7 @@ Outbound Airtime(Mins); 188,719;      211,063;   271,484
 Outbound Data(MB);  62,446,017;       5,639,038;    5,640,489
 IDD(Mins);     138,054; 620,851;      689,215
 Inbound Roamer Airtime;       2;    1; 1
-	
 
+gprs:
+co_summary 表中数据对应着rtx中的数据加条件and rtx.rated_flat_amount<>0
+hist表仅有参考意义。
