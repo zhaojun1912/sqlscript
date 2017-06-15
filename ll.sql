@@ -1,7 +1,15 @@
 SELECT * FROM directory_number   WHERE dn_id = 1534039;
 SELECT * FROM directory_number   WHERE dn_num = 56283868;
 Get imsi from iccid.
+select zn.des,  m.* from mpulktmm m, mpuzntab zn where tmcode=490 and spcode = 37 and  sncode=119  and m.zncode = zn.zncode and zn.des like 'China%';
+select IL01,IC01,IL10,IC10,typeind,zncode from mpulktmm where tmcode=653 and spcode=214 and sncode=1  and zncode=3;
+SELECT IL01,IC01,IL10,IC10,type_ind FROM ptcrate_tariff_usage WHERE tariff_id = 32 AND vscode = 1 AND sncode = 1 AND digit_id=86;
+SELECT IL01,IC01,IL10,IC10,type_ind FROM ptcrate_tariff_usage WHERE tariff_id = 32 and sncode = 119;
+select * from user_tables where table_name like '%ZONE%';
+select * from mpulktmm where tmcode=653 and spcode=37 and sncode=119 ;
 
+select * from rtx_040401;
+select * from PTCBILL_ZONE_GROUP where zncode = 869;
 
 SELECT port_num FROM storage_medium,port WHERE SM_SERIALNUM='89852121408280038032'
     AND storage_medium.sm_id=port.sm_id
@@ -14,10 +22,10 @@ select * from MPDHPLMN
 select * from PTC_IDRS_ROAM_PLMN where plcode = 409;
 select * from PTCDMG_DN where plcode = 409;
 select * from mpusptab where spcode in(89,214);
-select * from ptcbill_main_sub_lnk where  main_customer_id = 5729291 and exp_date is null order by sub_customer_id;
+select * from ptcbill_main_sub_lnk where  main_customer_id = 6295349 and exp_date is null order by sub_customer_id;
 select * from ptcbill_main_sub_lnk where sub_customer_id = 6295350;
 select * from ptcbill_main_sub_lnk where sub_co_id = 5130254;
-select * from customer_all ca where ca.custcode = '1.5795135';
+select * from customer_all ca where ca.custcode = '1.6356272';
 select * from customer_all ca where ca.customer_Id = 3792949;
 select * from contr_services where dn_id = 5083885;
 select * from contr_services  cs where co_id = 5130254 and substr(cs.cs_stat_chng, -1) IN ('a', 's');
@@ -72,7 +80,7 @@ SELECT * FROM contr_devices;
 SELECT *FROM port WHERE  port_num = 454120054983764;
 SELECT *FROM EQUIPMENT;
 
-SELECT * FROM mputmview WHERE des LIKE '4G HK%CH 3GB%';
+SELECT * FROM mputmview WHERE des LIKE 'Corp %';
 SELECT * FROM customer_all WHERE tmcode = 727;
 SELECT custcode, msisdn, invoice_date,s.*  FROM ptcbill_co_usage_summary s
  WHERE tmcode = 509 AND  invoice_date = To_Date('20161120', 'yyyymmdd');
@@ -107,7 +115,7 @@ SELECT ca.customer_id,ca.custcode,ca.cscusttype,ca.billcycle,  coa.co_id, ca.tmc
 dn.dn_num, cs1.cs_sparam1,ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn, contr_services cs1
 WHERE
-dn.dn_num = '92047394'
+dn.dn_num = '59335706'
 --ca.custcode = '1.6338176'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
@@ -130,8 +138,8 @@ SELECT ca.customer_id,ca.custcode,ca.cscusttype,ca.billcycle,  coa.co_id, ca.tmc
 dn.dn_num, '--', ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn
 WHERE
-dn.dn_num = '68477204'
---ca.custcode = '1.6454776'
+dn.dn_num = '59335706'
+--ca.custcode = '1.6294079'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
 and cs.sncode = 1
@@ -151,15 +159,16 @@ select dn.dn_num,  cs.co_id, cs.spcode,sp.des, cs.sncode, sn.des, cs.cs_stat_chn
 from contr_services cs, customer_all ca, contract_all coa,mpusptab sp, mpusntab sn, directory_number dn, contr_services cs2
 where cs.co_id = coa.co_id
 and ca.customer_id = coa.customer_id
---and ca.custcode = '1.5883068'
-and dn.dn_num = '52269764'
-and substr(cs.cs_stat_chng, -1) IN ('a', 's','d')
+--and ca.custcode = '1.6294079'
+and dn.dn_num = '56467939'
+and substr(cs.cs_stat_chng, -1) IN ('a', 's')
 and cs.spcode = sp.spcode
 and cs.sncode = sn.sncode
 and dn.dn_id = cs2.dn_id
 and cs2.sncode = 1
 and cs2.co_id = coa.co_id
---and substr(cs2.cs_stat_chng, -1) IN ('a', 's')
+and substr(cs2.cs_stat_chng, -1) IN ('a', 's')
+--and sn.sncode in (525)
 order by sp.spcode, sn.sncode
 ;
 
@@ -189,7 +198,7 @@ SELECT ca.custcode,ca1.customer_id,ca1.custcode,ca1.billcycle,  coa.co_id, cs.tm
 dn.dn_num, cs.cs_sparam1,ca1.csactivated, ca1.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
 FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, ptcbill_main_sub_lnk l , customer_all ca1
 WHERE
-ca.custcode = '1.5795135'
+ca.custcode = '1.3977778'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
 and ca.customer_id = l.main_customer_id
@@ -205,8 +214,8 @@ AND l.sub_customer_id = ca1.customer_id
 --CDR summary for corportate user:
 select rtx.sncode, rtx.rtx_type, sn.des, mpl.plcode, mpl.country, sum( rounded_volume)
 , sum(rated_flat_amount)
-from RTX_020401 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
-where cust.custcode='1.6454776' 
+from RTX_060401 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
+where cust.custcode='1.6534883' 
 and cust.customer_id=lnk.main_customer_id 
 and lnk.sub_co_id=conser.co_id 
 and conser.sncode=1
@@ -221,8 +230,8 @@ order by 1,2,3
 ;
 
 select  dir.dn_num, original_start_d_t,rtx.rtx_type,rtx.plcode,o_p_number,actual_volume,  rounded_volume, rated_flat_amount
-from RTX_020301 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
-where cust.custcode='1.6454776' 
+from RTX_060401 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl, mpusntab sn
+where cust.custcode='1.6534883' 
 and cust.customer_id=lnk.main_customer_id 
 and lnk.sub_co_id=conser.co_id 
 and conser.sncode=1
@@ -245,10 +254,10 @@ order by dir.dn_num, original_start_d_t
 --CDR summary for single user:
 select rtx.sncode, rtx.rtx_type, sn.des, mpl.plcode, mpl.country, sum( rounded_volume)
 , sum(rated_flat_amount)
-from RTX_040401 rtx,customer_all ca,contr_services cs, contract_all coa, directory_number dn ,mpdpltab mpl, mpusntab sn
+from RTX_030101 rtx,customer_all ca,contr_services cs, contract_all coa, directory_number dn ,mpdpltab mpl, mpusntab sn
 where 
 --ca.custcode='1.6204422' 
-dn.dn_num = '52201126'
+dn.dn_num = '1.6294079'
 and ca.customer_id = coa.customer_id
 and cs.co_id = coa.co_id
 and cs.sncode=1
@@ -261,7 +270,8 @@ and sn.sncode = rtx.sncode
 group by rtx.sncode, rtx.rtx_type, sn.des, mpl.plcode, mpl.country
 order by 1,2,3
 ;
-
+select * from RTX_010101;
+select * from RTX_;
 -- for single user:;
 select dn.dn_num "MSISDN",
        original_start_d_t "Date Initiated",
@@ -279,14 +289,14 @@ select dn.dn_num "MSISDN",
        decode(rtx.sncode,1,'MINS',237, 'MINS', 283, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
        'Normal' "Voice Type",
        rtx.rated_flat_amount "Charge"
-from rtx_070101 rtx, customer_all ca, contr_services cs, contract_all coa , mpdpltab mpl, directory_number dn --, mpuzptab zp
+from rtx_010101 rtx, customer_all ca, contr_services cs, contract_all coa , mpdpltab mpl, directory_number dn --, mpuzptab zp
 where ca.customer_id = rtx.r_p_customer_id
 and coa.co_id = rtx.r_p_contract_id
 and coa.customer_id = ca.CUSTOMER_ID
 and cs.co_id = coa.co_id
 and cs.dn_id = dn.dn_id
 --and ca.custcode = '1.6204422'
-and dn.dn_num = 92047394
+and dn.dn_num = 59335706
 and cs.sncode = 1
 and SubStr(cs.cs_Stat_chng,-1) IN ('a','s')
 and rtx.plcode = mpl.plcode
@@ -316,8 +326,8 @@ select dir.dn_num "MSISDN",
        decode(rtx.sncode,1,'MINS',237, 'MINS', 283, 'MINS',3,'[Msg]',4,'[Msg]',119,'[KB]') "Unit",
        'Normal' "Voice Type",
        round(rtx.rated_flat_amount,2) "Charge" 
-from RTX_020101 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl --, mpuzptab zp
-where cust.custcode='1.5795135' 
+from RTX_010101 rtx,customer_all cust,ptcbill_main_sub_lnk lnk ,contr_services conser,directory_number dir ,mpdpltab mpl --, mpuzptab zp
+where cust.custcode='1.6356272' 
 and cust.customer_id=lnk.main_customer_id 
 and lnk.sub_co_id=conser.co_id 
 and conser.sncode=1
@@ -328,7 +338,9 @@ and rtx.plcode=mpl.plcode
 and rtx.r_p_customer_id=lnk.sub_customer_id
 AND rtx.r_p_contract_id = lnk.sub_co_id
 and ( rtx.sncode = 119 )
---and rtx.rated_flat_amount<>0
+-- mpl.country = 'China'
+--and dir.dn_num = 98620868
+and rtx.rated_flat_amount<>0
 --and (( rtx.sncode  = 283 )  --1CMN IDD
 --  or (rtx.sncode = 1 and rtx.rtx_type = 'R' and mpl.country = 'China' ) -- 1CMN Out
 --  or (rtx.sncode = 1 and rtx.rtx_type = 'r' and mpl.country = 'China'  and not ( mpl.plcode =  409 and rtx.rtx_type = 'r' )) -- 1CMN In
@@ -343,7 +355,7 @@ and ( rtx.sncode = 119 )
 --)
 order by 3,4,6,2,1
 ;
-
+select * from RTX_010101;
 -- for corporate user;
 select dir.dn_num "MSISDN",
        original_start_d_t "Date Initiated",rtx.sncode,
@@ -423,7 +435,7 @@ WHERE cs.sncode = sn.sncode
 AND   cs.co_id = 5936297
 And   cs.sncode = 508;
 
-SELECT * FROM ptcbill_free_unit WHERE pkg_id = 508;
+SELECT * FROM ptcbill_free_unit WHERE pkg_id = 481;
 
 --查询sim no.
 SELECT sm.sm_serialnum, cd.cd_sm_num FROM storage_medium sm, contr_devices cd
@@ -582,7 +594,7 @@ and ch.ch_status = 'a'
 and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.co_id)
 and not exists ( select 1 from contr_services cs2 where cs2.sncode = 237 and cs2.co_id = cs.co_id and SubStr(cs2.cs_Stat_chng,-1) IN ('a','s')) 
 ;
-select * from ptcbill_co_usage_summary;
+select * from ptcbill_co_usage_summary a where a.co_id = 6490644;
 --查询流量使用明细（每号码每月一条数据） ， 每月汇总。
 SELECT
 tm.tmcode,
@@ -591,8 +603,8 @@ lnk.TM_GROUP_ID,
 Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id,co.customer_id, a.msisdn, a.invoice_date, a.FREE_GPRS, a.GPRS_USAGE,  a.EXTRA_GPRS_VOL,  a.FREE_CHINA_GPRS,  a.CHINA_GPRS_USAGE,  a.EXTRA_CHINA_GPRS_VOL, a.CHINA_LOCAL_GPRS_USAGE, a.EXTRA_GPRS_VOL + a.EXTRA_CHINA_GPRS_VOL  EXTRA_CHINA_LOCAL_GPRS_VOL
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-WHERE a.custcode IN ('1.5795135')
-AND a.invoice_date in ( To_Date('20170506','yyyymmdd'))
+WHERE a.custcode IN ('1.6356272')
+AND a.invoice_date in ( To_Date('20170601','yyyymmdd'))
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
@@ -608,9 +620,9 @@ SELECT
 --Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') pool_fu,
 a.custcode, a.co_id, a.msisdn, a.invoice_date, (a.LOCAL_FREE_MINS_INTER),(a.LOCAL_FREE_MINS_INTRA),(a.CHINA_FREE_MINS),(a.INTER_VOICE_USAGE),(a.INTRA_VOICE_USAGE),(a.CHINA_USAGE)
 FROM ptcbill_co_usage_summary a, contract_all co, customer_all ca, mputmview tm, ptcbill_rateplan_group_lnk lnk
-WHERE a.custcode IN ('2.11.52.64.100104')
+WHERE a.custcode IN ('1.6356272')
 --AND a.invoice_date in ( To_Date('20170316','yyyymmdd'))
-and a.invoice_date >= To_Date('20161020','yyyymmdd') and a.invoice_date <= To_Date('20170920','yyyymmdd')
+and a.invoice_date >= To_Date('20170601','yyyymmdd') and a.invoice_date <= To_Date('20170920','yyyymmdd')
 AND a.co_id = co.co_id
 AND co.customer_id = ca.customer_id
 AND ca.tmcode = tm.tmcode
@@ -618,17 +630,17 @@ AND ca.tmcode = tm.tmcode
 AND tm.tmcode = lnk.tmcode
 ORDER BY a.invoice_date, a.msisdn
 ;
-select * from ptcbill_co_usage_summary a where a.invoice_date in ( To_Date('20170501','yyyymmdd')) and a.custcode IN ('1.6356273');
-select * from ptcapp_usage_hist;
+select * from ptcbill_co_usage_summary a where a.invoice_date in ( To_Date('20170301','yyyymmdd')) and a.custcode IN ('1.5128767');
+select * from ptcapp_usage_hist where co_id = 5196902 and date_billed = to_date('20170301','yyyymmdd');
 SELECT su.customer_id, tm.tmcode,
 tm.des,
 lnk.TM_GROUP_ID,
 --Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= to_date('20170526', 'yyyymmdd') AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > to_date('20170526', 'yyyymmdd'))), 'N') pool_fu,
 ca.custcode, su.co_id,dn.dn_num,to_char(su.date_billed,'yyyymmdd'), Ceil(gprs_usg/60),/*Ceil(unb_p_roamgprs_usg/60),*/Ceil(roamgprs_chn_usg/60) 
 FROM ptcapp_usage_hist su, contract_all co, customer_all ca, mputmview tm, MBSADM.PTCBILL_MAIN_SUB_LNK l,ptcbill_rateplan_group_lnk lnk, customer_all ca2,directory_number dn,contr_services cs
-WHERE ca.custcode IN ('1.5795135')
+WHERE ca.custcode IN ('1.5128767')
 AND su.co_id = l.sub_co_id
-and su.date_billed in ( To_Date('20170506','yyyymmdd'))
+and su.date_billed in ( To_Date('20170301','yyyymmdd'))
 AND l.main_customer_id = ca.customer_id
 --AND ca.tmcode = tm.tmcode
 --AND Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= a.invoice_date AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > a.invoice_date)), 'N') = 'Y'
@@ -649,7 +661,7 @@ tm.des,
 --Nvl((SELECT 'Y' FROM ptcbill_sub_psh_fu_cat WHERE sub_customer_id = ca.customer_id AND free_unit_cat_id = 16 AND EFF_BILL_DATE <= to_date('20170526', 'yyyymmdd') AND (EXP_BILL_DATE IS NULL OR EXP_BILL_DATE > to_date('20170526', 'yyyymmdd'))), 'N') pool_fu,
 ca.custcode, su.co_id,dn.dn_num, 'UNBILLED',unb_p_roamnor_usg, unb_p_roamnor_amt, Ceil(unb_p_air_usg_inter/60),Ceil(unb_p_air_usg_intra/60),  Ceil(unb_p_gprs_usg/60),/*Ceil(unb_p_roamgprs_usg/60),*/Ceil(unb_p_chn_roamgprs_usg/60) 
 FROM ptcapp_sub_usage su, contract_all co, customer_all ca, mputmview tm, MBSADM.PTCBILL_MAIN_SUB_LNK l,ptcbill_rateplan_group_lnk lnk, customer_all ca2,directory_number dn,contr_services cs
-WHERE ca.custcode IN ('2.11.52.64.100104')
+WHERE ca.custcode IN ('1.3977778')
 AND su.co_id = l.sub_co_id
 AND l.main_customer_id = ca.customer_id
 --AND ca.tmcode = tm.tmcode
@@ -659,7 +671,7 @@ and ca2.customer_id = l.sub_customer_id
 and tm.tmcode = ca2.tmcode
 and co.customer_id = ca2.customer_id
 and cs.sncode = 1
-and substr(cs.cs_stat_chng,-1) in ('a','d')
+and substr(cs.cs_stat_chng,-1) in ('a','s')
 and cs.dn_id = dn.dn_id
 and cs.co_id = l.sub_co_id
 order by 7, 4,3
@@ -681,14 +693,15 @@ ORDER BY dn_num;
 
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
 mpusntab sn
-WHERE tmcode = 739
+WHERE tmcode = 684
 AND sn.sncode = fu.pkg_id
 AND   tfu.expiry_date IS null
 AND   tfu.free_unit_id = fu.free_unit_id
 --and free_unit_inter = 300
-AND   fu.pkg_id = 421
+AND   fu.pkg_id = 481
 --AND   fu.pkg_id in (1)
 ;
+select * from mpulktm2 where tmcode = 486 and sncode = 119 ;
 
 SELECT sn.des, fu.* FROM mbsadm.ptcbill_tm_free_unit tfu, ptcbill_free_unit fu,
 mpusntab sn
@@ -973,4 +986,4 @@ SELECT * FROM v$session order by logon_time desc;
 alter system kill session 'sid,serial#'; 
 alter system kill session '518,19';
 select * from all_tables where table_name like 'RTX_%';
-select  * from rtx_020101;
+select  * from rtx_010201;
