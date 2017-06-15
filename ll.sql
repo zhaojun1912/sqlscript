@@ -1,5 +1,11 @@
 SELECT * FROM directory_number   WHERE dn_id = 1534039;
 SELECT * FROM directory_number   WHERE dn_num = 56283868;
+select * from PTCBILL_MASTER_CONTROL order by bill_date desc;
+select * from RTX_CONTROL where billcycle = 03;
+select * from mpusntab where sncode = 38;
+select * from rtx_030101;
+select * from PTCBILL_CAT_GROUP ;
+select * from sms_group;
 Get imsi from iccid.
 select zn.des,  m.* from mpulktmm m, mpuzntab zn where tmcode=490 and spcode = 37 and  sncode=119  and m.zncode = zn.zncode and zn.des like 'China%';
 select IL01,IC01,IL10,IC10,typeind,zncode from mpulktmm where tmcode=653 and spcode=214 and sncode=1  and zncode=3;
@@ -108,14 +114,14 @@ SELECT * FROM ptcapp_bill_country pbc, MPDPLTAB dpl
 WHERE pbc.source = dpl.source ;
 SELECT * FROM mpulktmz WHERE zpcode = 231;
 SELECT * FROM ptcbill_idd_roa_display WHERE sncode = 4;
-
+select * from contract_history;
 -- rtx_xx0401: 若未出账单，则记录未出账月服务使用记录;若已出账单，则记录上月服务使用记录。
 --single user information query( 237 assigned):
 SELECT ca.customer_id,ca.custcode,ca.cscusttype,ca.billcycle,  coa.co_id, ca.tmcode, tm.des,cs.spcode,sp.des, cs.sncode, sn.des,cs.dn_id,
-dn.dn_num, cs1.cs_sparam1,ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
-FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn, contr_services cs1
+dn.dn_num, cs1.cs_sparam1,ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb, ch.ch_status, ch.ch_validfrom
+FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn, contr_services cs1, contract_history ch
 WHERE
-dn.dn_num = '59335706'
+dn.dn_num = '56407060'
 --ca.custcode = '1.6338176'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
@@ -130,7 +136,9 @@ and cs.spcode = sp.spcode
 and cs.sncode = sn.sncode
 and cs1.sncode = 237
 and cs1.co_id = coa.co_id
-and substr(cs1.cs_stat_chng, -1) IN ('a', 's');
+and substr(cs1.cs_stat_chng, -1) IN ('a', 's')
+and ch.co_id = coa.co_id
+and ch.ch_seqno = (select max(ch_seqno) from contract_history where co_id = coa.co_id);
 ;
 
 --single user information query( 237 not assigned):
@@ -160,7 +168,7 @@ from contr_services cs, customer_all ca, contract_all coa,mpusptab sp, mpusntab 
 where cs.co_id = coa.co_id
 and ca.customer_id = coa.customer_id
 --and ca.custcode = '1.6294079'
-and dn.dn_num = '56467939'
+and dn.dn_num = '59335706'
 and substr(cs.cs_stat_chng, -1) IN ('a', 's')
 and cs.spcode = sp.spcode
 and cs.sncode = sn.sncode
