@@ -143,10 +143,10 @@ and ch.ch_seqno = (select max(ch_seqno) from contract_history where co_id = coa.
 
 --single user information query( 237 not assigned):
 SELECT ca.customer_id,ca.custcode,ca.cscusttype,ca.billcycle,  coa.co_id, ca.tmcode, tm.des,cs.spcode,sp.des, cs.sncode, sn.des,cs.dn_id,
-dn.dn_num, '--', ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb
-FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn
+dn.dn_num, '--', ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb, ch.ch_status, ch.ch_validfrom
+FROM directory_number dn, contr_services cs,contract_all coa,customer_all ca, mputmview tm,mpusptab sp, mpusntab sn, contract_history ch
 WHERE
-dn.dn_num = '59335706'
+dn.dn_num = '68477450'
 --ca.custcode = '1.6294079'
 --ca.customer_id = 6187521
 --coa.co_id = 5979591
@@ -154,10 +154,13 @@ and cs.sncode = 1
 AND dn.dn_id = cs.dn_id
 AND cs.co_id = coa.co_id
 AND coa.customer_id = ca.customer_id    
-AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
+AND substr(cs.cs_stat_chng, -1) IN ('a', 's', 'd')
 and ca.tmcode = tm.tmcode
 and cs.spcode = sp.spcode
 and cs.sncode = sn.sncode
+and ch.co_id = coa.co_id
+and ch.ch_seqno = (select max(ch_seqno) from contract_history where co_id = coa.co_id)
+order by  ch.CH_VALIDFROM desc
 ;
 select * from contr_services where co_id = 3642592;
 select * from mpusptab where spcode = 208;
