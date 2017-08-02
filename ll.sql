@@ -71,7 +71,7 @@ SELECT tmcode,o_p_number, original_Start_d_t, sncode, call_type, actual_volume, 
 FROM rtx_060301 WHERE r_p_customer_id = 5762830 AND sncode = 1 AND rtx_type = 'L';
 
 ;
-select length('oracle å­—ç¬¦ä¸²é•¿åº¦') from dual;
+select length('oracle ×Ö·û´®³¤¶È') from dual;
 select * from ptcbill_rtx_type_group ;
 select * from ptcbill_zone_group;
 select * from ptcbill_roam_group where roam_group in (5);
@@ -117,7 +117,7 @@ WHERE pbc.source = dpl.source ;
 SELECT * FROM mpulktmz WHERE zpcode = 231;
 SELECT * FROM ptcbill_idd_roa_display WHERE sncode = 4;
 select * from contract_history;
--- rtx_xx0401: è‹¥æœªå‡ºè´¦å•ï¼Œåˆ™è®°å½•æœªå‡ºè´¦æœˆæœåŠ¡ä½¿ç”¨è®°å½•;è‹¥å·²å‡ºè´¦å•ï¼Œåˆ™è®°å½•ä¸ŠæœˆæœåŠ¡ä½¿ç”¨è®°å½•ã€‚
+-- rtx_xx0401: ÈôÎ´³öÕËµ¥£¬Ôò¼ÇÂ¼Î´³öÕËÔÂ·şÎñÊ¹ÓÃ¼ÇÂ¼;ÈôÒÑ³öÕËµ¥£¬Ôò¼ÇÂ¼ÉÏÔÂ·şÎñÊ¹ÓÃ¼ÇÂ¼¡£
 --single user information query( 237 assigned):
 SELECT ca.customer_id,ca.custcode,ca.cscusttype,ca.billcycle,  coa.co_id, ca.tmcode, tm.des,cs.spcode,sp.des, cs.sncode, sn.des,cs.dn_id,
 dn.dn_num, cs1.cs_sparam1,ca.csactivated, ca.csdeactivated,cs.cs_status,cs.cs_stat_chng,cs.cs_on_cbb, ch.ch_status, ch.ch_validfrom
@@ -476,13 +476,13 @@ And   cs.sncode = 508;
 
 SELECT * FROM ptcbill_free_unit WHERE pkg_id = 481;
 
---æŸ¥è¯¢sim no.
+--²éÑ¯sim no.
 SELECT sm.sm_serialnum, cd.cd_sm_num FROM storage_medium sm, contr_devices cd
 WHERE cd.cd_sm_num = sm.sm_serialnum;
 select * from mputmview where tmcode = 653;
 select * from contr_devices ;
---æŸ¥è¯¢data only plan ç”¨æˆ·çš„sim No.;
---682,740 ä¸ºdata only plan
+--²éÑ¯data only plan ÓÃ»§µÄsim No.;
+--682,740 Îªdata only plan
 SELECT dn.dn_num MSISDN,tm.des RATEPLAN,  ca.custcode, ca1.custcode,/*ca1.tmcode, l.sub_customer_id,l.sub_co_id,*/ cd.cd_sm_num SIM_NO
 FROM customer_all ca ,   ptcbill_main_sub_lnk l , customer_all ca1 ,
 mputmview tm, contr_devices cd , storage_medium sm, contr_services cs, directory_number dn
@@ -508,7 +508,7 @@ and sm.sm_status in ( 'a')
 order by ca.custcode,dn.dn_num, ca1.tmcode
 ;
 
---æŸ¥æ‰¾æ‰€æœ‰å­è´¦å·çš„imei(åªåŒ…æ‹¬æœ‰å¤§é™†å·ç çš„ç”¨æˆ·)
+--²éÕÒËùÓĞ×ÓÕËºÅµÄimei(Ö»°üÀ¨ÓĞ´óÂ½ºÅÂëµÄÓÃ»§)
 SELECT l.sub_co_id ,dn.dn_num HKG_MSISDN, mv.imei, cs2.cs_sparam1 CHN_MSISDN, l.sub_customer_id
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs, contr_services cs2, directory_number dn, DW_CONTRACT_IMEI_MVIEW mv, DW_HANDSET_MODEL
 hd
@@ -528,7 +528,7 @@ AND SubStr(cs2.cs_Stat_chng,-1) IN ('a','s')
 ORDER BY hkg_msisdn
 ;
 
---æŸ¥è¯¢sim no.
+--²éÑ¯sim no.
 select dn.dn_num, ca1.tmcode, tm.des,coa.co_id, coa.customer_id, cd.cd_sm_num from customer_all ca1 ,
 mputmview tm, contr_devices cd , contr_services cs, directory_number dn, contract_all coa
 where dn.dn_num in(51224959
@@ -548,7 +548,7 @@ and coa.customer_id = ca1.customer_id
 AND substr(cs.cs_stat_chng, -1) IN ('a', 's')
 ;
 
---br no. æŸ¥è¯¢1CMNã€€PRC number.
+--br no. ²éÑ¯1CMN¡¡PRC number.
 SELECT ca.custcode, ca.customer_id, coa.co_id CONTRACT_ID,dn.dn_num HKG_MSISDN, cs1.cs_sparam1 CHN_MSISDN, ca.tmcode,tm.des RATE_PLAN /*,ch.ch_validfrom CONTRACT_VALIDFROM, coo.LAST_CO_BIND_END_DATE CONTRACT_END_DATE*/
 FROM customer_all ca,  contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, PTCAPP_CUST_CO_OFFER_SUM coo, contract_history ch 
 WHERE ca.passportno = '18045383'
@@ -567,7 +567,7 @@ and ch.ch_status = 'a'
 and ch.co_id = coa.co_id
 and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.co_id)
 union all
---br no. æŸ¥è¯¢1CMNä¸å«PRC number.
+--br no. ²éÑ¯1CMN²»º¬PRC number.
 SELECT ca.custcode, ca.customer_id, coa.co_id ,dn.dn_num HKG_MSISDN, 'N/A' , ca.tmcode,tm.des/*,ch.ch_validfrom, coo.LAST_CO_BIND_END_DATE*/
 FROM customer_all ca,  contr_services cs,directory_number dn,mputmview tm, contract_all coa, PTCAPP_CUST_CO_OFFER_SUM coo, contract_history ch 
 WHERE ca.passportno = '18045383'
@@ -585,7 +585,7 @@ and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.c
 order by custcode,customer_id
 ;
 
---æŸ¥è¯¢é›†å®¢1CMN PRC number.
+--²éÑ¯¼¯¿Í1CMN PRC number.
 --corporate account summary :
 SELECT ca.custcode MAIN_CUSTCODE, ca1.custcode CUSTCODE, l.sub_customer_id, l.sub_co_id CONTRACT_ID ,dn.dn_num HKG_MSISDN, cs.cs_sparam1 CHN_MSISDN,  ca1.tmcode TMCODE,tm.des RATE_PLAN/*,ch.CH_VALIDFROM CONTRACT_VALIDFROM, coo.LAST_CO_BIND_END_DATE CONTRACT_END_DATE*/
 FROM customer_all ca, ptcbill_main_sub_lnk l, contr_services cs,  contr_services cs1, directory_number dn,mputmview tm, contract_all coa, customer_all ca1, contract_history ch 
@@ -634,7 +634,7 @@ and ch.CH_SEQNO = (select max(CH_SEQNO) from contract_history where co_id = ch.c
 and not exists ( select 1 from contr_services cs2 where cs2.sncode = 237 and cs2.co_id = cs.co_id and SubStr(cs2.cs_Stat_chng,-1) IN ('a','s')) 
 ;
 select * from ptcbill_co_usage_summary a where a.co_id = 6490644;
---æŸ¥è¯¢æµé‡ä½¿ç”¨æ˜ç»†ï¼ˆæ¯å·ç æ¯æœˆä¸€æ¡æ•°æ®ï¼‰ ï¼Œ æ¯æœˆæ±‡æ€»ã€‚
+--²éÑ¯Á÷Á¿Ê¹ÓÃÃ÷Ï¸£¨Ã¿ºÅÂëÃ¿ÔÂÒ»ÌõÊı¾İ£© £¬ Ã¿ÔÂ»ã×Ü¡£
 SELECT
 tm.tmcode,
 tm.des,
@@ -651,7 +651,7 @@ AND ca.tmcode = tm.tmcode
 AND tm.tmcode = lnk.tmcode
 ORDER BY 4,3,1
 ;
---æŸ¥è¯¢åˆ†é’Ÿé‡ä½¿ç”¨æ˜ç»†ï¼ˆæ¯å·ç æ¯æœˆä¸€æ¡æ•°æ®ï¼‰ ï¼Œ æ¯æœˆæ±‡æ€»ã€‚
+--²éÑ¯·ÖÖÓÁ¿Ê¹ÓÃÃ÷Ï¸£¨Ã¿ºÅÂëÃ¿ÔÂÒ»ÌõÊı¾İ£© £¬ Ã¿ÔÂ»ã×Ü¡£
 SELECT
 --tm.tmcode,
 --tm.des,
@@ -716,7 +716,7 @@ and cs.co_id = l.sub_co_id
 order by 7, 4,3
 ;
 select * from contr_volume_history where co_id = 6422402;
---æŸ¥è¯¢ä¸»è´¦å·ä¸‹æ‰€æœ‰å­è´¦å·çš„æµé‡é™åˆ¶
+--²éÑ¯Ö÷ÕËºÅÏÂËùÓĞ×ÓÕËºÅµÄÁ÷Á¿ÏŞÖÆ
 SELECT dn.dn_num, volume/1024 "volume(GB)", l.sub_customer_id,  cvh.co_id /*,  seq_no, cvh.ent_date, cs.tmcode, cs.spcode, cs.sncode */ FROM contr_volume_history cvh,
 ptcbill_main_sub_lnk l ,contr_services cs, directory_number dn , customer_all ca
 WHERE l.sub_co_id = cvh.co_id
@@ -775,7 +775,7 @@ AND cs2.spcode = cs.spcode
 AND cs2.sncode = cs.sncode)
 );
 
-/*æŸ¥è¯¢å…¬å¸è´¦å·ä¸‹å„ç°ç”Ÿæ•ˆç”¨æˆ·æ˜¯å¦å¼€é€šæŸæœåŠ¡*/
+/*²éÑ¯¹«Ë¾ÕËºÅÏÂ¸÷ÏÖÉúĞ§ÓÃ»§ÊÇ·ñ¿ªÍ¨Ä³·şÎñ*/
 WITH t AS
 ( SELECT ca.custcode, dn.dn_num, co.co_id FROM ptcbill_main_sub_lnk l, customer_all ca, contr_services cs, contract_all co,directory_number dn, mpusntab sn
  WHERE main_customer_id = ca.customer_id
@@ -802,7 +802,7 @@ WITH t AS
  ORDER BY  SubStr(cs.cs_Stat_chng,-1)
 ;
 
---ä»å†æ¬¡è´¦å•æ•°æ®ä¸­æŸ¥è¯¢åˆ†ç±»æœˆè´¹ç”¨
+--´ÓÀú´ÎÕËµ¥Êı¾İÖĞ²éÑ¯·ÖÀàÔÂ·ÑÓÃ
 SELECT oh.customer_id, oh.ohrefdate, ot.otname, ot.otmerch, CASE when ot.otname LIKE '%.R.R.%' THEN otmerch
                                                                  when ot.otname LIKE '%.r.r.%' THEN otmerch
                                                                  ELSE 0
@@ -929,7 +929,7 @@ and    cdr_status = 'N'
 order by start_date_time
 ;
 
---54983805  åŸºæœ¬å¥—é¤ä¹‹å¤–çš„æµé‡åŒ…æŸ¥è¯¢
+--54983805  »ù±¾Ì×²ÍÖ®ÍâµÄÁ÷Á¿°ü²éÑ¯
 select ca.co_id,cust.customer_id,cust.custcode,cust.billcycle,cust.prgcode from directory_number dirnum,contr_services conser,contract_all ca,customer_all cust
 where ca.customer_id=cust.customer_id and conser.co_id=ca.co_id
  and substr(conser.cs_stat_chng,-1,1) in ('a','s') and dirnum.dn_id=conser.dn_id and   dirnum.dn_num='54983805';
@@ -937,15 +937,15 @@ where ca.customer_id=cust.customer_id and conser.co_id=ca.co_id
  select sn.des, cs.* from contr_services cs, mpusntab sn where co_id=6594956 and cs.sncode = sn.sncode order by cs.sncode;
 
  select * from ptcbill_free_unit where pkg_id = 692;
---é€šè¿‡tmcodeå”¯ä¸€ç¡®å®šfreeæ•°æ®æµé‡
+--Í¨¹ıtmcodeÎ¨Ò»È·¶¨freeÊı¾İÁ÷Á¿
 select tm.des, tfu.* from ptcbill_tm_free_unit tfu, mputmview tm
  where free_unit_id in (10691, 10692, 10693)
 and tfu.tmcode = tm.tmcode;
 
 
-å¯¹äºptcbill_free_unitï¼Œä¸€èˆ¬æœ‰ä¸‰æ¡è®°å½•ï¼ŒHK ï¼Œ  HK&China  ï¼Œå¤§ä¸­åï¼Œä½†æ˜¯åªèƒ½ç”¨å…¶ä¸­ä¸€æ¡
+¶ÔÓÚptcbill_free_unit£¬Ò»°ãÓĞÈıÌõ¼ÇÂ¼£¬HK £¬  HK and China  £¬´óÖĞ»ª£¬µ«ÊÇÖ»ÄÜÓÃÆäÖĞÒ»Ìõ
 
-----å…±äº«QoS
+----¹²ÏíQoS
 
         select pool_type, decode(pool_type, 4, 2, 3, 0, 2, 1)
         from CORP_SUB_PSH_QOS_HISTORY h
@@ -989,7 +989,7 @@ select * from v$parameter WHERE name LIKE 'nls%';
 SELECT * FROM v$database;
 SELECT * FROM v$instance;
 
---æŸ¥è¯¢é”è¡¨çŠ¶æ€
+--²éÑ¯Ëø±í×´Ì¬
 SELECT l.session_id sid,
        s.serial#,
        l.locked_mode,
@@ -1005,7 +1005,7 @@ SELECT l.session_id sid,
    AND object_name = 'MB_CDR'
  ORDER BY sid, s.serial#;
  
---æŸ¥è¯¢å¤§æŸ¥è¯¢çŠ¶æ€
+--²éÑ¯´ó²éÑ¯×´Ì¬
 SELECT s.sid, s.serial#,  sa.sql_id, sql_text, s.logon_time, s.sql_exec_start, s.machine, s.osuser, s.module FROM v$session s, v$sqlarea sa 
 where s.machine like 'DESKTOP-EOUAPMT' 
 and s.module = 'SQL Developer'
@@ -1025,4 +1025,5 @@ SELECT * FROM v$session order by logon_time desc;
 alter system kill session 'sid,serial#'; 
 alter system kill session '518,19';
 select * from all_tables where table_name like 'RTX_%';
+
 select  * from rtx_010201;
