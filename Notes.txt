@@ -858,3 +858,4 @@ vim打开文档后，encoding=utf-8（locale决定的），fileencoding=latin1�
 解决方案2：与上面方案2类似，不过最后一步修改termencoding省略即可，在此情况下需要的修改最少，只要以locale为zh_CN开 启vim，则encoding=euc-cn，fileencoding和termencoding都为空即为encoding的值，是最理想的一种情 况。
 
 sqltools ANSI支持中文
+new release
