@@ -3,24 +3,24 @@ bgp , bip not found.
 pbrp : pre bill run process ( forks sub processes to bill )
     PTCBILL_CUST_PROCESS (customers' status and statistics. almost 15M for 150,000 customers)
 brp : bill run process ( calculate customer charges )
-      store invoice related data and presention details. 
+      store invoice related data and presention details.
 	  PTCBILL_ORDERTRAILER_DETAIL,
-	  PTCBILL_INVOICE_HEADER, 
+	  PTCBILL_INVOICE_HEADER,
 	  PTCBILL_INVOICE_DETAIL_SUM,
 	  PTCBILL_INVOICE_DETAIL_COSUM,
 	  PTCBILL_INVOICE_DETAIL_CDR
 pbpp : pre bill presentation process ( )
-bpp: bill presentation process ( 
-	format bills: 
+bpp: bill presentation process (
+	format bills:
 	add bill items,
-    prepare bill text,  
-	bill letter, 
+    prepare bill text,
+	bill letter,
 	insert beat code etc)
 pill papers or put it into bill Image Process system
 
-Bill Run Process: 
+Bill Run Process:
 Subscription Fee \?
-Credit Back Charge \?	
+Credit Back Charge \?
 
 Bill Seperation Process: target :identify the bills to be held.
 customer records \?
@@ -28,7 +28,7 @@ hold bill system \?
 
 Bill Insertion Press: target: identify the bill text and bill inserts.
 
-Bill Presentation Process: 
+Bill Presentation Process:
 VIPP format for Xerox printer.
 
 cmhk vpn : https://127.0.0.1:49514/proxy.pac
@@ -56,47 +56,47 @@ select * from mpuzntab where zncode=231;
 select * from mpuzntab where zncode in (1,2);
 
 "
-  CREATE TABLE "MBSADM"."MPDPLTAB" 
-   (	"PLCODE" NUMBER(*,0) NOT NULL ENABLE, 
-	"SCCODE" NUMBER(*,0) NOT NULL ENABLE, 
-	"SN_LENGTH" NUMBER(*,0) NOT NULL ENABLE, 
-	"MCC" VARCHAR2(3), 
-	"MNC" VARCHAR2(3), 
-	"CC" VARCHAR2(3), 
-	"NDC" VARCHAR2(8), 
-	"IAC" VARCHAR2(3), 
-	"NAC" VARCHAR2(2), 
-	"SOURCE" VARCHAR2(5), 
-	"PLMNNAME" VARCHAR2(12), 
-	"PLMNTYPE" VARCHAR2(1), 
-	"SHDES" VARCHAR2(6), 
-	"SCHEME" VARCHAR2(1), 
-	"HLRLEN" NUMBER(*,0), 
-	"COUNTRY" VARCHAR2(40), 
-	"GMSC_ID" VARCHAR2(15), 
-	"GMSC_MSISDN" VARCHAR2(15), 
-	"INTRUNK" VARCHAR2(15), 
-	"OUTTRUNK" VARCHAR2(15), 
-	"NACLEN" NUMBER(*,0) NOT NULL ENABLE, 
-	"RECONIND" VARCHAR2(1) DEFAULT (' ') NOT NULL ENABLE, 
-	"REC_VERSION" NUMBER(*,0) DEFAULT (0) NOT NULL ENABLE, 
-	"SOURCE2" VARCHAR2(5), 
+  CREATE TABLE "MBSADM"."MPDPLTAB"
+   (	"PLCODE" NUMBER(*,0) NOT NULL ENABLE,
+	"SCCODE" NUMBER(*,0) NOT NULL ENABLE,
+	"SN_LENGTH" NUMBER(*,0) NOT NULL ENABLE,
+	"MCC" VARCHAR2(3),
+	"MNC" VARCHAR2(3),
+	"CC" VARCHAR2(3),
+	"NDC" VARCHAR2(8),
+	"IAC" VARCHAR2(3),
+	"NAC" VARCHAR2(2),
+	"SOURCE" VARCHAR2(5),
+	"PLMNNAME" VARCHAR2(12),
+	"PLMNTYPE" VARCHAR2(1),
+	"SHDES" VARCHAR2(6),
+	"SCHEME" VARCHAR2(1),
+	"HLRLEN" NUMBER(*,0),
+	"COUNTRY" VARCHAR2(40),
+	"GMSC_ID" VARCHAR2(15),
+	"GMSC_MSISDN" VARCHAR2(15),
+	"INTRUNK" VARCHAR2(15),
+	"OUTTRUNK" VARCHAR2(15),
+	"NACLEN" NUMBER(*,0) NOT NULL ENABLE,
+	"RECONIND" VARCHAR2(1) DEFAULT (' ') NOT NULL ENABLE,
+	"REC_VERSION" NUMBER(*,0) DEFAULT (0) NOT NULL ENABLE,
+	"SOURCE2" VARCHAR2(5),
 	 CONSTRAINT "PKMPDPLTAB" PRIMARY KEY ("PLCODE")
-  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS NOLOGGING 
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS NOLOGGING
   STORAGE(INITIAL 40960 NEXT 40960 MINEXTENTS 1 MAXEXTENTS 2147483645
   PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT)
-  TABLESPACE "BSCSIDX00"  ENABLE, 
+  TABLESPACE "BSCSIDX00"  ENABLE,
 	 CONSTRAINT "PLSCCODE" FOREIGN KEY ("SCCODE")
 	  REFERENCES "MBSADM"."MPDSCTAB" ("SCCODE") ENABLE
    ) PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 NOCOMPRESS LOGGING
   STORAGE(INITIAL 40960 NEXT 65536 MINEXTENTS 1 MAXEXTENTS 2147483645
   PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT)
   TABLESPACE "BSCSDATA21" "
-  
-  
+
+
  cmcc-web wifi: 67657304/654321
  嵌套游标参数化。
- execute immediate : '' 
+ execute immediate : ''
    plsql_block := 'DECLARE '                 ||
                  ' v_date DATE; '           ||
                  'BEGIN'                   ||
@@ -107,7 +107,7 @@ select * from mpuzntab where zncode in (1,2);
    sql_stmt := 'CREATE TABLE my_student '||
              ' AS SELECT * FROM student WHERE zip = :zip';
   EXECUTE IMMEDIATE sql_stmt using v_zip;
-  
+
 不能把模式对象的名称作为绑定参数传递给动态SQL语句。如下 错误：
 EXECUTE  IMMEDIATE ' SELECT COUTN(*) FROM :my_table'
 into v_total_students
@@ -119,7 +119,7 @@ v_null varchar2(1);
 EXECUTE IMMEDIATE sql_stmt using v_null;
 z12/zhou123456
 Lazarus:q9w8.e7r6 +-.
-oracle用户名特殊 字符 ： 
+oracle用户名特殊 字符 ：
 create user "mbsbat[mbsadm]" identified by mbsbat;
 赋予用户可调试权限：
 grant DEBUG CONNECT SESSION to student;
@@ -127,11 +127,11 @@ grant debug any procedure to student;
 
 BBBTEST
 select count(*)  from  RTX_030101
-where r_p_customer_id in 
-(select sub_customer_id from ptcbill_main_sub_lnk where main_customer_id=6275536) 
+where r_p_customer_id in
+(select sub_customer_id from ptcbill_main_sub_lnk where main_customer_id=6275536)
 and rated_flat_amount >0 and sncode in (3,4) and rownum<2;
-  
-create public synonym plan_table for plan_table;  
+
+create public synonym plan_table for plan_table;
 
 on commit delete rows
 --事务级临时表：提交时删除数据
@@ -141,7 +141,7 @@ on commit preserve rows
 ORACLE对感兴趣的值加索引 。
 advanced queuing
 
-sqlplus : bind variable 
+sqlplus : bind variable
 
 variable empno number
 execute :empno := 7369
@@ -246,7 +246,7 @@ SELECT *FROM mpusntab WHERE sncode IN (3,4,119,374,376,525);
   and       owner = 'B'
   //and       protected is NULL;
   and       protected = 'N';
-  
+
  /* Check CUstomer */
    select    'Y'
   into      :PTCBILL_PROCESS_CONTROL_rec.selected
@@ -255,9 +255,9 @@ SELECT *FROM mpusntab WHERE sncode IN (3,4,119,374,376,525);
   and       bill_date = to_date(:bill_date, 'RRMMDD')
   and       brp_id > 0
   and       rownum <= 1;
-  
+
  pkgadd -s ./ -d ./lrzsz-0.12.20-sol10-sparc-local
-  
+
 使用命令：lsof -i:被占用的端口号
 [root@52listen ~]# lsof -i:88
 SELECT B.TABLE_NAME     AS "表名",
@@ -288,7 +288,7 @@ szjyx/62398688
 --check duplication run
 select * from PTCBILL_MASTER_CONTROL order by total_customer desc;
 -- get CDR table
-select * from rtx_control; where owner = 'B'; 
+select * from rtx_control; where owner = 'B';
 
 -- Tariff Model
 select * from mpulktmb;
@@ -515,13 +515,13 @@ Usage: pbrp.sh -bc<billcycle> -billdate<billdate_yyyymmdd> [-postingperiod<posti
 + exit -1
 
 export NLS_LANG="TRADITIONAL CHINESE_AMERICA.ZHS16GBK"
-pos： P2683/b 
+pos： P2683/b
 		P2870/b
 eip: zhaojun_yan*2
 
 customer_all: cs_type:客户类型 d:deactived, a, s. csdeactivated:失效时间,在合同失效日期后3个月之前失效。
               cscusttype: F: firm, P: private
-				
+
 contract_history: ch_status: 合同状态。d: deactived
                   ch_validfrom: status changed time
 contract_all: co_status:无意义。 本表记录customer_id, co_id对应关系。
@@ -529,7 +529,7 @@ contr_services:	记录合同服务详情。cs_stat_chng: 服务状态及改变�
                 cs_status:无意义。
 UOM: 1, minutes, 2, charge , 3 call, 4, 6 secs
 454120454983764
-       54983764				
+       54983764
 中國一咭多號地區通話： 包括
 一咭多號(接聽) 1 分鐘, 金額共 0.65
 一咭多號(打出) 87 分鐘, 金額共 56.55
@@ -586,7 +586,7 @@ git add/commit : add or commit to local version repository.
 git svn rebase : pull up-to-date version.
 git svn dcommit : push local version to remote svn repository.
 
-万州国本车站： 6：20开始有到开县的汽车。 23块。流水班。车站支持银联卡自动机器售票。 
+万州国本车站： 6：20开始有到开县的汽车。 23块。流水班。车站支持银联卡自动机器售票。
 火车站到国本车站， 15路 。 6：00开始有。 票价2元， 坐车到老年大学下车。
 我来总结一下：1、火车出站右手100米，写着开县的那些饭馆问问黑车，80元/人（很难说到70元/人），开县城内包送到。不要人带去哦，带去的话要收10元。2、开县-----达州汽车南站，68元/人，时间1.5小时，临江上高速；达州汽车南站------达州火车站坐22路（06：30-22：00），1.5元/人，时间0.5小时。 19路不能直达南外车站，需走段路。
 
@@ -660,34 +660,34 @@ export PS1="\u@\h \w> "
 172.19.7.96 zhaojun/Qq525875998
 su - boss  Oper2016
 
-/*2、批量执行第一步生成的语句  
-alter system kill session 'sid,serial#';  
-alter system kill session '6976,33967';*/     
-  
-/*3、查询oracle用户名，机器名，锁表对象*/  
-SELECT l.session_id sid,  
-       s.serial#,  
-       l.locked_mode,  
-       l.oracle_username,  
-       l.os_user_name,  
-       s.machine,  
-       s.terminal,  
-       o.object_name,  
-       s.logon_time  
-  FROM v$locked_object l, all_objects o, v$session s  
- WHERE l.object_id = o.object_id  
-   AND l.session_id = s.sid  
- ORDER BY sid, s.serial#;  
+/*2、批量执行第一步生成的语句
+alter system kill session 'sid,serial#';
+alter system kill session '6976,33967';*/
 
-https://raw.githubusercontent.com/bannedbook/fanqiang/master/ios/ios.pac 
+/*3、查询oracle用户名，机器名，锁表对象*/
+SELECT l.session_id sid,
+       s.serial#,
+       l.locked_mode,
+       l.oracle_username,
+       l.os_user_name,
+       s.machine,
+       s.terminal,
+       o.object_name,
+       s.logon_time
+  FROM v$locked_object l, all_objects o, v$session s
+ WHERE l.object_id = o.object_id
+   AND l.session_id = s.sid
+ ORDER BY sid, s.serial#;
+
+https://raw.githubusercontent.com/bannedbook/fanqiang/master/ios/ios.pac
 D:\01DOWN\ChromeGo-lite\go.pac
- 
+
 ps0010@IT-SZ09 /d> awk 'BEGIN{FS="\n";OFS="\n"; RS="\n[ \t\n]*\n|^\n+" } {print $1,$2,$4, $5 > FILENAME }' *.srt
 
 IT_P2938.nico_hw_cs_cdr.call_type ( =1 MO;
 =2 MT
 =3 CF
-=4 RoamingRecord (RCF) will appear when roaming or inter call. 
+=4 RoamingRecord (RCF) will appear when roaming or inter call.
 =5 SMS MT
 =6 SMS MO
 =0 Transit ) no need to look into in the test cases.
@@ -813,10 +813,10 @@ echo "DONE!"
 
 date format:dd.mm.yyyy hh24:mi:ss
 		DD-MON-RRRR hh24:mi:ss
---alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';	
+--alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 
 
-breakdown report :/boss/work/app/report/sql	
+breakdown report :/boss/work/app/report/sql
 Subject: Daily Airtime Usage For the date 10/05/2017
 
 For the date 10/05/2017
@@ -859,3 +859,5 @@ vim打开文档后，encoding=utf-8（locale决定的），fileencoding=latin1�
 
 sqltools ANSI支持中文
 new release
+代售点：中和镇鹤林街邮政营业厅
+重庆市开县中和镇长滩街64号联通营业内
