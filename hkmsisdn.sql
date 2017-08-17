@@ -42,7 +42,7 @@ SELECT dn.dn_num HKG_MSISDN,cs1.cs_sparam1,SubStr(cs1.cs_stat_chng,-1)
 FROM  contr_services cs,  contr_services cs1, directory_number dn
 WHERE dn.dn_id = cs.dn_id
 AND cs.cs_seqno =  (SELECT Max(cs_seqno) FROM contr_services WHERE co_id = cs.co_id )
---AND To_Date( SubStr(cs.cs_stat_chng, -7, 6), 'rrmmdd') = (SELECT   Max(To_Date( SubStr(cs_stat_chng, -7, 6), 'rrmmdd'))     FROM contr_services WHERE dn_id = dn.dn_id AND SNCODE = 1)
+AND To_Date( SubStr(cs.cs_stat_chng, -7, 6), 'rrmmdd') = (SELECT   Max(To_Date( SubStr(cs_stat_chng, -7, 6), 'rrmmdd'))     FROM contr_services WHERE dn_id = dn.dn_id AND SNCODE = 1)
 AND Length(cs.cs_stat_chng) = (SELECT Min( Length(cs_stat_chng)) FROM   contr_services WHERE dn_id = dn.dn_id     AND SNCODE = 1 AND    To_Date( SubStr(cs_stat_chng, -7, 6), 'rrmmdd') =  (SELECT   Max(To_Date( SubStr(cs_stat_chng, -7, 6), 'rrmmdd'))     FROM contr_services WHERE dn_id = dn.dn_id AND SNCODE = 1))
 AND cs.sncode =   1
 and cs1.sncode = 237
@@ -55,7 +55,7 @@ SELECT dn.dn_num HKG_MSISDN
 FROM  contr_services cs,   directory_number dn
 WHERE dn.dn_id = cs.dn_id
 AND cs.cs_seqno =  (SELECT Max(cs_seqno) FROM contr_services WHERE co_id = cs.co_id AND cs.sncode =   1 )
---AND cs.co_id = (SELECT   Max(co_id)     FROM contr_services WHERE dn_id = dn.dn_id AND SNCODE = 1)
+AND cs.co_id = (SELECT   Max(co_id)     FROM contr_services WHERE dn_id = dn.dn_id AND SNCODE = 1)
 AND Length(cs.cs_stat_chng) = (SELECT Min( Length(cs_stat_chng)) FROM   contr_services WHERE dn_id = dn.dn_id     AND SNCODE = 1 AND    To_Date( SubStr(cs_stat_chng, -7, 6), 'rrmmdd') =  (SELECT   Max(To_Date( SubStr(cs_stat_chng, -7, 6), 'rrmmdd'))     FROM contr_services WHERE dn_id = dn.dn_id AND SNCODE = 1))
 AND cs.sncode =   1
 and not exists( select 1 from contr_services cs2 where cs2.sncode = 237 and cs2.co_id = cs.co_id
