@@ -49,6 +49,7 @@ and cs1.sncode = 237
 and cs.co_id = cs1.co_id
 AND cs.cs_Seqno=cs1.cs_seqno
 AND cs1.cs_seqno =  (SELECT Max(cs_seqno) FROM contr_services WHERE co_id = cs1.co_id AND SNCODE=237 )
+--use single quotes for MSISDN
 AND dn.dn_num in ();
 
 SELECT dn.dn_num HKG_MSISDN 
