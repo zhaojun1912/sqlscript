@@ -1,7 +1,12 @@
-SELECT * FROM directory_number   WHERE dn_id = 1534039;
-SELECT * FROM directory_number   WHERE dn_num = 56283868;
+SELECT * FROM directory_number   WHERE dn_id = 2333800;
+SELECT * FROM directory_number   WHERE dn_num = '98117811';
 select * from PTCBILL_MASTER_CONTROL where bill_cycle = 04 order by bill_date desc;
 select * from PTCBILL_MASTER_CONTROL order by bill_date desc;
+SELECT * FROM contr_services WHERE dn_id = 6121684;
+SELECT * FROM contr_services WHERE co_id =    6305955 AND sncode = 237;
+--52667810
+--96665326
+--98117811
 select * from RTX_CONTROL where billcycle = 04;
 select * from mpusntab where sncode = 38;
 select * from rtx_030101;

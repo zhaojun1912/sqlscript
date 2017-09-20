@@ -861,3 +861,113 @@ sqltools ANSI支持中文
 new release
 代售点：中和镇鹤林街邮政营业厅
 重庆市开县中和镇长滩街64号联通营业内
+
+百度网盘 - https://pan.baidu.com/15G-3T去年登陆手机 App 可扩容至2T，现在只能扩容至1T，第2T需要绑定银行卡。老用户参加过购买过容量等活动的可扩容到3T。安装 Chrome 插件 - Tampermonkey，并安装百度网盘相关脚本，即可直接网页下载文件。上传，下载均有限速，可使用 IDM 等软件加速下载。
+
+作者：匿名用户
+链接：https://www.zhihu.com/question/51309695/answer/125210100
+来源：知乎
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+Hadoop note:
+
+Pig: awk like, translate pig script to map-reduce job.
+Hive: Mapper, SQL92, Map Sql statement to Map-reduce job. slow-speeding.
+Cloudera impala: A Column-oriented DBMS,  Makeout of Google Dremel. quickly . 
+
+cluster:
+oracle rac: share disk
+mysql : HA, read-write separation, load balance
+real cluster: share-nothing
+
+sqoop: connect hadoop and database..
+ODCH/OLH: oracle hadoop connector.
+ODCH: oracle sql connectors for hadoop distributed file system
+	use hdfs file as external table.
+OLD: oracle loader for hadoop : load hadoop hdfs file to oracle table.
+oracle R connectors for hadoop:  oracle R language support for hadoop. 
+
+Flume: distributed data (file, log) collection system.
+Flume , Chukwa: log collector. ETL.
+Chukwa:
+13th week: data integration
+14th week: application integration.
+15th week: hadoop source analyse.
+
+mysql -h host -u root -p
+
+can connect from any ip to login to the mysql server:
+grant all privileges on *.* to 'grid'@'%' identified by 'dev123' with grant option;
+flush privileges;
+
+sqoop list-databases --connect jdbc:mysql://192.168.56.101:3306/ --username grid --P
+
+sqoop list-tables --connect jdbc:mysql://192.168.56.101:3306/sqoop --username grid --password
+
+sqoop import --connect jdbc:mysql://192.168.56.101:3306/sqoop --username grid --password dev123 --table tb1 -m 1
+
+sqoop export --connect jdbc:mysql://192.168.56.101:3306/sqoop --username grid --password dev123 --table tb2 --export-dir hdfs://master1:9000/user/grid/tb1/part-m-00000
+
+sqoop import --connect jdbc:mysql://192.168.56.101:3306/sqoop --username grid --password dev123 --table tb1 -m 1 --hive-table tb3 --hive-import 
+
+sqoop export --connect jdbc:mysql://192.168.56.101:3306/sqoop --username grid --password dev123 --table tb2 -m 1 --export-dir hdfs://master1:9000/user/hive/warehouse/tb3/part-m-00000 --input-fields-terminated-by '\001' 
+
+create table tb1 as select table_schema, table_name, table_type from information_schema;
+
+qwone.com/~jason/20Newsgroups/
+
+mahout org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups \
+-p /home/grid/20news-bydate-train \
+-o /home/grid/bayes-train-input \
+-a org.apache.mahout.vectorizer.DefaultAnalyzer \
+-c UTF-8
+
+mahout org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups \
+-p /home/grid/20news-bydate-test \
+-o /home/grid/bayes-test-input \
+-a org.apache.mahout.vectorizer.DefaultAnalyzer \
+-c UTF-8
+
+mahout trainclassifier \
+-i /user/grid/20news/bayes-train-input \
+-o /user/grid/20news/newsmodel \
+-type cbayes \
+-ng 2 \
+-source hdfs
+
+mahout testclassifier \
+-m /user/grid/20news/newsmodel \
+-d /user/grid/20news/bayes-test-input \
+-type cbayes \
+-ng 2 \
+-source hdfs \
+-method mapreduce
+
+hadoop  jar MaxTemperature.jar maxTemperature.MaxTemperature hdfs://master1:9000/user/grid/input/weth2.txt hdfs://master1:9000/user/grid/outputweth
+ hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-*.jar \
+    -files ./max_temperature_map.rb,./max_temperature_reduce.rb \
+  -input input/weth2.txt \
+  -output outputweth3 \
+  -mapper ./max_temperature_map.rb \
+  -combiner ./max_temperature_reduce.rb \
+  -reducer ./max_temperature_reduce.rb
+  
+--final version
+SELECT a.audit_name, nvl( a.times, 0), Nvl(a.amount,0), Nvl(description, ' ')   FROM 
+(SELECT AT.audit_id,  AT.audit_name, Count(ii.audit_id) times, Sum(paid_in_amount) amount FROM    
+audit_type AT,    MK_T_INSPECTION_INFO ii
+WHERE  AT.audit_id = ii.audit_id(+)
+GROUP BY AT.audit_id ,   AT.audit_name 
+ORDER BY audit_id) a,
+(SELECT audit_name,
+REPLACE( audit_name||'共' || sum(time) ||'次。 其中' ||   wmsys.wm_concat (deal_result || TIME || '次，追缴金额'|| paid_in_amount||'元'  ), ',', ';') description
+from (
+SELECT  AT.audit_id ,   AT.audit_name   , deal_result, Count(*) time, Sum(paid_in_amount)  paid_in_amount
+ FROM 
+audit_type AT,    MK_T_INSPECTION_INFO ii
+WHERE  AT.audit_id = ii.audit_id
+GROUP BY    AT.audit_id ,   AT.audit_name   , deal_result 
+ORDER BY AT.audit_id) GROUP BY audit_name) b
+WHERE a.audit_name = b.audit_name(+)
+ORDER BY Nvl(a.amount,0) desc;
+  
