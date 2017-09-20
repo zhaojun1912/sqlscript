@@ -954,20 +954,23 @@ hadoop  jar MaxTemperature.jar maxTemperature.MaxTemperature hdfs://master1:9000
   
 --final version
 SELECT a.audit_name, nvl( a.times, 0), Nvl(a.amount,0), Nvl(description, ' ')   FROM 
-(SELECT AT.audit_id,  AT.audit_name, Count(ii.audit_id) times, Sum(paid_in_amount) amount FROM    
-audit_type AT,    MK_T_INSPECTION_INFO ii
+(
+SELECT AT.audit_id,  AT.audit_name, Count(ii.audit_id) times, Sum(ii.paid_in_amount) amount 
+FROM audit_type AT, MK_T_INSPECTION_INFO ii
 WHERE  AT.audit_id = ii.audit_id(+)
-GROUP BY AT.audit_id ,   AT.audit_name 
-ORDER BY audit_id) a,
-(SELECT audit_name,
-REPLACE( audit_name||'共' || sum(time) ||'次。 其中' ||   wmsys.wm_concat (deal_result || TIME || '次，追缴金额'|| paid_in_amount||'元'  ), ',', ';') description
+GROUP BY AT.audit_id ,AT.audit_name 
+) a,
+(
+SELECT audit_id, audit_name,
+REPLACE( audit_name||'共' || sum(time) ||'次。 其中' ||wmsys.wm_concat (deal_result ||' '|| TIME || '次，追缴金额'|| paid_in_amount||'元'  ), ',', ';') description
 from (
-SELECT  AT.audit_id ,   AT.audit_name   , deal_result, Count(*) time, Sum(paid_in_amount)  paid_in_amount
+SELECT  AT.audit_id, AT.audit_name, ii.deal_result, Count(*) time, Sum(ii.paid_in_amount)  paid_in_amount
  FROM 
-audit_type AT,    MK_T_INSPECTION_INFO ii
+audit_type AT, MK_T_INSPECTION_INFO ii
 WHERE  AT.audit_id = ii.audit_id
-GROUP BY    AT.audit_id ,   AT.audit_name   , deal_result 
-ORDER BY AT.audit_id) GROUP BY audit_name) b
-WHERE a.audit_name = b.audit_name(+)
+GROUP BY AT.audit_id ,AT.audit_name, ii.deal_result 
+) GROUP BY audit_id, audit_name
+) b
+WHERE a.audit_id = b.audit_id(+)
 ORDER BY Nvl(a.amount,0) desc;
   
